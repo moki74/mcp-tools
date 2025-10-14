@@ -1,0 +1,248 @@
+{
+  "name": "mysql-mcp",
+  "description": "A Model Context Protocol for MySQL database interaction",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "list_databases",
+      "description": "Lists all databases available on the MySQL server.",
+      "input_schema": {},
+      "output_schema": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    {
+      "name": "list_tables",
+      "description": "Lists all tables in the connected MySQL database.",
+      "input_schema": {},
+      "output_schema": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    {
+      "name": "read_table_schema",
+      "description": "Reads the schema of a specified table.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string" }
+        },
+        "required": ["table_name"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "columns": { 
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string" },
+                "nullable": { "type": "boolean" },
+                "default": { "type": ["string", "null"] },
+                "primary_key": { "type": "boolean" }
+              }
+            }
+          },
+          "primary_key": { "type": ["string", "null"] },
+          "indexes": { 
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "name": "create_record",
+      "description": "Creates a new record in the specified table.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string" },
+          "data": { "type": "object" }
+        },
+        "required": ["table_name", "data"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "id": { "type": ["string", "number"] },
+          "affected_rows": { "type": "number" }
+        }
+      }
+    },
+    {
+      "name": "read_records",
+      "description": "Reads records from the specified table with optional filtering, pagination, and sorting.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string" },
+          "filters": { "type": "object" },
+          "limit": { "type": "number" },
+          "offset": { "type": "number" },
+          "sort_by": { "type": "string" },
+          "sort_direction": { "type": "string", "enum": ["ASC", "DESC"] }
+        },
+        "required": ["table_name"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "records": { "type": "array" },
+          "total": { "type": "number" }
+        }
+      }
+    },
+    {
+      "name": "update_record",
+      "description": "Updates an existing record in the specified table.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string" },
+          "id_field": { "type": "string" },
+          "id": { "type": ["string", "number"] },
+          "data": { "type": "object" }
+        },
+        "required": ["table_name", "id", "data"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "affected_rows": { "type": "number" }
+        }
+      }
+    },
+    {
+      "name": "delete_record",
+      "description": "Deletes a record from the specified table.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string" },
+          "id_field": { "type": "string" },
+          "id": { "type": ["string", "number"] }
+        },
+        "required": ["table_name", "id"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "affected_rows": { "type": "number" }
+        }
+      }
+    },
+    {
+      "name": "run_query",
+      "description": "Runs a read-only SQL query with optional parameters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "params": { "type": "array" }
+        },
+        "required": ["query"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "results": { "type": "array" },
+          "fields": { "type": "array" }
+        }
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "Executes a write SQL operation (INSERT, UPDATE, DELETE) with optional parameters.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "params": { "type": "array" }
+        },
+        "required": ["query"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "affected_rows": { "type": "number" },
+          "insert_id": { "type": ["number", "null"] }
+        }
+      }
+    },
+    {
+      "name": "describe_connection",
+      "description": "Returns information about the current database connection.",
+      "input_schema": {},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "host": { "type": "string" },
+          "port": { "type": "number" },
+          "database": { "type": "string" },
+          "user": { "type": "string" },
+          "connected": { "type": "boolean" }
+        }
+      }
+    },
+    {
+      "name": "test_connection",
+      "description": "Tests the database connection and returns latency information.",
+      "input_schema": {},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "latency_ms": { "type": "number" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    {
+      "name": "get_table_relationships",
+      "description": "Returns foreign key relationships for a specified table.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string" }
+        },
+        "required": ["table_name"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "as_parent": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "table": { "type": "string" },
+                "column": { "type": "string" },
+                "referenced_column": { "type": "string" }
+              }
+            }
+          },
+          "as_child": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "table": { "type": "string" },
+                "column": { "type": "string" },
+                "referenced_column": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

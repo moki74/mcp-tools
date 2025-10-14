@@ -1,0 +1,45 @@
+# Source files (users only need compiled dist/)
+src/
+tsconfig.json
+
+# Environment files
+.env
+.env.*
+*.log
+logs/
+
+# Test files
+test_*.js
+*.test.ts
+*.spec.ts
+__tests__/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.factory/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Development documentation (keep only essential docs)
+NEED.md
+requirement.md
+IMPLEMENTATION_SUMMARY.md
+DYNAMIC_PERMISSIONS_UPDATE.md
+DEPLOYMENT_GUIDE.md
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build artifacts
+*.tgz
