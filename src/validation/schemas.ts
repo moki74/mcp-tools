@@ -181,6 +181,54 @@ export const getTableRelationshipsSchema = {
   additionalProperties: false
 };
 
+// Transaction Schemas
+export const beginTransactionSchema = {
+  type: 'object',
+  properties: {
+    transactionId: { type: 'string', nullable: true }
+  },
+  additionalProperties: false
+};
+
+export const commitTransactionSchema = {
+  type: 'object',
+  required: ['transactionId'],
+  properties: {
+    transactionId: { type: 'string' }
+  },
+  additionalProperties: false
+};
+
+export const rollbackTransactionSchema = {
+  type: 'object',
+  required: ['transactionId'],
+  properties: {
+    transactionId: { type: 'string' }
+  },
+  additionalProperties: false
+};
+
+export const getTransactionStatusSchema = {
+  type: 'object',
+  properties: {},
+  additionalProperties: false
+};
+
+export const executeInTransactionSchema = {
+  type: 'object',
+  required: ['transactionId', 'query'],
+  properties: {
+    transactionId: { type: 'string' },
+    query: { type: 'string' },
+    params: { 
+      type: 'array',
+      items: {},
+      nullable: true
+    }
+  },
+  additionalProperties: false
+};
+
 // Compile validators
 export const validateListTables = ajv.compile(listTablesSchema);
 export const validateReadTableSchema = ajv.compile(readTableSchemaSchema);
@@ -190,3 +238,8 @@ export const validateUpdateRecord = ajv.compile(updateRecordSchema);
 export const validateDeleteRecord = ajv.compile(deleteRecordSchema);
 export const validateRunQuery = ajv.compile(runQuerySchema);
 export const validateGetTableRelationships = ajv.compile(getTableRelationshipsSchema);
+export const validateBeginTransaction = ajv.compile(beginTransactionSchema);
+export const validateCommitTransaction = ajv.compile(commitTransactionSchema);
+export const validateRollbackTransaction = ajv.compile(rollbackTransactionSchema);
+export const validateGetTransactionStatus = ajv.compile(getTransactionStatusSchema);
+export const validateExecuteInTransaction = ajv.compile(executeInTransactionSchema);

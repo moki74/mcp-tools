@@ -3,6 +3,7 @@ import { CrudTools } from './tools/crudTools';
 import { QueryTools } from './tools/queryTools';
 import { UtilityTools } from './tools/utilityTools';
 import { DdlTools } from './tools/ddlTools';
+import { TransactionTools } from './tools/transactionTools';
 import SecurityLayer from './security/securityLayer';
 import DatabaseConnection from './db/connection';
 import { FeatureConfig } from './config/featureConfig';
@@ -17,6 +18,7 @@ export class MySQLMCP {
   private queryTools: QueryTools;
   private utilityTools: UtilityTools;
   private ddlTools: DdlTools;
+  private transactionTools: TransactionTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -26,6 +28,7 @@ export class MySQLMCP {
     this.queryTools = new QueryTools();
     this.utilityTools = new UtilityTools();
     this.ddlTools = new DdlTools();
+    this.transactionTools = new TransactionTools();
     this.security = new SecurityLayer();
     this.featureConfig = new FeatureConfig(permissionsConfig);
   }
@@ -203,6 +206,51 @@ export class MySQLMCP {
       return { status: 'error', error: check.error };
     }
     return await this.utilityTools.getTableRelationships(params);
+  }
+
+  // Transaction Tools
+  async beginTransaction(params?: { transactionId?: string }) {
+    const check = this.checkToolEnabled('beginTransaction');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.transactionTools.beginTransaction(params);
+  }
+
+  async commitTransaction(params: { transactionId: string }) {
+    const check = this.checkToolEnabled('commitTransaction');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.transactionTools.commitTransaction(params);
+  }
+
+  async rollbackTransaction(params: { transactionId: string }) {
+    const check = this.checkToolEnabled('rollbackTransaction');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.transactionTools.rollbackTransaction(params);
+  }
+
+  async getTransactionStatus() {
+    const check = this.checkToolEnabled('getTransactionStatus');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.transactionTools.getTransactionStatus();
+  }
+
+  async executeInTransaction(params: {
+    transactionId: string;
+    query: string;
+    params?: any[];
+  }) {
+    const check = this.checkToolEnabled('executeSql'); // Use executeSql permission for transaction queries
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.transactionTools.executeInTransaction(params);
   }
   
   // Get feature configuration status

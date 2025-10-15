@@ -14,7 +14,8 @@ export enum ToolCategory {
   DELETE = 'delete',   // Delete records
   EXECUTE = 'execute', // Execute custom SQL
   DDL = 'ddl',         // Data Definition Language (CREATE/ALTER/DROP tables)
-  UTILITY = 'utility'  // Utility functions like connection testing
+  UTILITY = 'utility', // Utility functions like connection testing
+  TRANSACTION = 'transaction' // Transaction management (BEGIN, COMMIT, ROLLBACK)
 }
 
 /**
@@ -45,7 +46,13 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   // Utility tools
   'describeConnection': ToolCategory.UTILITY,
   'testConnection': ToolCategory.UTILITY,
-  'getTableRelationships': ToolCategory.UTILITY
+  'getTableRelationships': ToolCategory.UTILITY,
+  
+  // Transaction tools
+  'beginTransaction': ToolCategory.TRANSACTION,
+  'commitTransaction': ToolCategory.TRANSACTION,
+  'rollbackTransaction': ToolCategory.TRANSACTION,
+  'getTransactionStatus': ToolCategory.TRANSACTION
 };
 
 /**

@@ -367,6 +367,79 @@ const TOOLS: Tool[] = [
       required: ['table_name'],
     },
   },
+  // Transaction Tools
+  {
+    name: 'begin_transaction',
+    description: 'Begins a new database transaction. Returns a transaction ID for subsequent operations.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        transactionId: {
+          type: 'string',
+          description: 'Optional custom transaction ID. If not provided, one will be generated.',
+        },
+      },
+    },
+  },
+  {
+    name: 'commit_transaction',
+    description: 'Commits a transaction and makes all changes permanent.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        transactionId: {
+          type: 'string',
+          description: 'The transaction ID to commit',
+        },
+      },
+      required: ['transactionId'],
+    },
+  },
+  {
+    name: 'rollback_transaction',
+    description: 'Rolls back a transaction and undoes all changes made within it.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        transactionId: {
+          type: 'string',
+          description: 'The transaction ID to rollback',
+        },
+      },
+      required: ['transactionId'],
+    },
+  },
+  {
+    name: 'get_transaction_status',
+    description: 'Returns the status of all active transactions.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'execute_in_transaction',
+    description: 'Executes a SQL query within an active transaction.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        transactionId: {
+          type: 'string',
+          description: 'The transaction ID to execute the query within',
+        },
+        query: {
+          type: 'string',
+          description: 'SQL query to execute within the transaction',
+        },
+        params: {
+          type: 'array',
+          description: 'Optional array of parameters for parameterized queries',
+          items: {},
+        },
+      },
+      required: ['transactionId', 'query'],
+    },
+  },
 ];
 
 // Create the MCP server
@@ -461,6 +534,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = await mysqlMCP.getTableRelationships(args as { table_name: string });
         break;
 
+      // Transaction Tools
+      case 'begin_transaction':
+        result = await mysqlMCP.beginTransaction(args as { transactionId?: string });
+        break;
+
+      case 'commit_transaction':
+        result = await mysqlMCP.commitTransaction(args as { transactionId: string });
+        break;
+
+      case 'rollback_transaction':
+        result = await mysqlMCP.rollbackTransaction(args as { transactionId: string });
+        break;
+
+      case 'get_transaction_status':
+        result = await mysqlMCP.getTransactionStatus();
+        break;
+
+      case 'execute_in_transaction':
+        result = await mysqlMCP.executeInTransaction(args as { transactionId: string; query: string; params?: any[] });
+        break;
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -478,12 +572,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    // Return successful result
+    // Return successful result - handle different result types
+    let responseData;
+    if ('data' in result) {
+      // Standard result with data property
+      responseData = result.data;
+    } else if ('transactionId' in result) {
+      // Transaction result
+      responseData = {
+        transactionId: result.transactionId,
+        message: result.message,
+        activeTransactions: result.activeTransactions
+      };
+    } else if ('message' in result) {
+      // Simple message result
+      responseData = { message: result.message };
+    } else {
+      // Fallback
+      responseData = result;
+    }
+
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(result.data, null, 2),
+          text: JSON.stringify(responseData, null, 2),
         },
       ],
     };

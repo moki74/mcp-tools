@@ -11,9 +11,10 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 - ✅ **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
 - 🔒 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
-- 🛠️ **16 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection)
+- 🛠️ **21 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions)
 - 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
 - 🏗️ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
+- 💰 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
 - 🌐 **Dual Mode** - Run as MCP server OR as REST API
 - 📊 **Rich Metadata** - Table schemas, relationships, connection info
 - ⚡ **TypeScript** - Fully typed with TypeScript definitions
@@ -138,7 +139,7 @@ Try asking your AI:
 
 ## 🛠️ Available Tools
 
-The MCP server provides **16 powerful tools**:
+The MCP server provides **21 powerful tools**:
 
 ### Database Discovery (4 tools)
 
@@ -180,6 +181,16 @@ The MCP server provides **16 powerful tools**:
 |------|-------------|
 | `test_connection` | Test database connectivity and measure latency |
 | `describe_connection` | Get current connection information |
+
+### Transaction Management (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `begin_transaction` | Start a new database transaction |
+| `commit_transaction` | Commit the current transaction |
+| `rollback_transaction` | Rollback the current transaction |
+| `get_transaction_status` | Check if a transaction is active |
+| `execute_in_transaction` | Execute SQL within a transaction context |
 
 ---
 
@@ -354,6 +365,103 @@ DDL operations are **disabled by default** for safety. Add `ddl` to permissions 
 
 ---
 
+## 💰 Transaction Management
+
+The MySQL MCP Server provides full ACID transaction support, allowing you to group multiple database operations into atomic units.
+
+### Transaction Tools Overview
+
+- **`begin_transaction`** - Start a new transaction
+- **`execute_in_transaction`** - Execute SQL within transaction context
+- **`commit_transaction`** - Permanently save all changes
+- **`rollback_transaction`** - Discard all changes since transaction start
+- **`get_transaction_status`** - Check if transaction is active
+
+### Transaction Example: Money Transfer
+
+**User:** *"Transfer $100 from Alice's account to Bob's account"*
+
+**AI executes:**
+```json
+// Step 1: Begin transaction
+{
+  "tool": "begin_transaction"
+}
+
+// Step 2: Deduct from Alice's account
+{
+  "tool": "execute_in_transaction",
+  "arguments": {
+    "sql": "UPDATE accounts SET balance = balance - 100 WHERE name = 'Alice'"
+  }
+}
+
+// Step 3: Add to Bob's account
+{
+  "tool": "execute_in_transaction",
+  "arguments": {
+    "sql": "UPDATE accounts SET balance = balance + 100 WHERE name = 'Bob'"
+  }
+}
+
+// Step 4: Verify both accounts exist and have sufficient funds
+{
+  "tool": "execute_in_transaction",
+  "arguments": {
+    "sql": "SELECT * FROM accounts WHERE name IN ('Alice', 'Bob')"
+  }
+}
+
+// Step 5: Commit if everything is valid
+{
+  "tool": "commit_transaction"
+}
+```
+
+### Transaction Safety Features
+
+1. ✅ **Atomic Operations** - All operations succeed or all fail together
+2. ✅ **Automatic Rollback** - If any operation fails, transaction automatically rolls back
+3. ✅ **Isolation** - Other sessions see changes only after commit
+4. ✅ **Status Checking** - Always know if a transaction is active
+5. ✅ **Error Handling** - Comprehensive error reporting for failed operations
+
+### Transaction Best Practices
+
+1. **Keep transactions short** - Long transactions can block other operations
+2. **Always commit or rollback** - Don't leave transactions hanging
+3. **Test transaction logic** - Verify your transaction sequence works correctly
+4. **Handle errors gracefully** - Check for errors after each operation
+5. **Use appropriate isolation levels** - Understand your consistency requirements
+
+### Common Transaction Patterns
+
+**Pattern 1: Safe Update with Verification**
+```json
+// Begin transaction
+// Update records
+// Verify changes with SELECT
+// Commit if valid, rollback if not
+```
+
+**Pattern 2: Batch Operations**
+```json
+// Begin transaction
+// Insert multiple related records
+// Update related tables
+// Commit all changes together
+```
+
+**Pattern 3: Error Recovery**
+```json
+// Begin transaction
+// Try operations
+// If error occurs: rollback
+// If success: commit
+```
+
+---
+
 ## 📋 Usage Examples
 
 ### Example 1: Read Data
@@ -399,6 +507,45 @@ DDL operations are **disabled by default** for safety. Add `ddl` to permissions 
 - Applies date filter
 - Groups by user
 - Returns aggregated results
+
+### Example 6: Transaction Management
+
+**User:** *"Transfer $100 from account 1 to account 2 in a single transaction"*
+
+**AI uses transaction tools:**
+```json
+{
+  "tool": "begin_transaction"
+}
+
+{
+  "tool": "execute_in_transaction",
+  "arguments": {
+    "sql": "UPDATE accounts SET balance = balance - 100 WHERE id = 1"
+  }
+}
+
+{
+  "tool": "execute_in_transaction",
+  "arguments": {
+    "sql": "UPDATE accounts SET balance = balance + 100 WHERE id = 2"
+  }
+}
+
+{
+  "tool": "commit_transaction"
+}
+```
+
+**User:** *"Check if there's an active transaction"*
+
+**AI uses `get_transaction_status`:**
+- Returns transaction status and ID if active
+
+**User:** *"Rollback the current transaction"*
+
+**AI uses `rollback_transaction`:**
+- Cancels all changes in the current transaction
 
 ---
 
@@ -759,7 +906,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🗺️ Roadmap
 
-- [ ] Transaction support (BEGIN, COMMIT, ROLLBACK)
+- ✅ **Transaction support (BEGIN, COMMIT, ROLLBACK)** - **COMPLETED!**
 - [ ] Stored procedure execution
 - [ ] Bulk operations
 - [ ] Query result caching
