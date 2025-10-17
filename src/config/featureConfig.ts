@@ -52,7 +52,8 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   'beginTransaction': ToolCategory.TRANSACTION,
   'commitTransaction': ToolCategory.TRANSACTION,
   'rollbackTransaction': ToolCategory.TRANSACTION,
-  'getTransactionStatus': ToolCategory.TRANSACTION
+  'getTransactionStatus': ToolCategory.TRANSACTION,
+  'executeInTransaction': ToolCategory.TRANSACTION
 };
 
 /**

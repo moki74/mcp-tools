@@ -139,7 +139,7 @@ Try asking your AI:
 
 ## 🛠️ Available Tools
 
-The MCP server provides **21 powerful tools**:
+The MCP server provides **22 powerful tools**:
 
 ### Database Discovery (4 tools)
 
@@ -209,6 +209,7 @@ Control access with these permission categories:
 | **`delete`** | DELETE records | Data cleanup |
 | **`execute`** | Execute custom SQL (DML) | Complex operations |
 | **`ddl`** | CREATE/ALTER/DROP tables | Schema management |
+| **`transaction`** | BEGIN, COMMIT, ROLLBACK transactions | ACID operations |
 | **`utility`** | Connection testing, info | Diagnostics |
 
 ### Per-Project Configuration
@@ -241,9 +242,14 @@ list,read,create,utility
 list,read,create,update,delete,utility
 ```
 
+**Full Data Access with Transactions:**
+```
+list,read,create,update,delete,transaction,utility
+```
+
 **Development (Full Access):**
 ```
-list,read,create,update,delete,execute,ddl,utility
+list,read,create,update,delete,execute,ddl,transaction,utility
 ```
 
 **DBA Tasks:**
@@ -906,13 +912,29 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🗺️ Roadmap
 
+### Core Features
 - ✅ **Transaction support (BEGIN, COMMIT, ROLLBACK)** - **COMPLETED!**
 - [ ] Stored procedure execution
-- [ ] Bulk operations
+- [ ] Bulk operations (batch insert/update/delete)
 - [ ] Query result caching
+- [ ] Advanced query optimization hints
+
+### Enterprise Features
+- [ ] **Database backup and restore tools**
+- [ ] **Data export/import utilities** (CSV, JSON, SQL dumps)
+- [ ] **Performance monitoring and metrics**
+- [ ] **Query performance analysis**
+- [ ] **Connection pool monitoring**
+- [ ] **Audit logging and compliance**
+- [ ] **Data migration utilities**
+- [ ] **Schema versioning and migrations**
+
+### Database Adapters
 - [ ] PostgreSQL adapter
 - [ ] MongoDB adapter
 - [ ] SQLite adapter
+- [ ] Oracle Database adapter
+- [ ] SQL Server adapter
 
 ---
 
