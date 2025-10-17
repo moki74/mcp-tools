@@ -34,8 +34,8 @@ npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db "list,read
 ### Option 2: Clone and Build
 
 ```bash
-git clone <your-repo-url>
-cd mcp_mysql
+git clone https://github.com/berthojoris/mysql-mcp.git
+cd mysql-mcp
 npm install
 npm run build
 ```
@@ -80,24 +80,7 @@ npm run build
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-**Configuration:**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "node",
-      "args": [
-        "C:\\path\\to\\mcp_mysql\\bin\\mcp-mysql.js",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
-```
-
-**Or use npx (if published):**
+**Configuration (using npx - recommended):**
 
 ```json
 {
@@ -106,7 +89,24 @@ npm run build
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-mysql",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+**Alternative: Local development (if you cloned the repository):**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "C:\\path\\to\\mysql-mcp\\bin\\mcp-mysql.js",
         "mysql://user:password@localhost:3306/database",
         "list,read,utility"
       ]
@@ -276,17 +276,19 @@ You can have different databases with different permissions in the same AI agent
 {
   "mcpServers": {
     "mysql-prod": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "C:\\path\\to\\bin\\mcp-mysql.js",
+        "-y",
+        "@berthojoris/mcp-mysql-server",
         "mysql://reader:pass@prod-server:3306/prod_db",
         "list,read,utility"
       ]
     },
     "mysql-dev": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "C:\\path\\to\\bin\\mcp-mysql.js",
+        "-y",
+        "@berthojoris/mcp-mysql-server",
         "mysql://root:pass@localhost:3306/dev_db",
         "list,read,create,update,delete,execute,ddl,utility"
       ]
@@ -907,7 +909,10 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 ### Test MCP Server Locally
 
 ```bash
-# Test connection
+# Test connection using npx (recommended)
+npx -y @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/test "list,read,utility"
+
+# Or if you cloned the repository locally
 node bin/mcp-mysql.js mysql://user:pass@localhost:3306/test "list,read,utility"
 ```
 
@@ -941,7 +946,7 @@ To make your MCP server available to the world:
   "author": "Your Name <your.email@example.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/mcp-mysql.git"
+    "url": "https://github.com/berthojoris/mysql-mcp.git"
   }
 }
 ```
@@ -979,8 +984,9 @@ npx @your-username/mcp-mysql mysql://user:pass@localhost:3306/db "list,read,util
 **Solutions:**
 1. Check config file path is correct
 2. Restart AI agent completely  
-3. Verify bin/mcp-mysql.js exists
-4. Check for JSON syntax errors
+3. If using npx: Verify internet connection for package download
+4. If using local files: Verify bin/mcp-mysql.js exists
+5. Check for JSON syntax errors
 
 **Problem:** Connection fails
 
@@ -1028,7 +1034,7 @@ FLUSH PRIVILEGES;
 ### Project Structure
 
 ```
-mcp_mysql/
+mysql-mcp/
 ├── src/
 │   ├── config/         # Configuration and permissions
 │   ├── db/             # Database connection
@@ -1103,8 +1109,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 💬 Support
 
-- **Issues:** [GitHub Issues](https://github.com/your-username/mcp-mysql/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/your-username/mcp-mysql/discussions)
+- **Issues:** [GitHub Issues](https://github.com/berthojoris/mysql-mcp/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/berthojoris/mysql-mcp/discussions)
 - **Documentation:** This README
 
 ---

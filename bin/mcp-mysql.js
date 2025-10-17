@@ -60,7 +60,7 @@ try {
   
 } catch (error) {
   console.error('Error parsing MySQL URL:', error.message);
-  console.error('Usage: npx @modelcontextprotocol/server-mysql mysql://user:password@host:port/dbname');
+  console.error('Usage: npx @berthojoris/mcp-mysql-server mysql://user:password@host:port/dbname');
   process.exit(1);
 }
 
