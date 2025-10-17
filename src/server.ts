@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import jwt from 'jsonwebtoken';
 import { dbConfig } from './config/config';
 import { MySQLMCP } from './index';
 import { createLogger, format, transports } from 'winston';
@@ -44,36 +43,7 @@ const apiLimiter = rateLimit({
 });
 app.use(apiLimiter);
 
-// Authentication middleware
-const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ 
-      error: {
-        code: 'AUTH_TOKEN_MISSING',
-        message: 'Authentication token is required',
-        details: 'Please provide a valid JWT token in the Authorization header'
-      }
-    });
-  }
-
-  try {
-    const secret = process.env.JWT_SECRET || 'default_secret_change_in_production';
-    const user = jwt.verify(token, secret);
-    (req as any).user = user;
-    next();
-  } catch (error) {
-    return res.status(403).json({ 
-      error: {
-        code: 'AUTH_TOKEN_INVALID',
-        message: 'Invalid or expired token',
-        details: 'Please provide a valid JWT token'
-      }
-    });
-  }
-};
+// No authentication middleware needed for MCP server
 
 // Error handling middleware
 const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -99,7 +69,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // Feature configuration status endpoint
-app.get('/features', authenticateToken, (req: Request, res: Response) => {
+app.get('/features', (req: Request, res: Response) => {
   try {
     const featureStatus = mcp.getFeatureStatus();
     res.status(200).json(featureStatus);
@@ -112,9 +82,9 @@ app.get('/features', authenticateToken, (req: Request, res: Response) => {
   }
 });
 
-// API routes - all protected with authentication
+// API routes - no authentication required for MCP server
 const apiRouter = express.Router();
-app.use('/api', authenticateToken, apiRouter);
+app.use('/api', apiRouter);
 
 // Database Tools Routes
 apiRouter.get('/databases', async (req: Request, res: Response, next: NextFunction) => {

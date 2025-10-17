@@ -1,18 +1,21 @@
 import DatabaseConnection from '../db/connection';
+import SecurityLayer from '../security/securityLayer';
 import { validateRunQuery } from '../validation/schemas';
 
 export class QueryTools {
   private db: DatabaseConnection;
+  private security: SecurityLayer;
 
   constructor() {
     this.db = DatabaseConnection.getInstance();
+    this.security = new SecurityLayer();
   }
 
   /**
    * Execute a safe read-only SELECT query
    */
   async runQuery(queryParams: { query: string; params?: any[] }): Promise<{ status: string; data?: any[]; error?: string }> {
-    // Validate input
+    // Validate input schema
     if (!validateRunQuery(queryParams)) {
       return {
         status: 'error',
@@ -23,16 +26,34 @@ export class QueryTools {
     try {
       const { query, params = [] } = queryParams;
       
-      // Security check: Only allow SELECT queries
-      if (!query.trim().toUpperCase().startsWith('SELECT')) {
+      // Validate query using security layer
+      const queryValidation = this.security.validateQuery(query);
+      if (!queryValidation.valid) {
+        return {
+          status: 'error',
+          error: `Query validation failed: ${queryValidation.error}`
+        };
+      }
+
+      // Ensure it's a SELECT query
+      if (queryValidation.queryType !== 'SELECT') {
         return {
           status: 'error',
           error: 'Only SELECT queries are allowed with runQuery. Use executeSql for other operations.'
         };
       }
+
+      // Validate parameters
+      const paramValidation = this.security.validateParameters(params);
+      if (!paramValidation.valid) {
+        return {
+          status: 'error',
+          error: `Parameter validation failed: ${paramValidation.error}`
+        };
+      }
       
-      // Execute the query
-      const results = await this.db.query<any[]>(query, params);
+      // Execute the query with sanitized parameters
+      const results = await this.db.query<any[]>(query, paramValidation.sanitizedParams!);
       
       return {
         status: 'success',
@@ -47,11 +68,11 @@ export class QueryTools {
   }
 
   /**
-   * Execute write operations (INSERT, UPDATE, DELETE, and DDL if permitted) with validation
-   * Note: DDL permission checks are performed at a higher level (MySQLMCP class)
+   * Execute write operations (INSERT, UPDATE, DELETE) with validation
+   * Note: DDL operations are blocked by the security layer for safety
    */
   async executeSql(queryParams: { query: string; params?: any[] }): Promise<{ status: string; data?: any; error?: string }> {
-    // Validate input
+    // Validate input schema
     if (!validateRunQuery(queryParams)) {
       return {
         status: 'error',
@@ -62,8 +83,34 @@ export class QueryTools {
     try {
       const { query, params = [] } = queryParams;
       
-      // Execute the query (permission checks done at higher level)
-      const result = await this.db.query<any>(query, params);
+      // Validate query using security layer
+      const queryValidation = this.security.validateQuery(query);
+      if (!queryValidation.valid) {
+        return {
+          status: 'error',
+          error: `Query validation failed: ${queryValidation.error}`
+        };
+      }
+
+      // Ensure it's not a SELECT query (use runQuery for that)
+      if (queryValidation.queryType === 'SELECT') {
+        return {
+          status: 'error',
+          error: 'SELECT queries should use runQuery method instead of executeSql.'
+        };
+      }
+
+      // Validate parameters
+      const paramValidation = this.security.validateParameters(params);
+      if (!paramValidation.valid) {
+        return {
+          status: 'error',
+          error: `Parameter validation failed: ${paramValidation.error}`
+        };
+      }
+      
+      // Execute the query with sanitized parameters
+      const result = await this.db.query<any>(query, paramValidation.sanitizedParams!);
       
       return {
         status: 'success',
