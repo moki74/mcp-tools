@@ -35,16 +35,16 @@
     "mysql-client",
     "ai-tools"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Bertho Joris <berthojoris@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/mcp-mysql.git"
+    "url": "https://github.com/berthojoris/mysql-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/mcp-mysql/issues"
+    "url": "https://github.com/berthojoris/mysql-mcp/issues"
   },
-  "homepage": "https://github.com/your-username/mcp-mysql#readme",
+  "homepage": "https://github.com/berthojoris/mysql-mcp#readme",
   "files": [
     "dist",
     "bin",
