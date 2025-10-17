@@ -1,25 +1,31 @@
 import Ajv from 'ajv';
+import { FeatureConfig, ToolCategory } from '../config/featureConfig.js';
 
 export class SecurityLayer {
   private ajv: Ajv;
   private readonly dangerousKeywords: string[];
   private readonly allowedOperations: string[];
+  private readonly ddlOperations: string[];
+  private featureConfig: FeatureConfig;
 
-  constructor() {
+  constructor(featureConfig?: FeatureConfig) {
     this.ajv = new Ajv();
+    this.featureConfig = featureConfig || new FeatureConfig();
     
-    // Define dangerous SQL keywords that should be blocked
+    // Define dangerous SQL keywords that should always be blocked (security threats)
     this.dangerousKeywords = [
-      'DROP', 'TRUNCATE', 'ALTER', 'CREATE', 'GRANT', 'REVOKE',
-      'LOAD_FILE', 'INTO OUTFILE', 'INTO DUMPFILE', 'LOAD DATA',
-      'UNION', 'INFORMATION_SCHEMA', 'MYSQL', 'PERFORMANCE_SCHEMA',
+      'GRANT', 'REVOKE', 'LOAD_FILE', 'INTO OUTFILE', 'INTO DUMPFILE', 
+      'LOAD DATA', 'INFORMATION_SCHEMA', 'MYSQL', 'PERFORMANCE_SCHEMA',
       'SYS', 'SHOW', 'DESCRIBE', 'DESC', 'EXPLAIN', 'PROCEDURE',
       'FUNCTION', 'TRIGGER', 'EVENT', 'VIEW', 'INDEX', 'DATABASE',
       'SCHEMA', 'USER', 'PASSWORD', 'SLEEP', 'BENCHMARK'
     ];
 
-    // Define allowed SQL operations for this MCP server
+    // Define basic allowed SQL operations
     this.allowedOperations = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
+    
+    // Define DDL operations that require special permission
+    this.ddlOperations = ['CREATE', 'ALTER', 'DROP', 'TRUNCATE', 'RENAME'];
   }
 
   /**
@@ -98,7 +104,7 @@ export class SecurityLayer {
     // Remove trailing semicolon for analysis
     const cleanQuery = trimmedQuery.replace(/;$/, '');
 
-    // Determine query type
+    // Determine query type - check basic operations first
     let queryType = '';
     for (const operation of this.allowedOperations) {
       if (cleanQuery.startsWith(operation)) {
@@ -107,11 +113,29 @@ export class SecurityLayer {
       }
     }
 
+    // If not a basic operation, check if it's a DDL operation
+    if (!queryType) {
+      for (const ddlOp of this.ddlOperations) {
+        if (cleanQuery.startsWith(ddlOp)) {
+          // Check if DDL permission is enabled
+          if (this.featureConfig.isCategoryEnabled(ToolCategory.DDL)) {
+            queryType = ddlOp;
+            break;
+          } else {
+            return { 
+              valid: false, 
+              error: `DDL operation '${ddlOp}' requires 'ddl' permission. Add 'ddl' to your permissions configuration.` 
+            };
+          }
+        }
+      }
+    }
+
     if (!queryType) {
       return { valid: false, error: 'Query type not allowed' };
     }
 
-    // Check for dangerous keywords
+    // Check for dangerous keywords (always blocked regardless of permissions)
     for (const keyword of this.dangerousKeywords) {
       if (cleanQuery.includes(keyword)) {
         return { valid: false, error: `Dangerous keyword detected: ${keyword}` };

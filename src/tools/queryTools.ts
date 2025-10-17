@@ -6,9 +6,9 @@ export class QueryTools {
   private db: DatabaseConnection;
   private security: SecurityLayer;
 
-  constructor() {
+  constructor(security: SecurityLayer) {
     this.db = DatabaseConnection.getInstance();
-    this.security = new SecurityLayer();
+    this.security = security;
   }
 
   /**

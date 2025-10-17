@@ -23,14 +23,14 @@ export class MySQLMCP {
   private featureConfig: FeatureConfig;
 
   constructor(permissionsConfig?: string) {
+    this.featureConfig = new FeatureConfig(permissionsConfig);
+    this.security = new SecurityLayer(this.featureConfig);
     this.dbTools = new DatabaseTools();
-    this.crudTools = new CrudTools();
-    this.queryTools = new QueryTools();
+    this.crudTools = new CrudTools(this.security);
+    this.queryTools = new QueryTools(this.security);
     this.utilityTools = new UtilityTools();
     this.ddlTools = new DdlTools();
     this.transactionTools = new TransactionTools();
-    this.security = new SecurityLayer();
-    this.featureConfig = new FeatureConfig(permissionsConfig);
   }
 
   // Helper method to check if tool is enabled
