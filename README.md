@@ -31,16 +31,7 @@ No installation needed! Use directly with npx:
 npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db "list,read,utility"
 ```
 
-### Option 2: Clone and Build
-
-```bash
-git clone https://github.com/berthojoris/mysql-mcp.git
-cd mysql-mcp
-npm install
-npm run build
-```
-
-### Option 3: Global Installation
+### Option 2: Global Installation
 
 ```bash
 npm install -g @berthojoris/mcp-mysql-server
