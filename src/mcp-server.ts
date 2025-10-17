@@ -440,6 +440,140 @@ const TOOLS: Tool[] = [
       required: ['transactionId', 'query'],
     },
   },
+  // Stored Procedure Tools
+  {
+    name: 'list_stored_procedures',
+    description: 'Lists all stored procedures in the specified database.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        database: {
+          type: 'string',
+          description: 'Optional: specific database name to list procedures from',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_stored_procedure_info',
+    description: 'Gets detailed information about a specific stored procedure including parameters and metadata.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        procedure_name: {
+          type: 'string',
+          description: 'Name of the stored procedure to get information for',
+        },
+        database: {
+          type: 'string',
+          description: 'Optional: specific database name',
+        },
+      },
+      required: ['procedure_name'],
+    },
+  },
+  {
+    name: 'execute_stored_procedure',
+    description: 'Executes a stored procedure with optional parameters.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        procedure_name: {
+          type: 'string',
+          description: 'Name of the stored procedure to execute',
+        },
+        parameters: {
+          type: 'array',
+          description: 'Optional array of parameters to pass to the stored procedure',
+          items: {},
+        },
+        database: {
+          type: 'string',
+          description: 'Optional: specific database name',
+        },
+      },
+      required: ['procedure_name'],
+    },
+  },
+  {
+    name: 'create_stored_procedure',
+    description: 'Creates a new stored procedure with the specified parameters and body.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        procedure_name: {
+          type: 'string',
+          description: 'Name of the stored procedure to create',
+        },
+        parameters: {
+          type: 'array',
+          description: 'Optional array of parameter definitions',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'Parameter name' },
+              mode: { type: 'string', enum: ['IN', 'OUT', 'INOUT'], description: 'Parameter mode' },
+              data_type: { type: 'string', description: 'MySQL data type (e.g., VARCHAR(255), INT)' },
+            },
+            required: ['name', 'mode', 'data_type'],
+          },
+        },
+        body: {
+          type: 'string',
+          description: 'SQL body of the stored procedure',
+        },
+        comment: {
+          type: 'string',
+          description: 'Optional comment for the stored procedure',
+        },
+        database: {
+          type: 'string',
+          description: 'Optional: specific database name',
+        },
+      },
+      required: ['procedure_name', 'body'],
+    },
+  },
+  {
+    name: 'drop_stored_procedure',
+    description: 'Drops (deletes) a stored procedure. WARNING: This is irreversible!',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        procedure_name: {
+          type: 'string',
+          description: 'Name of the stored procedure to drop',
+        },
+        if_exists: {
+          type: 'boolean',
+          description: 'If true, will not error if procedure does not exist',
+        },
+        database: {
+          type: 'string',
+          description: 'Optional: specific database name',
+        },
+      },
+      required: ['procedure_name'],
+    },
+  },
+  {
+    name: 'show_create_procedure',
+    description: 'Shows the CREATE statement for a stored procedure.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        procedure_name: {
+          type: 'string',
+          description: 'Name of the stored procedure to show CREATE statement for',
+        },
+        database: {
+          type: 'string',
+          description: 'Optional: specific database name',
+        },
+      },
+      required: ['procedure_name'],
+    },
+  },
 ];
 
 // Create the MCP server
@@ -555,6 +689,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = await mysqlMCP.executeInTransaction(args as { transactionId: string; query: string; params?: any[] });
         break;
 
+      // Stored Procedure Tools
+      case 'list_stored_procedures':
+        result = await mysqlMCP.listStoredProcedures(args as { database?: string });
+        break;
+
+      case 'get_stored_procedure_info':
+        result = await mysqlMCP.getStoredProcedureInfo(args as { procedure_name: string; database?: string });
+        break;
+
+      case 'execute_stored_procedure':
+        result = await mysqlMCP.executeStoredProcedure(args as { procedure_name: string; parameters?: any[]; database?: string });
+        break;
+
+      case 'create_stored_procedure':
+        result = await mysqlMCP.createStoredProcedure(args as any);
+        break;
+
+      case 'drop_stored_procedure':
+        result = await mysqlMCP.dropStoredProcedure(args as { procedure_name: string; if_exists?: boolean; database?: string });
+        break;
+
+      case 'show_create_procedure':
+        result = await mysqlMCP.showCreateProcedure(args as { procedure_name: string; database?: string });
+        break;
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -580,10 +739,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     } else if ('transactionId' in result) {
       // Transaction result
       responseData = {
-        transactionId: result.transactionId,
-        message: result.message,
-        activeTransactions: result.activeTransactions
-      };
+        transactionId: result.transactionId
+      } as any;
+      
+      if ('message' in result && result.message) {
+        responseData.message = result.message;
+      }
+      
+      if ('activeTransactions' in result && result.activeTransactions) {
+        responseData.activeTransactions = result.activeTransactions;
+      }
     } else if ('message' in result) {
       // Simple message result
       responseData = { message: result.message };

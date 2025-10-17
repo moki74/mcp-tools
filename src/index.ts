@@ -4,6 +4,7 @@ import { QueryTools } from './tools/queryTools';
 import { UtilityTools } from './tools/utilityTools';
 import { DdlTools } from './tools/ddlTools';
 import { TransactionTools } from './tools/transactionTools';
+import { StoredProcedureTools } from './tools/storedProcedureTools';
 import SecurityLayer from './security/securityLayer';
 import DatabaseConnection from './db/connection';
 import { FeatureConfig } from './config/featureConfig';
@@ -19,6 +20,7 @@ export class MySQLMCP {
   private utilityTools: UtilityTools;
   private ddlTools: DdlTools;
   private transactionTools: TransactionTools;
+  private storedProcedureTools: StoredProcedureTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -31,6 +33,7 @@ export class MySQLMCP {
     this.utilityTools = new UtilityTools();
     this.ddlTools = new DdlTools();
     this.transactionTools = new TransactionTools();
+    this.storedProcedureTools = new StoredProcedureTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -251,6 +254,61 @@ export class MySQLMCP {
       return { status: 'error', error: check.error };
     }
     return await this.transactionTools.executeInTransaction(params);
+  }
+
+  // Stored Procedure Tools
+  async listStoredProcedures(params: { database?: string }) {
+    const check = this.checkToolEnabled('listStoredProcedures');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.storedProcedureTools.listStoredProcedures(params);
+  }
+
+  async getStoredProcedureInfo(params: { procedure_name: string; database?: string }) {
+    const check = this.checkToolEnabled('getStoredProcedureInfo');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.storedProcedureTools.getStoredProcedureInfo(params);
+  }
+
+  async executeStoredProcedure(params: { procedure_name: string; parameters?: any[]; database?: string }) {
+    const check = this.checkToolEnabled('executeStoredProcedure');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.storedProcedureTools.executeStoredProcedure(params);
+  }
+
+  async createStoredProcedure(params: { 
+    procedure_name: string; 
+    parameters?: Array<{ name: string; mode: 'IN' | 'OUT' | 'INOUT'; data_type: string }>; 
+    body: string; 
+    comment?: string; 
+    database?: string 
+  }) {
+    const check = this.checkToolEnabled('createStoredProcedure');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.storedProcedureTools.createStoredProcedure(params);
+  }
+
+  async dropStoredProcedure(params: { procedure_name: string; if_exists?: boolean; database?: string }) {
+    const check = this.checkToolEnabled('dropStoredProcedure');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.storedProcedureTools.dropStoredProcedure(params);
+  }
+
+  async showCreateProcedure(params: { procedure_name: string; database?: string }) {
+    const check = this.checkToolEnabled('showCreateProcedure');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.storedProcedureTools.showCreateProcedure(params);
   }
   
   // Get feature configuration status

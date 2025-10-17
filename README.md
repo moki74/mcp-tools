@@ -11,7 +11,7 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 - ✅ **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
 - 🔒 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
-- 🛠️ **21 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions)
+- 🛠️ **27 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures)
 - 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
 - 🏗️ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
 - 💰 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
@@ -139,7 +139,7 @@ Try asking your AI:
 
 ## 🛠️ Available Tools
 
-The MCP server provides **22 powerful tools**:
+The MCP server provides **27 powerful tools**:
 
 ### Database Discovery (4 tools)
 
@@ -192,6 +192,16 @@ The MCP server provides **22 powerful tools**:
 | `get_transaction_status` | Check if a transaction is active |
 | `execute_in_transaction` | Execute SQL within a transaction context |
 
+### Stored Procedures (5 tools)
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_stored_procedures` | List all stored procedures in a database | `procedure` permission |
+| `create_stored_procedure` | Create new stored procedures with parameters | `procedure` permission |
+| `get_stored_procedure_info` | Get detailed information about a stored procedure | `procedure` permission |
+| `execute_stored_procedure` | Execute stored procedures with IN/OUT/INOUT parameters | `procedure` permission |
+| `drop_stored_procedure` | Delete stored procedures | `procedure` permission |
+
 ---
 
 ## 🔐 Permission System
@@ -209,6 +219,7 @@ Control access with these permission categories:
 | **`delete`** | DELETE records | Data cleanup |
 | **`execute`** | Execute custom SQL (DML) | Complex operations |
 | **`ddl`** | CREATE/ALTER/DROP tables | Schema management |
+| **`procedure`** | CREATE/DROP/EXECUTE stored procedures | Stored procedure management |
 | **`transaction`** | BEGIN, COMMIT, ROLLBACK transactions | ACID operations |
 | **`utility`** | Connection testing, info | Diagnostics |
 
@@ -464,6 +475,194 @@ The MySQL MCP Server provides full ACID transaction support, allowing you to gro
 // Try operations
 // If error occurs: rollback
 // If success: commit
+```
+
+---
+
+## 🔧 Stored Procedures
+
+The MySQL MCP Server provides comprehensive stored procedure management, allowing you to create, execute, and manage stored procedures with full parameter support.
+
+### Stored Procedure Tools Overview
+
+- **`list_stored_procedures`** - List all stored procedures in a database
+- **`create_stored_procedure`** - Create new stored procedures with IN/OUT/INOUT parameters
+- **`get_stored_procedure_info`** - Get detailed information about parameters and metadata
+- **`execute_stored_procedure`** - Execute procedures with automatic parameter handling
+- **`drop_stored_procedure`** - Delete stored procedures safely
+
+### ⚠️ Enable Stored Procedures
+
+Stored procedure operations require the `procedure` permission. Add it to your configuration:
+
+```json
+{
+  "args": [
+    "mysql://user:pass@localhost:3306/db",
+    "list,read,procedure,utility"  // ← Include 'procedure'
+  ]
+}
+```
+
+### Creating Stored Procedures
+
+**User:** *"Create a stored procedure that calculates tax for a given amount"*
+
+**AI will execute:**
+```json
+{
+  "tool": "create_stored_procedure",
+  "arguments": {
+    "procedure_name": "calculate_tax",
+    "parameters": [
+      {
+        "name": "amount",
+        "mode": "IN",
+        "data_type": "DECIMAL(10,2)"
+      },
+      {
+        "name": "tax_rate",
+        "mode": "IN", 
+        "data_type": "DECIMAL(5,4)"
+      },
+      {
+        "name": "tax_amount",
+        "mode": "OUT",
+        "data_type": "DECIMAL(10,2)"
+      }
+    ],
+    "body": "SET tax_amount = amount * tax_rate;",
+    "comment": "Calculate tax amount based on amount and tax rate"
+  }
+}
+```
+
+### Executing Stored Procedures
+
+**User:** *"Calculate tax for $1000 with 8.5% tax rate"*
+
+**AI will execute:**
+```json
+{
+  "tool": "execute_stored_procedure",
+  "arguments": {
+    "procedure_name": "calculate_tax",
+    "parameters": [1000.00, 0.085]
+  }
+}
+```
+
+**Result:**
+```json
+{
+  "status": "success",
+  "data": {
+    "results": { /* execution results */ },
+    "outputParameters": {
+      "tax_amount": 85.00
+    }
+  }
+}
+```
+
+### Parameter Types
+
+**IN Parameters** - Input values passed to the procedure
+```sql
+IN user_id INT
+IN email VARCHAR(255)
+```
+
+**OUT Parameters** - Output values returned by the procedure
+```sql
+OUT total_count INT
+OUT average_score DECIMAL(5,2)
+```
+
+**INOUT Parameters** - Values that are both input and output
+```sql
+INOUT running_total DECIMAL(10,2)
+```
+
+### Complex Stored Procedure Example
+
+**User:** *"Create a procedure to process an order with inventory check"*
+
+```json
+{
+  "tool": "create_stored_procedure",
+  "arguments": {
+    "procedure_name": "process_order",
+    "parameters": [
+      { "name": "product_id", "mode": "IN", "data_type": "INT" },
+      { "name": "quantity", "mode": "IN", "data_type": "INT" },
+      { "name": "customer_id", "mode": "IN", "data_type": "INT" },
+      { "name": "order_id", "mode": "OUT", "data_type": "INT" },
+      { "name": "success", "mode": "OUT", "data_type": "BOOLEAN" }
+    ],
+    "body": "DECLARE available_qty INT; SELECT stock_quantity INTO available_qty FROM products WHERE id = product_id; IF available_qty >= quantity THEN INSERT INTO orders (customer_id, product_id, quantity) VALUES (customer_id, product_id, quantity); SET order_id = LAST_INSERT_ID(); UPDATE products SET stock_quantity = stock_quantity - quantity WHERE id = product_id; SET success = TRUE; ELSE SET order_id = 0; SET success = FALSE; END IF;",
+    "comment": "Process order with inventory validation"
+  }
+}
+```
+
+### Getting Procedure Information
+
+**User:** *"Show me details about the calculate_tax procedure"*
+
+**AI will execute:**
+```json
+{
+  "tool": "get_stored_procedure_info",
+  "arguments": {
+    "procedure_name": "calculate_tax"
+  }
+}
+```
+
+**Returns detailed information:**
+- Procedure metadata (created date, security type, etc.)
+- Parameter details (names, types, modes)
+- Procedure definition
+- Comments and documentation
+
+### Stored Procedure Best Practices
+
+1. ✅ **Use descriptive names** - Make procedure purposes clear
+2. ✅ **Document with comments** - Add meaningful comments to procedures
+3. ✅ **Validate inputs** - Check parameter values within procedures
+4. ✅ **Handle errors** - Use proper error handling in procedure bodies
+5. ✅ **Test thoroughly** - Verify procedures work with various inputs
+6. ✅ **Use appropriate data types** - Choose correct types for parameters
+7. ✅ **Consider security** - Be mindful of SQL injection in dynamic SQL
+
+### Common Stored Procedure Patterns
+
+**Pattern 1: Data Validation and Processing**
+```sql
+-- Validate input, process if valid, return status
+IF input_value > 0 THEN
+  -- Process data
+  SET success = TRUE;
+ELSE
+  SET success = FALSE;
+END IF;
+```
+
+**Pattern 2: Complex Business Logic**
+```sql
+-- Multi-step business process
+-- Step 1: Validate
+-- Step 2: Calculate
+-- Step 3: Update multiple tables
+-- Step 4: Return results
+```
+
+**Pattern 3: Reporting and Analytics**
+```sql
+-- Aggregate data from multiple tables
+-- Apply business rules
+-- Return calculated results
 ```
 
 ---

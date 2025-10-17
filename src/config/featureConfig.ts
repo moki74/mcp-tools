@@ -15,7 +15,8 @@ export enum ToolCategory {
   EXECUTE = 'execute', // Execute custom SQL
   DDL = 'ddl',         // Data Definition Language (CREATE/ALTER/DROP tables)
   UTILITY = 'utility', // Utility functions like connection testing
-  TRANSACTION = 'transaction' // Transaction management (BEGIN, COMMIT, ROLLBACK)
+  TRANSACTION = 'transaction', // Transaction management (BEGIN, COMMIT, ROLLBACK)
+  PROCEDURE = 'procedure' // Stored procedure operations (CREATE, EXECUTE, DROP procedures)
 }
 
 /**
@@ -53,7 +54,15 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   'commitTransaction': ToolCategory.TRANSACTION,
   'rollbackTransaction': ToolCategory.TRANSACTION,
   'getTransactionStatus': ToolCategory.TRANSACTION,
-  'executeInTransaction': ToolCategory.TRANSACTION
+  'executeInTransaction': ToolCategory.TRANSACTION,
+  
+  // Stored procedure tools
+  'listStoredProcedures': ToolCategory.LIST,
+  'getStoredProcedureInfo': ToolCategory.LIST,
+  'executeStoredProcedure': ToolCategory.PROCEDURE,
+  'createStoredProcedure': ToolCategory.PROCEDURE,
+  'dropStoredProcedure': ToolCategory.PROCEDURE,
+  'showCreateProcedure': ToolCategory.LIST
 };
 
 /**
