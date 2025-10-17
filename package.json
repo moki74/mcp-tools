@@ -1,5 +1,5 @@
 {
-  "name": "@modelcontextprotocol/server-mysql",
+  "name": "@berthojoris/mcp-mysql-server",
   "version": "1.0.0",
   "description": "Model Context Protocol server for MySQL database integration with dynamic per-project permissions",
   "main": "dist/index.js",

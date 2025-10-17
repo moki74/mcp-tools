@@ -2,7 +2,7 @@
 
 A fully-featured **Model Context Protocol (MCP)** server for MySQL database integration with AI agents like Claude Desktop, Cline, Windsurf, and other MCP-compatible tools.
 
-[![npm version](https://img.shields.io/npm/v/@modelcontextprotocol/server-mysql)](https://www.npmjs.com/package/@modelcontextprotocol/server-mysql)
+[![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -28,7 +28,7 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 No installation needed! Use directly with npx:
 
 ```bash
-npx @modelcontextprotocol/server-mysql mysql://user:pass@localhost:3306/db "list,read,utility"
+npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db "list,read,utility"
 ```
 
 ### Option 2: Clone and Build
@@ -43,7 +43,7 @@ npm run build
 ### Option 3: Global Installation
 
 ```bash
-npm install -g @modelcontextprotocol/server-mysql
+npm install -g @berthojoris/mcp-mysql-server
 mcp-mysql mysql://user:pass@localhost:3306/db "list,read,utility"
 ```
 
