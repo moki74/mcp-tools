@@ -925,48 +925,7 @@ curl http://localhost:3000/health
 
 ---
 
-## 🚀 Publishing to npm
-
-To make your MCP server available to the world:
-
-### 1. Update package.json
-
-```json
-{
-  "name": "@your-username/mcp-mysql",
-  "author": "Your Name <your.email@example.com>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/berthojoris/mysql-mcp.git"
-  }
-}
-```
-
-### 2. Build
-
-```bash
-npm run build
-```
-
-### 3. Publish
-
-```bash
-# Login to npm
-npm login
-
-# Publish (for scoped packages)
-npm publish --access public
-```
-
-### 4. Users Can Install
-
-```bash
-npx @your-username/mcp-mysql mysql://user:pass@localhost:3306/db "list,read,utility"
-```
-
----
-
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### MCP Server Not Connecting
 
