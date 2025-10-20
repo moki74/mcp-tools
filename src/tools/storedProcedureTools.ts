@@ -20,6 +20,43 @@ export class StoredProcedureTools {
   }
 
   /**
+   * Validate database access - ensures only the connected database can be accessed
+   */
+  private validateDatabaseAccess(requestedDatabase?: string): { valid: boolean; database: string; error?: string } {
+    const connectedDatabase = dbConfig.database;
+    
+    if (!connectedDatabase) {
+      return {
+        valid: false,
+        database: '',
+        error: 'No database specified in connection string. Cannot access any database.'
+      };
+    }
+
+    // If no database is requested, use the connected database
+    if (!requestedDatabase) {
+      return {
+        valid: true,
+        database: connectedDatabase
+      };
+    }
+
+    // If a specific database is requested, ensure it matches the connected database
+    if (requestedDatabase !== connectedDatabase) {
+      return {
+        valid: false,
+        database: '',
+        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`
+      };
+    }
+
+    return {
+      valid: true,
+      database: connectedDatabase
+    };
+  }
+
+  /**
    * List all stored procedures in the current database
    */
   async listStoredProcedures(params: { database?: string }): Promise<{ status: string; data?: any[]; error?: string }> {
@@ -32,14 +69,16 @@ export class StoredProcedureTools {
         };
       }
 
-      const database = params.database || dbConfig.database;
-      
-      if (!database) {
+      // Validate database access
+      const dbValidation = this.validateDatabaseAccess(params.database);
+      if (!dbValidation.valid) {
         return {
           status: 'error',
-          error: 'No database specified and no current database selected'
+          error: dbValidation.error!
         };
       }
+
+      const database = dbValidation.database;
 
       const query = `
         SELECT 
@@ -85,15 +124,17 @@ export class StoredProcedureTools {
         };
       }
 
-      const { procedure_name } = params;
-      const database = params.database || dbConfig.database;
-      
-      if (!database) {
+      // Validate database access
+      const dbValidation = this.validateDatabaseAccess(params.database);
+      if (!dbValidation.valid) {
         return {
           status: 'error',
-          error: 'No database specified and no current database selected'
+          error: dbValidation.error!
         };
       }
+
+      const { procedure_name } = params;
+      const database = dbValidation.database;
 
       // Get procedure information
       const procedureQuery = `
@@ -172,15 +213,17 @@ export class StoredProcedureTools {
     }
 
     try {
-      const { procedure_name, parameters = [] } = params;
-      const database = params.database || dbConfig.database;
-      
-      if (!database) {
+      // Validate database access
+      const dbValidation = this.validateDatabaseAccess(params.database);
+      if (!dbValidation.valid) {
         return {
           status: 'error',
-          error: 'No database specified and no current database selected'
+          error: dbValidation.error!
         };
       }
+
+      const { procedure_name, parameters = [] } = params;
+      const database = dbValidation.database;
 
       // Validate procedure name
       const identifierValidation = this.security.validateIdentifier(procedure_name);
@@ -310,15 +353,17 @@ export class StoredProcedureTools {
     }
 
     try {
-      const { procedure_name, parameters = [], body, comment } = params;
-      const database = params.database || dbConfig.database;
-      
-      if (!database) {
+      // Validate database access
+      const dbValidation = this.validateDatabaseAccess(params.database);
+      if (!dbValidation.valid) {
         return {
           status: 'error',
-          error: 'No database specified and no current database selected'
+          error: dbValidation.error!
         };
       }
+
+      const { procedure_name, parameters = [], body, comment } = params;
+      const database = dbValidation.database;
 
       // Validate procedure name
       const identifierValidation = this.security.validateIdentifier(procedure_name);
@@ -385,15 +430,17 @@ export class StoredProcedureTools {
         };
       }
 
-      const { procedure_name, if_exists = false } = params;
-      const database = params.database || dbConfig.database;
-      
-      if (!database) {
+      // Validate database access
+      const dbValidation = this.validateDatabaseAccess(params.database);
+      if (!dbValidation.valid) {
         return {
           status: 'error',
-          error: 'No database specified and no current database selected'
+          error: dbValidation.error!
         };
       }
+
+      const { procedure_name, if_exists = false } = params;
+      const database = dbValidation.database;
 
       // Validate procedure name
       const identifierValidation = this.security.validateIdentifier(procedure_name);
@@ -435,15 +482,17 @@ export class StoredProcedureTools {
         };
       }
 
-      const { procedure_name } = params;
-      const database = params.database || dbConfig.database;
-      
-      if (!database) {
+      // Validate database access
+      const dbValidation = this.validateDatabaseAccess(params.database);
+      if (!dbValidation.valid) {
         return {
           status: 'error',
-          error: 'No database specified and no current database selected'
+          error: dbValidation.error!
         };
       }
+
+      const { procedure_name } = params;
+      const database = dbValidation.database;
 
       // Validate procedure name
       const identifierValidation = this.security.validateIdentifier(procedure_name);

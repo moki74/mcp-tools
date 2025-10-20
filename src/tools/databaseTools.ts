@@ -1,5 +1,6 @@
 import DatabaseConnection from '../db/connection';
 import { validateListTables, validateReadTableSchema, TableInfo, ColumnInfo } from '../validation/schemas';
+import { dbConfig } from '../config/config';
 
 export class DatabaseTools {
   private db: DatabaseConnection;
@@ -9,16 +10,34 @@ export class DatabaseTools {
   }
 
   /**
-   * List all available databases
+   * List only the connected database (security restriction)
+   * This prevents access to other databases on the MySQL server
    */
   async listDatabases(): Promise<{ status: string; data?: string[]; error?: string }> {
     try {
-      const results = await this.db.query<any[]>('SHOW DATABASES');
-      const databases = results.map(row => row.Database);
+      // Only return the database specified in the connection string
+      // This is a security measure to prevent access to other databases
+      if (!dbConfig.database) {
+        return {
+          status: 'error',
+          error: 'No database specified in connection string. Please specify a database name in your MySQL connection URL.'
+        };
+      }
+      
+      // Verify the database exists and is accessible
+      const results = await this.db.query<any[]>('SELECT DATABASE() as current_database');
+      const currentDatabase = results[0]?.current_database;
+      
+      if (!currentDatabase) {
+        return {
+          status: 'error',
+          error: 'No database selected. Please ensure your connection string includes a valid database name.'
+        };
+      }
       
       return {
         status: 'success',
-        data: databases
+        data: [currentDatabase]
       };
     } catch (error: any) {
       return {
@@ -41,9 +60,26 @@ export class DatabaseTools {
     }
 
     try {
+      // Security validation: if database is specified, ensure it matches the connected database
+      if (params.database) {
+        if (!dbConfig.database) {
+          return {
+            status: 'error',
+            error: 'No database specified in connection string. Cannot access other databases.'
+          };
+        }
+        
+        if (params.database !== dbConfig.database) {
+          return {
+            status: 'error',
+            error: `Access denied. You can only access the connected database '${dbConfig.database}'. Requested database '${params.database}' is not allowed.`
+          };
+        }
+      }
+      
       let query = 'SHOW TABLES';
       
-      // If database is specified, use it
+      // If database is specified and validated, use it
       if (params.database) {
         query = `SHOW TABLES FROM \`${params.database}\``;
       }
