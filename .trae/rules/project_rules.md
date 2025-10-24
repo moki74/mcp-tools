@@ -1,1 +1,3 @@
 - When create a new feature, make sure to update the README.md file with the new feature and increment the version number in package.json when the task is completed
+- When you create a new file for test, make sure the file need to be deleted when the test is completed
+- Before publish to npmjs, make sure to set `dist-tag latest` for this current version
