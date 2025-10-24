@@ -704,7 +704,7 @@ const TOOLS: Tool[] = [
 const server = new Server(
   {
     name: 'mysql-mcp-server',
-    version: '1.0.0',
+    version: '1.2.6',
   },
   {
     capabilities: {
