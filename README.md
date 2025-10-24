@@ -1224,7 +1224,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ### Core Features
 - ✅ **Transaction support (BEGIN, COMMIT, ROLLBACK)** - **COMPLETED!**
 - ✅ **Stored procedure execution** - **COMPLETED!**
-- [ ] Bulk operations (batch insert/update/delete)
+- ✅ **Bulk operations (batch insert/update/delete)** - **COMPLETED!**
 - [ ] Query result caching
 - [ ] Advanced query optimization hints
 
