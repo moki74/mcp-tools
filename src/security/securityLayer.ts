@@ -2,7 +2,7 @@ import Ajv from 'ajv';
 import { FeatureConfig, ToolCategory } from '../config/featureConfig.js';
 
 export class SecurityLayer {
-  private ajv: Ajv;
+  private ajv: InstanceType<typeof Ajv>;
   private readonly dangerousKeywords: string[];
   private readonly allowedOperations: string[];
   private readonly ddlOperations: string[];

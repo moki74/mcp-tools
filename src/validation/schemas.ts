@@ -1,4 +1,4 @@
-import Ajv, { JSONSchemaType } from 'ajv';
+import Ajv from 'ajv';
 
 const ajv = new Ajv();
 
@@ -158,6 +158,21 @@ export const deleteRecordSchema = {
   additionalProperties: false
 };
 
+// Filter condition schema for reuse
+const filterConditionSchema = {
+  type: 'object',
+  required: ['field', 'operator', 'value'],
+  properties: {
+    field: { type: 'string' },
+    operator: { 
+      type: 'string',
+      enum: ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'in']
+    },
+    value: {}
+  },
+  additionalProperties: false
+};
+
 export const runQuerySchema = {
   type: 'object',
   required: ['query'],
@@ -168,6 +183,107 @@ export const runQuerySchema = {
       items: {},
       nullable: true
     }
+  },
+  additionalProperties: false
+};
+
+// SQL execution schema
+export const executeSqlSchema = {
+  type: 'object',
+  required: ['query'],
+  properties: {
+    query: { type: 'string' },
+    params: { 
+      type: 'array',
+      items: {},
+      nullable: true
+    }
+  },
+  additionalProperties: false
+};
+
+// DDL schemas
+export const createTableSchema = {
+  type: 'object',
+  required: ['table_name', 'columns'],
+  properties: {
+    table_name: { type: 'string' },
+    columns: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['name', 'type'],
+        properties: {
+          name: { type: 'string' },
+          type: { type: 'string' },
+          nullable: { type: 'boolean' },
+          primary_key: { type: 'boolean' },
+          auto_increment: { type: 'boolean' },
+          default: { type: 'string' }
+        }
+      }
+    },
+    indexes: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          columns: { type: 'array', items: { type: 'string' } },
+          unique: { type: 'boolean' }
+        }
+      },
+      nullable: true
+    }
+  },
+  additionalProperties: false
+};
+
+export const alterTableSchema = {
+  type: 'object',
+  required: ['table_name', 'operations'],
+  properties: {
+    table_name: { type: 'string' },
+    operations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['type'],
+        properties: {
+          type: { 
+            type: 'string',
+            enum: ['add_column', 'drop_column', 'modify_column', 'rename_column', 'add_index', 'drop_index']
+          },
+          column_name: { type: 'string' },
+          new_column_name: { type: 'string' },
+          column_type: { type: 'string' },
+          nullable: { type: 'boolean' },
+          default: { type: 'string' },
+          index_name: { type: 'string' },
+          index_columns: { type: 'array', items: { type: 'string' } },
+          unique: { type: 'boolean' }
+        }
+      }
+    }
+  },
+  additionalProperties: false
+};
+
+export const dropTableSchema = {
+  type: 'object',
+  required: ['table_name'],
+  properties: {
+    table_name: { type: 'string' },
+    if_exists: { type: 'boolean' }
+  },
+  additionalProperties: false
+};
+
+export const executeDdlSchema = {
+  type: 'object',
+  required: ['query'],
+  properties: {
+    query: { type: 'string' }
   },
   additionalProperties: false
 };
@@ -309,6 +425,76 @@ export const showCreateProcedureSchema = {
   additionalProperties: false
 };
 
+// Bulk Insert Schema
+const bulkInsertSchema = {
+  type: 'object',
+  properties: {
+    table_name: { type: 'string', minLength: 1 },
+    data: {
+      type: 'array',
+      minItems: 1,
+      items: {
+        type: 'object',
+        additionalProperties: true
+      }
+    },
+    batch_size: { type: 'number', minimum: 1, maximum: 10000 }
+  },
+  required: ['table_name', 'data'],
+  additionalProperties: false
+};
+
+// Bulk Update Schema
+const bulkUpdateSchema = {
+  type: 'object',
+  properties: {
+    table_name: { type: 'string', minLength: 1 },
+    updates: {
+      type: 'array',
+      minItems: 1,
+      items: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'object',
+            additionalProperties: true
+          },
+          conditions: {
+            type: 'array',
+            minItems: 1,
+            items: filterConditionSchema
+          }
+        },
+        required: ['data', 'conditions'],
+        additionalProperties: false
+      }
+    },
+    batch_size: { type: 'number', minimum: 1, maximum: 1000 }
+  },
+  required: ['table_name', 'updates'],
+  additionalProperties: false
+};
+
+// Bulk Delete Schema
+const bulkDeleteSchema = {
+  type: 'object',
+  properties: {
+    table_name: { type: 'string', minLength: 1 },
+    condition_sets: {
+      type: 'array',
+      minItems: 1,
+      items: {
+        type: 'array',
+        minItems: 1,
+        items: filterConditionSchema
+      }
+    },
+    batch_size: { type: 'number', minimum: 1, maximum: 1000 }
+  },
+  required: ['table_name', 'condition_sets'],
+  additionalProperties: false
+};
+
 // Compile validators
 export const validateListTables = ajv.compile(listTablesSchema);
 export const validateReadTableSchema = ajv.compile(readTableSchemaSchema);
@@ -316,18 +502,25 @@ export const validateCreateRecord = ajv.compile(createRecordSchema);
 export const validateReadRecords = ajv.compile(readRecordsSchema);
 export const validateUpdateRecord = ajv.compile(updateRecordSchema);
 export const validateDeleteRecord = ajv.compile(deleteRecordSchema);
+export const validateBulkInsert = ajv.compile(bulkInsertSchema);
+export const validateBulkUpdate = ajv.compile(bulkUpdateSchema);
+export const validateBulkDelete = ajv.compile(bulkDeleteSchema);
 export const validateRunQuery = ajv.compile(runQuerySchema);
-export const validateGetTableRelationships = ajv.compile(getTableRelationshipsSchema);
+export const validateExecuteSql = ajv.compile(executeSqlSchema);
+export const validateCreateTable = ajv.compile(createTableSchema);
+export const validateAlterTable = ajv.compile(alterTableSchema);
+export const validateDropTable = ajv.compile(dropTableSchema);
+export const validateExecuteDdl = ajv.compile(executeDdlSchema);
 export const validateBeginTransaction = ajv.compile(beginTransactionSchema);
 export const validateCommitTransaction = ajv.compile(commitTransactionSchema);
 export const validateRollbackTransaction = ajv.compile(rollbackTransactionSchema);
-export const validateGetTransactionStatus = ajv.compile(getTransactionStatusSchema);
 export const validateExecuteInTransaction = ajv.compile(executeInTransactionSchema);
-
-// Stored procedure validators
 export const validateListStoredProcedures = ajv.compile(listStoredProceduresSchema);
 export const validateGetStoredProcedureInfo = ajv.compile(getStoredProcedureInfoSchema);
-export const validateStoredProcedureExecution = ajv.compile(executeStoredProcedureSchema);
-export const validateStoredProcedureCreation = ajv.compile(createStoredProcedureSchema);
+export const validateExecuteStoredProcedure = ajv.compile(executeStoredProcedureSchema);
+export const validateCreateStoredProcedure = ajv.compile(createStoredProcedureSchema);
 export const validateDropStoredProcedure = ajv.compile(dropStoredProcedureSchema);
 export const validateShowCreateProcedure = ajv.compile(showCreateProcedureSchema);
+export const validateStoredProcedureExecution = ajv.compile(executeStoredProcedureSchema);
+export const validateStoredProcedureCreation = ajv.compile(createStoredProcedureSchema);
+export const validateGetTableRelationships = ajv.compile(getTableRelationshipsSchema);

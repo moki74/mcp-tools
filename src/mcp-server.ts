@@ -189,6 +189,130 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'bulk_insert',
+    description: 'Bulk insert multiple records into the specified table with batch processing for optimal performance.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        table_name: {
+          type: 'string',
+          description: 'Name of the table to insert into',
+        },
+        data: {
+          type: 'array',
+          description: 'Array of objects containing column names and values to insert',
+          minItems: 1,
+          items: {
+            type: 'object',
+            additionalProperties: true,
+          },
+        },
+        batch_size: {
+          type: 'number',
+          description: 'Optional batch size for processing (default: 1000, max: 10000)',
+          minimum: 1,
+          maximum: 10000,
+        },
+      },
+      required: ['table_name', 'data'],
+    },
+  },
+  {
+    name: 'bulk_update',
+    description: 'Bulk update multiple records with different conditions and data using batch processing.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        table_name: {
+          type: 'string',
+          description: 'Name of the table to update',
+        },
+        updates: {
+          type: 'array',
+          description: 'Array of update operations with data and conditions',
+          minItems: 1,
+          items: {
+            type: 'object',
+            properties: {
+              data: {
+                type: 'object',
+                description: 'Object containing column names and new values',
+                additionalProperties: true,
+              },
+              conditions: {
+                type: 'array',
+                description: 'Array of conditions to identify which records to update',
+                minItems: 1,
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    operator: { 
+                      type: 'string',
+                      enum: ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'in']
+                    },
+                    value: {},
+                  },
+                  required: ['field', 'operator', 'value'],
+                },
+              },
+            },
+            required: ['data', 'conditions'],
+          },
+        },
+        batch_size: {
+          type: 'number',
+          description: 'Optional batch size for processing (default: 100, max: 1000)',
+          minimum: 1,
+          maximum: 1000,
+        },
+      },
+      required: ['table_name', 'updates'],
+    },
+  },
+  {
+    name: 'bulk_delete',
+    description: 'Bulk delete records based on multiple condition sets using batch processing.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        table_name: {
+          type: 'string',
+          description: 'Name of the table to delete from',
+        },
+        condition_sets: {
+          type: 'array',
+          description: 'Array of condition sets, each defining records to delete',
+          minItems: 1,
+          items: {
+            type: 'array',
+            description: 'Array of conditions for this delete operation',
+            minItems: 1,
+            items: {
+              type: 'object',
+              properties: {
+                field: { type: 'string' },
+                operator: { 
+                  type: 'string',
+                  enum: ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'in']
+                },
+                value: {},
+              },
+              required: ['field', 'operator', 'value'],
+            },
+          },
+        },
+        batch_size: {
+          type: 'number',
+          description: 'Optional batch size for processing (default: 100, max: 1000)',
+          minimum: 1,
+          maximum: 1000,
+        },
+      },
+      required: ['table_name', 'condition_sets'],
+    },
+  },
+  {
     name: 'run_query',
     description: 'Runs a read-only SQL SELECT query with optional parameters. Only SELECT statements are allowed.',
     inputSchema: {
@@ -597,7 +721,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 });
 
 // Handle tool call requests
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
+server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
   const { name, arguments: args } = request.params;
 
   try {
@@ -630,6 +754,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'delete_record':
         result = await mysqlMCP.deleteRecord(args as any);
+        break;
+
+      case 'bulk_insert':
+        result = await mysqlMCP.bulkInsert(args as any);
+        break;
+
+      case 'bulk_update':
+        result = await mysqlMCP.bulkUpdate(args as any);
+        break;
+
+      case 'bulk_delete':
+        result = await mysqlMCP.bulkDelete(args as any);
         break;
 
       case 'run_query':

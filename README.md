@@ -130,7 +130,7 @@ Try asking your AI:
 
 ## 🛠️ Available Tools
 
-The MCP server provides **27 powerful tools**:
+The MCP server provides **30 powerful tools**:
 
 ### Database Discovery (4 tools)
 
@@ -149,6 +149,14 @@ The MCP server provides **27 powerful tools**:
 | `read_records` | Query records with filtering, pagination, and sorting |
 | `update_record` | Update records based on conditions |
 | `delete_record` | Delete records with safety checks |
+
+### Bulk Operations (3 tools)
+
+| Tool | Description | Performance |
+|------|-------------|-------------|
+| `bulk_insert` | Insert multiple records in batches for optimal performance | Up to 10,000 records per batch |
+| `bulk_update` | Update multiple records with different conditions in batches | Up to 1,000 operations per batch |
+| `bulk_delete` | Delete multiple record sets based on different conditions | Up to 1,000 operations per batch |
 
 ### Custom Queries (2 tools)
 
@@ -740,6 +748,77 @@ END IF;
 **AI uses `get_transaction_status`:**
 - Returns transaction status and ID if active
 
+### Example 7: Bulk Insert
+
+**User:** *"Insert 1000 new products from this CSV data"*
+
+**AI uses `bulk_insert`:**
+```json
+{
+  "tool": "bulk_insert",
+  "arguments": {
+    "table_name": "products",
+    "data": [
+      {"name": "Product 1", "price": 19.99, "category": "Electronics"},
+      {"name": "Product 2", "price": 29.99, "category": "Books"},
+      // ... up to 1000 records
+    ],
+    "batch_size": 1000
+  }
+}
+```
+- Processes records in optimized batches
+- Returns total inserted count and performance metrics
+
+### Example 8: Bulk Update
+
+**User:** *"Update prices for all products in specific categories with different discounts"*
+
+**AI uses `bulk_update`:**
+```json
+{
+  "tool": "bulk_update",
+  "arguments": {
+    "table_name": "products",
+    "updates": [
+      {
+        "data": {"price": "price * 0.9"},
+        "conditions": [{"field": "category", "operator": "eq", "value": "Electronics"}]
+      },
+      {
+        "data": {"price": "price * 0.8"},
+        "conditions": [{"field": "category", "operator": "eq", "value": "Books"}]
+      }
+    ],
+    "batch_size": 100
+  }
+}
+```
+- Applies different updates based on conditions
+- Processes in batches for optimal performance
+
+### Example 9: Bulk Delete
+
+**User:** *"Delete all inactive users and expired sessions"*
+
+**AI uses `bulk_delete`:**
+```json
+{
+  "tool": "bulk_delete",
+  "arguments": {
+    "table_name": "users",
+    "condition_sets": [
+      [{"field": "status", "operator": "eq", "value": "inactive"}],
+      [{"field": "last_login", "operator": "lt", "value": "2023-01-01"}],
+      [{"field": "email_verified", "operator": "eq", "value": false}]
+    ],
+    "batch_size": 100
+  }
+}
+```
+- Deletes records matching any of the condition sets
+- Processes deletions in safe batches
+
 **User:** *"Rollback the current transaction"*
 
 **AI uses `rollback_transaction`:**
@@ -921,6 +1000,81 @@ npm run start:api
 
 # Test health endpoint
 curl http://localhost:3000/health
+```
+
+---
+
+## 🚀 Bulk Operations
+
+The MySQL MCP server includes powerful bulk operation tools designed for high-performance data processing. These tools are optimized for handling large datasets efficiently.
+
+### Performance Characteristics
+
+- **Batch Processing**: Operations are processed in configurable batches to optimize memory usage and database performance
+- **Transaction Safety**: Each batch is wrapped in a transaction for data consistency
+- **Error Handling**: Detailed error reporting with batch-level granularity
+- **Memory Efficient**: Streaming approach prevents memory overflow with large datasets
+
+### Best Practices
+
+#### Batch Size Optimization
+```json
+{
+  "batch_size": 1000  // Recommended for most operations
+}
+```
+
+**Guidelines:**
+- **Small records (< 1KB)**: Use batch sizes of 1000-5000
+- **Large records (> 10KB)**: Use batch sizes of 100-500
+- **Complex operations**: Start with 100 and increase based on performance
+
+#### Bulk Insert Tips
+- Use consistent data structure across all records
+- Pre-validate data to avoid mid-batch failures
+- Consider using `ON DUPLICATE KEY UPDATE` for upsert operations
+- Monitor MySQL's `max_allowed_packet` setting for large batches
+
+#### Bulk Update Optimization
+- Use indexed columns in conditions for better performance
+- Group similar updates together
+- Consider using raw SQL expressions for calculated updates
+- Test with small batches first to verify logic
+
+#### Bulk Delete Safety
+- Always test delete conditions with `SELECT` first
+- Use smaller batch sizes for delete operations
+- Consider soft deletes for important data
+- Monitor foreign key constraints
+
+### Error Handling
+
+Bulk operations provide detailed error information:
+
+```json
+{
+  "success": false,
+  "error": "Batch 3 failed: Duplicate entry 'user123' for key 'username'",
+  "processed_batches": 2,
+  "total_batches": 5,
+  "successful_operations": 2000,
+  "failed_operations": 1000
+}
+```
+
+### Performance Monitoring
+
+Each bulk operation returns performance metrics:
+
+```json
+{
+  "success": true,
+  "total_processed": 10000,
+  "batches_processed": 10,
+  "execution_time_ms": 2500,
+  "average_batch_time_ms": 250,
+  "records_per_second": 4000
+}
 ```
 
 ---

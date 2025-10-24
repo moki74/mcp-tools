@@ -322,6 +322,45 @@ export class MySQLMCP {
     };
   }
 
+  /**
+   * Bulk insert multiple records into the specified table
+   */
+  async bulkInsert(params: { 
+    table_name: string; 
+    data: Record<string, any>[];
+    batch_size?: number;
+  }): Promise<{ status: string; data?: any; error?: string }> {
+    this.checkToolEnabled('bulk_insert');
+    return this.crudTools.bulkInsert(params);
+  }
+
+  /**
+   * Bulk update multiple records with different conditions and data
+   */
+  async bulkUpdate(params: { 
+    table_name: string; 
+    updates: Array<{
+      data: Record<string, any>;
+      conditions: any[];
+    }>;
+    batch_size?: number;
+  }): Promise<{ status: string; data?: any; error?: string }> {
+    this.checkToolEnabled('bulk_update');
+    return this.crudTools.bulkUpdate(params);
+  }
+
+  /**
+   * Bulk delete records based on multiple condition sets
+   */
+  async bulkDelete(params: { 
+    table_name: string; 
+    condition_sets: any[][];
+    batch_size?: number;
+  }): Promise<{ status: string; data?: any; error?: string }> {
+    this.checkToolEnabled('bulk_delete');
+    return this.crudTools.bulkDelete(params);
+  }
+
   // Close database connection
   async close() {
     const db = DatabaseConnection.getInstance();
