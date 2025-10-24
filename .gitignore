@@ -151,3 +151,5 @@ credentials/
 .cache/
 .parcel-cache/
 DEPLOY.md
+NOTE.txt
+.next/
