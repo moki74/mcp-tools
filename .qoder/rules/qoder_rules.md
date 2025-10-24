@@ -1,3 +1,7 @@
+---
+trigger: always_on
+alwaysApply: true
+---
 - This is a MCP MySQL using the latest version of Node.js
 - When creating a new feature, make sure to update the README.md file with the new feature and increment the version number in package.json when the task is completed
 - When creating a new file for testing, make sure the file needs to be deleted when the test is completed
