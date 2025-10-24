@@ -1,0 +1,1 @@
+- When create a new feature, make sure to update the README.md file with the new feature and increment the version number in package.json when the task is completed
