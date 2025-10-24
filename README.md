@@ -89,23 +89,6 @@ npm run build
 }
 ```
 
-**Alternative: Local development (if you cloned the repository):**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "node",
-      "args": [
-        "C:\\path\\to\\mysql-mcp\\bin\\mcp-mysql.js",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
-```
-
 #### Cline (VS Code Extension)
 
 Add to Cline MCP settings (same JSON format as Claude Desktop).
