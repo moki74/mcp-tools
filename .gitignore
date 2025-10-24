@@ -147,6 +147,11 @@ credentials/
 .docker/
 *.dockerfile
 
+# Automation scripts and workflows (local development tools)
+scripts/
+.github/
+DEVELOPMENT_WORKFLOW.md
+
 # Misc
 .cache/
 .parcel-cache/
