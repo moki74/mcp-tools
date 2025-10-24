@@ -11,7 +11,7 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 - ✅ **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
 - 🔒 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
-- 🛠️ **27 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures)
+- 🛠️ **30 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations)
 - 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
 - 🏗️ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
 - 💰 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
