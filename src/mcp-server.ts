@@ -698,13 +698,87 @@ const TOOLS: Tool[] = [
       required: ['procedure_name'],
     },
   },
+  // Data Export Tools
+  {
+    name: 'export_table_to_csv',
+    description: 'Export table data to CSV format with optional filtering, pagination, and sorting.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        table_name: {
+          type: 'string',
+          description: 'Name of the table to export',
+        },
+        filters: {
+          type: 'array',
+          description: 'Array of filter conditions',
+          items: {
+            type: 'object',
+            properties: {
+              field: { type: 'string' },
+              operator: { 
+                type: 'string',
+                enum: ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'in']
+              },
+              value: { 
+                description: 'Value to compare against (can be string, number, boolean, or array for "in" operator)'
+              },
+            },
+            required: ['field', 'operator', 'value'],
+          },
+        },
+        pagination: {
+          type: 'object',
+          properties: {
+            page: { type: 'number', description: 'Page number (starting from 1)' },
+            limit: { type: 'number', description: 'Number of records per page' },
+          },
+        },
+        sorting: {
+          type: 'object',
+          properties: {
+            field: { type: 'string', description: 'Field name to sort by' },
+            direction: { type: 'string', enum: ['asc', 'desc'] },
+          },
+        },
+        include_headers: {
+          type: 'boolean',
+          description: 'Whether to include column headers in the CSV output',
+        },
+      },
+      required: ['table_name'],
+    },
+  },
+  {
+    name: 'export_query_to_csv',
+    description: 'Export the results of a SELECT query to CSV format.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'SQL SELECT query to execute and export',
+        },
+        params: {
+          type: 'array',
+          description: 'Optional array of parameters for parameterized queries',
+          items: {},
+        },
+        include_headers: {
+          type: 'boolean',
+          description: 'Whether to include column headers in the CSV output',
+        },
+      },
+      required: ['query'],
+    },
+  },
 ];
 
 // Create the MCP server
 const server = new Server(
   {
     name: 'mysql-mcp-server',
-    version: '1.2.6',
+    version: '1.3.0',
   },
   {
     capabilities: {
@@ -848,6 +922,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
       case 'show_create_procedure':
         result = await mysqlMCP.showCreateProcedure(args as { procedure_name: string; database?: string });
+        break;
+
+      // Data Export Tools
+      case 'export_table_to_csv':
+        result = await mysqlMCP.exportTableToCSV(args as any);
+        break;
+
+      case 'export_query_to_csv':
+        result = await mysqlMCP.exportQueryToCSV(args as { query: string; params?: any[]; include_headers?: boolean });
         break;
 
       default:

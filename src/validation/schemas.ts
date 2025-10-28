@@ -495,6 +495,66 @@ const bulkDeleteSchema = {
   additionalProperties: false
 };
 
+// Data Export schemas
+export const exportTableToCsvSchema = {
+  type: 'object',
+  required: ['table_name'],
+  properties: {
+    table_name: { type: 'string' },
+    filters: { 
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['field', 'operator', 'value'],
+        properties: {
+          field: { type: 'string' },
+          operator: { 
+            type: 'string',
+            enum: ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'in']
+          },
+          value: {}
+        }
+      },
+      nullable: true
+    },
+    pagination: {
+      type: 'object',
+      properties: {
+        page: { type: 'integer', minimum: 1 },
+        limit: { type: 'integer', minimum: 1, maximum: 10000 }
+      },
+      required: ['page', 'limit'],
+      nullable: true
+    },
+    sorting: {
+      type: 'object',
+      properties: {
+        field: { type: 'string' },
+        direction: { type: 'string', enum: ['asc', 'desc'] }
+      },
+      required: ['field', 'direction'],
+      nullable: true
+    },
+    include_headers: { type: 'boolean', nullable: true }
+  },
+  additionalProperties: false
+};
+
+export const exportQueryToCsvSchema = {
+  type: 'object',
+  required: ['query'],
+  properties: {
+    query: { type: 'string' },
+    params: { 
+      type: 'array',
+      items: {},
+      nullable: true
+    },
+    include_headers: { type: 'boolean', nullable: true }
+  },
+  additionalProperties: false
+};
+
 // Compile validators
 export const validateListTables = ajv.compile(listTablesSchema);
 export const validateReadTableSchema = ajv.compile(readTableSchemaSchema);
@@ -524,3 +584,5 @@ export const validateShowCreateProcedure = ajv.compile(showCreateProcedureSchema
 export const validateStoredProcedureExecution = ajv.compile(executeStoredProcedureSchema);
 export const validateStoredProcedureCreation = ajv.compile(createStoredProcedureSchema);
 export const validateGetTableRelationships = ajv.compile(getTableRelationshipsSchema);
+export const validateExportTableToCsv = ajv.compile(exportTableToCsvSchema);
+export const validateExportQueryToCsv = ajv.compile(exportQueryToCsvSchema);

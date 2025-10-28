@@ -157,12 +157,14 @@ The MCP server provides **30 powerful tools**:
 | `drop_table` | Delete tables | `ddl` permission |
 | `execute_ddl` | Execute raw DDL SQL (CREATE, ALTER, DROP, TRUNCATE, RENAME) | `ddl` permission |
 
-### Utilities (2 tools)
+### Utilities (4 tools)
 
 | Tool | Description |
 |------|-------------|
 | `test_connection` | Test database connectivity and measure latency |
 | `describe_connection` | Get current connection information |
+| `export_table_to_csv` | Export table data to CSV format with optional filtering, pagination, and sorting |
+| `export_query_to_csv` | Export the results of a SELECT query to CSV format |
 
 ### Transaction Management (5 tools)
 
@@ -363,6 +365,140 @@ DDL operations are **disabled by default** for safety. Add `ddl` to permissions 
 2. ✅ **Backup before major changes** - DDL operations are usually irreversible
 3. ✅ **Test in dev first** - Try schema changes in development environment
 4. ✅ **Use proper MySQL user permissions** - Grant only necessary privileges
+
+---
+
+## 📤 Data Export Tools
+
+The MySQL MCP Server provides powerful data export capabilities, allowing AI agents to export database content in CSV format for analysis, reporting, and data sharing.
+
+### Data Export Tools Overview
+
+- **`export_table_to_csv`** - Export all or filtered data from a table to CSV format
+- **`export_query_to_csv`** - Export the results of a custom SELECT query to CSV format
+
+Both tools support:
+- Filtering data with conditions
+- Pagination for large datasets
+- Sorting results
+- Optional column headers
+- Proper CSV escaping for special characters
+
+### Data Export Tool Examples
+
+#### Export Table to CSV
+
+**User prompt:** *"Export the first 100 users ordered by registration date to CSV"*
+
+**AI will execute:**
+```json
+{
+  "tool": "export_table_to_csv",
+  "arguments": {
+    "table_name": "users",
+    "sorting": {
+      "field": "registration_date",
+      "direction": "desc"
+    },
+    "pagination": {
+      "page": 1,
+      "limit": 100
+    },
+    "include_headers": true
+  }
+}
+```
+
+#### Export Filtered Data to CSV
+
+**User prompt:** *"Export all users from the marketing department to CSV"*
+
+**AI will execute:**
+```json
+{
+  "tool": "export_table_to_csv",
+  "arguments": {
+    "table_name": "users",
+    "filters": [
+      {
+        "field": "department",
+        "operator": "eq",
+        "value": "marketing"
+      }
+    ],
+    "include_headers": true
+  }
+}
+```
+
+#### Export Query Results to CSV
+
+**User prompt:** *"Export a report of total sales by product category to CSV"*
+
+**AI will execute:**
+```json
+{
+  "tool": "export_query_to_csv",
+  "arguments": {
+    "query": "SELECT category, SUM(sales_amount) as total_sales FROM sales GROUP BY category ORDER BY total_sales DESC",
+    "include_headers": true
+  }
+}
+```
+
+### Data Export Best Practices
+
+1. ✅ **Use filtering** - Export only the data you need to reduce file size
+2. ✅ **Implement pagination** - For large datasets, use pagination to avoid memory issues
+3. ✅ **Include headers** - Make CSV files more understandable with column headers
+4. ✅ **Test with small datasets first** - Verify export format before processing large amounts of data
+5. ✅ **Use proper permissions** - Data export tools require `utility` permission
+
+### Common Data Export Patterns
+
+**Pattern 1: Simple Table Export**
+```json
+{
+  "tool": "export_table_to_csv",
+  "arguments": {
+    "table_name": "products",
+    "include_headers": true
+  }
+}
+```
+
+**Pattern 2: Filtered and Sorted Export**
+```json
+{
+  "tool": "export_table_to_csv",
+  "arguments": {
+    "table_name": "orders",
+    "filters": [
+      {
+        "field": "order_date",
+        "operator": "gte",
+        "value": "2023-01-01"
+      }
+    ],
+    "sorting": {
+      "field": "order_date",
+      "direction": "desc"
+    },
+    "include_headers": true
+  }
+}
+```
+
+**Pattern 3: Complex Query Export**
+```json
+{
+  "tool": "export_query_to_csv",
+  "arguments": {
+    "query": "SELECT u.name, u.email, COUNT(o.id) as order_count FROM users u LEFT JOIN orders o ON u.id = o.user_id GROUP BY u.id HAVING order_count > 5",
+    "include_headers": true
+  }
+}
+```
 
 ---
 

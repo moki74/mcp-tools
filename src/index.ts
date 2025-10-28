@@ -5,6 +5,7 @@ import { UtilityTools } from './tools/utilityTools';
 import { DdlTools } from './tools/ddlTools';
 import { TransactionTools } from './tools/transactionTools';
 import { StoredProcedureTools } from './tools/storedProcedureTools';
+import { DataExportTools } from './tools/dataExportTools';
 import SecurityLayer from './security/securityLayer';
 import DatabaseConnection from './db/connection';
 import { FeatureConfig } from './config/featureConfig';
@@ -21,6 +22,7 @@ export class MySQLMCP {
   private ddlTools: DdlTools;
   private transactionTools: TransactionTools;
   private storedProcedureTools: StoredProcedureTools;
+  private dataExportTools: DataExportTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -34,6 +36,7 @@ export class MySQLMCP {
     this.ddlTools = new DdlTools();
     this.transactionTools = new TransactionTools();
     this.storedProcedureTools = new StoredProcedureTools(this.security);
+    this.dataExportTools = new DataExportTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -309,6 +312,33 @@ export class MySQLMCP {
       return { status: 'error', error: check.error };
     }
     return await this.storedProcedureTools.showCreateProcedure(params);
+  }
+
+  // Data Export Tools
+  async exportTableToCSV(params: { 
+    table_name: string; 
+    filters?: any[];
+    pagination?: { page: number; limit: number };
+    sorting?: { field: string; direction: 'asc' | 'desc' };
+    include_headers?: boolean;
+  }) {
+    const check = this.checkToolEnabled('exportTableToCSV');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.dataExportTools.exportTableToCSV(params);
+  }
+
+  async exportQueryToCSV(params: { 
+    query: string; 
+    params?: any[];
+    include_headers?: boolean;
+  }) {
+    const check = this.checkToolEnabled('exportQueryToCSV');
+    if (!check.enabled) {
+      return { status: 'error', error: check.error };
+    }
+    return await this.dataExportTools.exportQueryToCSV(params);
   }
   
   // Get feature configuration status

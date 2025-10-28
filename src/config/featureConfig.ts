@@ -48,6 +48,8 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   'describeConnection': ToolCategory.UTILITY,
   'testConnection': ToolCategory.UTILITY,
   'getTableRelationships': ToolCategory.UTILITY,
+  'exportTableToCSV': ToolCategory.UTILITY,
+  'exportQueryToCSV': ToolCategory.UTILITY,
   
   // Transaction tools
   'beginTransaction': ToolCategory.TRANSACTION,
