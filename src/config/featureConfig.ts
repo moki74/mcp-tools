@@ -34,6 +34,11 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   'updateRecord': ToolCategory.UPDATE,
   'deleteRecord': ToolCategory.DELETE,
   
+  // Bulk operations
+  'bulkInsert': ToolCategory.CREATE,
+  'bulkUpdate': ToolCategory.UPDATE,
+  'bulkDelete': ToolCategory.DELETE,
+  
   // Query tools
   'runQuery': ToolCategory.READ,
   'executeSql': ToolCategory.EXECUTE,
@@ -72,8 +77,10 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
  */
 export class FeatureConfig {
   private enabledCategories: Set<ToolCategory>;
+  private originalConfigString: string;
   
   constructor(configStr?: string) {
+    this.originalConfigString = configStr || process.env.MCP_CONFIG || '';
     this.enabledCategories = this.parseConfig(configStr);
   }
   
@@ -102,6 +109,7 @@ export class FeatureConfig {
    * Update configuration at runtime
    */
   setConfig(configStr: string): void {
+    this.originalConfigString = configStr;
     this.enabledCategories = this.parseConfig(configStr);
   }
   
@@ -118,6 +126,64 @@ export class FeatureConfig {
     }
     
     return this.enabledCategories.has(category);
+  }
+
+  /**
+   * Get detailed permission error message for a specific tool
+   */
+  getPermissionError(toolName: string): string {
+    const category = toolCategoryMap[toolName];
+    
+    if (!category) {
+      return `Unknown tool '${toolName}'. This tool is not recognized by the MCP server.`;
+    }
+
+    const isAllPermissions = !this.originalConfigString.trim();
+    const currentPermissions = isAllPermissions ? 'all' : this.originalConfigString;
+    
+    const actionDescriptions: Record<ToolCategory, string> = {
+      [ToolCategory.LIST]: 'list databases and tables',
+      [ToolCategory.READ]: 'read data from tables',
+      [ToolCategory.CREATE]: 'create new records',
+      [ToolCategory.UPDATE]: 'update existing records',
+      [ToolCategory.DELETE]: 'delete records',
+      [ToolCategory.EXECUTE]: 'execute custom SQL queries',
+      [ToolCategory.DDL]: 'create, alter, or drop tables (schema changes)',
+      [ToolCategory.UTILITY]: 'use utility functions',
+      [ToolCategory.TRANSACTION]: 'manage database transactions',
+      [ToolCategory.PROCEDURE]: 'manage stored procedures'
+    };
+
+    const toolDescriptions: Record<string, string> = {
+       'createTable': 'create new tables',
+       'alterTable': 'modify table structure',
+       'dropTable': 'delete tables',
+       'executeDdl': 'execute DDL statements',
+       'createRecord': 'insert new records',
+       'updateRecord': 'update existing records',
+       'deleteRecord': 'delete records',
+       'bulkInsert': 'insert multiple records in batches',
+       'bulkUpdate': 'update multiple records in batches',
+       'bulkDelete': 'delete multiple records in batches',
+       'executeSql': 'execute custom SQL statements',
+       'runQuery': 'run SELECT queries',
+       'beginTransaction': 'start database transactions',
+       'commitTransaction': 'commit database transactions',
+       'rollbackTransaction': 'rollback database transactions',
+       'executeInTransaction': 'execute queries within transactions',
+       'createStoredProcedure': 'create stored procedures',
+       'dropStoredProcedure': 'delete stored procedures',
+       'executeStoredProcedure': 'execute stored procedures',
+       'exportTableToCSV': 'export table data to CSV',
+       'exportQueryToCSV': 'export query results to CSV'
+     };
+
+    const toolDescription = toolDescriptions[toolName] || actionDescriptions[category];
+    const requiredPermission = category;
+    
+    return `Permission denied: Cannot ${toolDescription}. ` +
+           `This action requires '${requiredPermission}' permission, but your current MCP configuration only allows: ${currentPermissions}. ` +
+           `To enable this feature, update your MCP server configuration to include '${requiredPermission}' in the permissions list.`;
   }
   
   /**

@@ -44,7 +44,7 @@ export class MySQLMCP {
     if (!this.featureConfig.isToolEnabled(toolName)) {
       return {
         enabled: false,
-        error: `Tool '${toolName}' is disabled in the current configuration. Enabled categories: ${this.featureConfig.getEnabledCategories().join(', ')}`
+        error: this.featureConfig.getPermissionError(toolName)
       };
     }
     return { enabled: true };

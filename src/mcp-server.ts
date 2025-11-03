@@ -985,6 +985,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       ],
     };
   } catch (error: any) {
+    // Check if this is a permission error
+    if (error.message && error.message.includes('Permission denied')) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `❌ ${error.message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+    
+    // Handle other errors with generic message
     return {
       content: [
         {

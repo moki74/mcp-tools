@@ -283,6 +283,120 @@ You can have different databases with different permissions in the same AI agent
 
 ---
 
+## 🚫 Permission Error Handling
+
+The MySQL MCP Server provides clear, user-friendly error messages when operations are attempted without proper permissions. This helps users understand exactly what permissions are needed and how to enable them.
+
+### Error Message Format
+
+When a tool is called without the required permission, you'll receive a detailed error message like:
+
+```
+❌ Permission denied: Cannot use tool 'create_table'. This tool requires 'ddl' permission.
+
+Current permissions: list,read,utility
+To enable this tool, add 'ddl' to your permissions configuration.
+
+Example configuration:
+"args": ["mysql://user:pass@host:3306/db", "list,read,utility,ddl"]
+
+Tool description: Create new tables with columns and indexes
+```
+
+### Common Permission Error Examples
+
+#### Creating Tables Without DDL Permission
+
+**User prompt:** *"Create a new table called 'products'"*
+
+**Error response when DDL not enabled:**
+```
+❌ Permission denied: Cannot use tool 'create_table'. This tool requires 'ddl' permission.
+
+Current permissions: list,read,utility
+To enable this tool, add 'ddl' to your permissions configuration.
+
+Example configuration:
+"args": ["mysql://user:pass@host:3306/db", "list,read,utility,ddl"]
+
+Tool description: Create new tables with columns and indexes
+```
+
+#### Inserting Data Without Create Permission
+
+**User prompt:** *"Add a new user to the users table"*
+
+**Error response when CREATE not enabled:**
+```
+❌ Permission denied: Cannot use tool 'create_record'. This tool requires 'create' permission.
+
+Current permissions: list,read,utility
+To enable this tool, add 'create' to your permissions configuration.
+
+Example configuration:
+"args": ["mysql://user:pass@host:3306/db", "list,read,utility,create"]
+
+Tool description: Insert new records with automatic SQL generation
+```
+
+#### Updating Data Without Update Permission
+
+**User prompt:** *"Update the email for user ID 123"*
+
+**Error response when UPDATE not enabled:**
+```
+❌ Permission denied: Cannot use tool 'update_record'. This tool requires 'update' permission.
+
+Current permissions: list,read,utility
+To enable this tool, add 'update' to your permissions configuration.
+
+Example configuration:
+"args": ["mysql://user:pass@host:3306/db", "list,read,utility,update"]
+
+Tool description: Update existing records based on conditions
+```
+
+### Permission Error Benefits
+
+1. **🎯 Clear Guidance** - Exact permission needed and how to add it
+2. **📋 Current State** - Shows what permissions are currently active
+3. **💡 Example Configuration** - Ready-to-use configuration example
+4. **📖 Tool Context** - Explains what the tool does
+5. **🔒 Security** - Prevents unauthorized operations while being helpful
+
+### Troubleshooting Permission Errors
+
+If you encounter permission errors:
+
+1. **Check your configuration** - Verify the permissions string in your MCP configuration
+2. **Add required permission** - Add the missing permission to your configuration
+3. **Restart your AI agent** - Changes require a restart to take effect
+4. **Test with a simple operation** - Verify the permission is working
+
+**Example fix for DDL operations:**
+
+Before (DDL disabled):
+```json
+{
+  "args": [
+    "mysql://user:pass@localhost:3306/db",
+    "list,read,utility"
+  ]
+}
+```
+
+After (DDL enabled):
+```json
+{
+  "args": [
+    "mysql://user:pass@localhost:3306/db",
+    "list,read,utility,ddl"
+  ]
+}
+```
+
+---
+
 ## 🏗️ DDL Operations
 
 DDL (Data Definition Language) operations allow AI to create, modify, and delete tables.
