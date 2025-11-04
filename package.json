@@ -1,6 +1,6 @@
 {
   "name": "@berthojoris/mcp-mysql-server",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Model Context Protocol server for MySQL database integration with dynamic per-project permissions and data export capabilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -49,6 +49,7 @@
     "dist",
     "bin",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
     "manifest.json"
   ],

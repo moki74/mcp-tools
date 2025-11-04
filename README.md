@@ -1364,6 +1364,40 @@ FLUSH PRIVILEGES;
 }
 ```
 
+### Parameter Validation Errors
+
+**Problem:** "Invalid parameters: must be object" error
+
+**Symptoms:**
+- Tools fail when called without parameters
+- Error message: `Error: Invalid parameters: [{"instancePath":"","schemaPath":"#/type","keyword":"type","params":{"type":"object"},"message":"must be object"}]`
+- Occurs especially with tools that have optional parameters like `list_tables`, `begin_transaction`, `list_stored_procedures`
+
+**Cause:**
+This error occurred in earlier versions (< 1.4.1) when AI agents called MCP tools without providing parameters. The MCP SDK sometimes passes `undefined` or `null` instead of an empty object `{}`, causing JSON schema validation to fail.
+
+**Solution:**
+✅ **Fixed in version 1.4.1+** - All 33 tools now include defensive parameter handling that automatically converts `undefined`/`null` to empty objects.
+
+**If you're still experiencing this issue:**
+1. Update to the latest version:
+   ```bash
+   npx -y @berthojoris/mcp-mysql-server@latest mysql://user:pass@localhost:3306/db "permissions"
+   ```
+
+2. If using global installation:
+   ```bash
+   npm update -g @berthojoris/mcp-mysql-server
+   ```
+
+3. Restart your AI agent after updating
+
+**Technical Details:**
+- All tool handlers now use defensive pattern: `(args || {})` to ensure parameters are always objects
+- This fix applies to all 27 tools that accept parameters
+- Tools with no parameters (like `list_databases`, `test_connection`) were not affected
+- No breaking changes - existing valid calls continue to work exactly as before
+
 ---
 
 ## 📄 License

@@ -778,7 +778,7 @@ const TOOLS: Tool[] = [
 const server = new Server(
   {
     name: 'mysql-mcp-server',
-    version: '1.3.0',
+    version: '1.4.1',
   },
   {
     capabilities: {
@@ -811,59 +811,59 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
 
       case 'read_table_schema':
-        result = await mysqlMCP.readTableSchema(args as { table_name: string });
+        result = await mysqlMCP.readTableSchema((args || {}) as { table_name: string });
         break;
 
       case 'create_record':
-        result = await mysqlMCP.createRecord(args as { table_name: string; data: Record<string, any> });
+        result = await mysqlMCP.createRecord((args || {}) as { table_name: string; data: Record<string, any> });
         break;
 
       case 'read_records':
-        result = await mysqlMCP.readRecords(args as any);
+        result = await mysqlMCP.readRecords((args || {}) as any);
         break;
 
       case 'update_record':
-        result = await mysqlMCP.updateRecord(args as any);
+        result = await mysqlMCP.updateRecord((args || {}) as any);
         break;
 
       case 'delete_record':
-        result = await mysqlMCP.deleteRecord(args as any);
+        result = await mysqlMCP.deleteRecord((args || {}) as any);
         break;
 
       case 'bulk_insert':
-        result = await mysqlMCP.bulkInsert(args as any);
+        result = await mysqlMCP.bulkInsert((args || {}) as any);
         break;
 
       case 'bulk_update':
-        result = await mysqlMCP.bulkUpdate(args as any);
+        result = await mysqlMCP.bulkUpdate((args || {}) as any);
         break;
 
       case 'bulk_delete':
-        result = await mysqlMCP.bulkDelete(args as any);
+        result = await mysqlMCP.bulkDelete((args || {}) as any);
         break;
 
       case 'run_query':
-        result = await mysqlMCP.runQuery(args as { query: string; params?: any[] });
+        result = await mysqlMCP.runQuery((args || {}) as { query: string; params?: any[] });
         break;
 
       case 'execute_sql':
-        result = await mysqlMCP.executeSql(args as { query: string; params?: any[] });
+        result = await mysqlMCP.executeSql((args || {}) as { query: string; params?: any[] });
         break;
 
       case 'create_table':
-        result = await mysqlMCP.createTable(args);
+        result = await mysqlMCP.createTable(args || {});
         break;
 
       case 'alter_table':
-        result = await mysqlMCP.alterTable(args);
+        result = await mysqlMCP.alterTable(args || {});
         break;
 
       case 'drop_table':
-        result = await mysqlMCP.dropTable(args);
+        result = await mysqlMCP.dropTable(args || {});
         break;
 
       case 'execute_ddl':
-        result = await mysqlMCP.executeDdl(args as { query: string });
+        result = await mysqlMCP.executeDdl((args || {}) as { query: string });
         break;
 
       case 'describe_connection':
@@ -875,7 +875,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
 
       case 'get_table_relationships':
-        result = await mysqlMCP.getTableRelationships(args as { table_name: string });
+        result = await mysqlMCP.getTableRelationships((args || {}) as { table_name: string });
         break;
 
       // Transaction Tools
@@ -884,11 +884,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
 
       case 'commit_transaction':
-        result = await mysqlMCP.commitTransaction(args as { transactionId: string });
+        result = await mysqlMCP.commitTransaction((args || {}) as { transactionId: string });
         break;
 
       case 'rollback_transaction':
-        result = await mysqlMCP.rollbackTransaction(args as { transactionId: string });
+        result = await mysqlMCP.rollbackTransaction((args || {}) as { transactionId: string });
         break;
 
       case 'get_transaction_status':
@@ -896,7 +896,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
 
       case 'execute_in_transaction':
-        result = await mysqlMCP.executeInTransaction(args as { transactionId: string; query: string; params?: any[] });
+        result = await mysqlMCP.executeInTransaction((args || {}) as { transactionId: string; query: string; params?: any[] });
         break;
 
       // Stored Procedure Tools
@@ -905,32 +905,32 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
 
       case 'get_stored_procedure_info':
-        result = await mysqlMCP.getStoredProcedureInfo(args as { procedure_name: string; database?: string });
+        result = await mysqlMCP.getStoredProcedureInfo((args || {}) as { procedure_name: string; database?: string });
         break;
 
       case 'execute_stored_procedure':
-        result = await mysqlMCP.executeStoredProcedure(args as { procedure_name: string; parameters?: any[]; database?: string });
+        result = await mysqlMCP.executeStoredProcedure((args || {}) as { procedure_name: string; parameters?: any[]; database?: string });
         break;
 
       case 'create_stored_procedure':
-        result = await mysqlMCP.createStoredProcedure(args as any);
+        result = await mysqlMCP.createStoredProcedure((args || {}) as any);
         break;
 
       case 'drop_stored_procedure':
-        result = await mysqlMCP.dropStoredProcedure(args as { procedure_name: string; if_exists?: boolean; database?: string });
+        result = await mysqlMCP.dropStoredProcedure((args || {}) as { procedure_name: string; if_exists?: boolean; database?: string });
         break;
 
       case 'show_create_procedure':
-        result = await mysqlMCP.showCreateProcedure(args as { procedure_name: string; database?: string });
+        result = await mysqlMCP.showCreateProcedure((args || {}) as { procedure_name: string; database?: string });
         break;
 
       // Data Export Tools
       case 'export_table_to_csv':
-        result = await mysqlMCP.exportTableToCSV(args as any);
+        result = await mysqlMCP.exportTableToCSV((args || {}) as any);
         break;
 
       case 'export_query_to_csv':
-        result = await mysqlMCP.exportQueryToCSV(args as { query: string; params?: any[]; include_headers?: boolean });
+        result = await mysqlMCP.exportQueryToCSV((args || {}) as { query: string; params?: any[]; include_headers?: boolean });
         break;
 
       default:
