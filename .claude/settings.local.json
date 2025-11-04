@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm pack:*)",
+      "Bash(npm publish:*)",
+      "Bash(npm view:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -5,6 +5,19 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] - 2025-01-04
+
+### Changed
+- Updated README.md with comprehensive parameter validation error troubleshooting section
+- Ensured all documentation is up-to-date with latest fixes
+- No functional code changes from version 1.4.2
+
+## [1.4.2] - 2025-01-04
+
+### Changed
+- Re-published package to ensure README.md displays correctly on npmjs.com
+- No functional changes from version 1.4.1
+
 ## [1.4.1] - 2025-01-04
 
 ### Fixed
