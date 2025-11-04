@@ -807,7 +807,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
 
       case 'list_tables':
-        result = await mysqlMCP.listTables(args as { database?: string });
+        result = await mysqlMCP.listTables((args || {}) as { database?: string });
         break;
 
       case 'read_table_schema':
@@ -880,7 +880,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
       // Transaction Tools
       case 'begin_transaction':
-        result = await mysqlMCP.beginTransaction(args as { transactionId?: string });
+        result = await mysqlMCP.beginTransaction((args || {}) as { transactionId?: string });
         break;
 
       case 'commit_transaction':
@@ -901,7 +901,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
       // Stored Procedure Tools
       case 'list_stored_procedures':
-        result = await mysqlMCP.listStoredProcedures(args as { database?: string });
+        result = await mysqlMCP.listStoredProcedures((args || {}) as { database?: string });
         break;
 
       case 'get_stored_procedure_info':
