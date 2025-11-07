@@ -21,39 +21,6 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 ---
 
-## 🆕 Recent Updates (v1.4.4)
-
-### Bug Fixes
-
-#### ✅ Fixed: First Tool Call Failure Issue
-**Problem**: The first tool call would fail with "Connection closed" error (-32000), but subsequent calls would succeed.
-
-**Root Cause**: The MySQL MCP instance was initialized at module load time, before the MCP transport was fully connected, causing a race condition.
-
-**Solution**: Moved the initialization to occur after the MCP transport is connected, ensuring proper startup sequence.
-
-**Impact**: First tool calls now work reliably without needing retry.
-
-#### ✅ Fixed: Execute Permission Not Respected
-**Problem**: Users with `execute` permission would still get "Dangerous keyword detected" errors when using legitimate SQL functions like `LOAD_FILE()`, `UNION`, or accessing `INFORMATION_SCHEMA`.
-
-**Root Cause**: The security layer blocked certain SQL keywords unconditionally, regardless of granted permissions.
-
-**Solution**: 
-- Modified security validation to respect the `execute` permission
-- Users with `execute` permission can now use:
-  - SQL functions like `LOAD_FILE()`, `BENCHMARK()`, `SLEEP()`
-  - Advanced SELECT features like `UNION` and subqueries
-  - Access to `INFORMATION_SCHEMA` for metadata queries
-- Critical security operations remain blocked (GRANT, REVOKE, INTO OUTFILE, etc.)
-
-**Impact**: Users with full permissions can now use advanced SQL features as intended.
-
-### Breaking Changes
-None - all changes are backward compatible.
-
----
-
 ## 📦 Installation
 
 ### Option 1: Quick Start (npx)
