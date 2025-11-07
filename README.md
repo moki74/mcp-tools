@@ -21,6 +21,39 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 ---
 
+## 🆕 Recent Updates (v1.4.4)
+
+### Bug Fixes
+
+#### ✅ Fixed: First Tool Call Failure Issue
+**Problem**: The first tool call would fail with "Connection closed" error (-32000), but subsequent calls would succeed.
+
+**Root Cause**: The MySQL MCP instance was initialized at module load time, before the MCP transport was fully connected, causing a race condition.
+
+**Solution**: Moved the initialization to occur after the MCP transport is connected, ensuring proper startup sequence.
+
+**Impact**: First tool calls now work reliably without needing retry.
+
+#### ✅ Fixed: Execute Permission Not Respected
+**Problem**: Users with `execute` permission would still get "Dangerous keyword detected" errors when using legitimate SQL functions like `LOAD_FILE()`, `UNION`, or accessing `INFORMATION_SCHEMA`.
+
+**Root Cause**: The security layer blocked certain SQL keywords unconditionally, regardless of granted permissions.
+
+**Solution**: 
+- Modified security validation to respect the `execute` permission
+- Users with `execute` permission can now use:
+  - SQL functions like `LOAD_FILE()`, `BENCHMARK()`, `SLEEP()`
+  - Advanced SELECT features like `UNION` and subqueries
+  - Access to `INFORMATION_SCHEMA` for metadata queries
+- Critical security operations remain blocked (GRANT, REVOKE, INTO OUTFILE, etc.)
+
+**Impact**: Users with full permissions can now use advanced SQL features as intended.
+
+### Breaking Changes
+None - all changes are backward compatible.
+
+---
+
 ## 📦 Installation
 
 ### Option 1: Quick Start (npx)
@@ -201,7 +234,7 @@ Control access with these permission categories:
 | **`create`** | INSERT new records | Data entry |
 | **`update`** | UPDATE existing records | Data maintenance |
 | **`delete`** | DELETE records | Data cleanup |
-| **`execute`** | Execute custom SQL (DML) | Complex operations |
+| **`execute`** | Execute custom SQL (DML) + Advanced SQL features | Complex operations, advanced queries |
 | **`ddl`** | CREATE/ALTER/DROP tables | Schema management |
 | **`procedure`** | CREATE/DROP/EXECUTE stored procedures | Stored procedure management |
 | **`transaction`** | BEGIN, COMMIT, ROLLBACK transactions | ACID operations |
@@ -280,6 +313,103 @@ You can have different databases with different permissions in the same AI agent
   }
 }
 ```
+
+---
+
+## 🔓 Execute Permission & Advanced SQL Features
+
+The `execute` permission unlocks advanced SQL capabilities that are restricted by default for security reasons.
+
+### What Execute Permission Enables
+
+When you grant the `execute` permission, users can:
+
+#### 1. **Advanced SQL Functions**
+- `LOAD_FILE()` - Read files from the server
+- `BENCHMARK()` - Performance testing
+- `SLEEP()` - Delay execution
+- And other MySQL built-in functions
+
+#### 2. **Advanced SELECT Features**
+- `UNION` queries - Combine multiple SELECT results
+- Subqueries in FROM clause - Complex nested queries
+- Access to `INFORMATION_SCHEMA` - Database metadata queries
+
+#### 3. **Execute Custom SQL**
+- Use `execute_sql` tool for INSERT, UPDATE, DELETE with advanced features
+- Use `run_query` tool for complex SELECT queries with UNION and subqueries
+
+### Security Considerations
+
+**Without `execute` permission:**
+```sql
+-- ❌ BLOCKED: UNION queries
+SELECT * FROM users WHERE id = 1 UNION SELECT * FROM admin;
+
+-- ❌ BLOCKED: Subqueries in FROM
+SELECT * FROM (SELECT * FROM users WHERE active = 1) AS active_users;
+
+-- ❌ BLOCKED: LOAD_FILE function
+SELECT LOAD_FILE('/etc/passwd');
+
+-- ❌ BLOCKED: INFORMATION_SCHEMA access
+SELECT * FROM INFORMATION_SCHEMA.TABLES;
+```
+
+**With `execute` permission:**
+```sql
+-- ✅ ALLOWED: All advanced SQL features
+SELECT * FROM users WHERE id = 1 UNION SELECT * FROM admin;
+SELECT * FROM (SELECT * FROM users WHERE active = 1) AS active_users;
+SELECT LOAD_FILE('/path/to/file.txt');
+SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'mydb';
+```
+
+### When to Grant Execute Permission
+
+**Grant `execute` when:**
+- Users need complex analytical queries with UNION or subqueries
+- Developers need access to INFORMATION_SCHEMA for metadata analysis
+- Advanced SQL functions are required for specific operations
+- You trust the user with broader database access
+
+**Don't grant `execute` when:**
+- Users only need basic CRUD operations
+- Working with untrusted AI agents
+- Production environments with strict security policies
+- Read-only access is sufficient
+
+### Example: Analytics with Execute Permission
+
+```json
+{
+  "args": [
+    "mysql://analyst:pass@localhost:3306/analytics_db",
+    "list,read,execute,utility"
+  ]
+}
+```
+
+This allows the AI agent to run complex analytical queries:
+
+```sql
+-- Complex query with UNION and subqueries
+SELECT 'Q1' as quarter, SUM(revenue) as total
+FROM (SELECT * FROM sales WHERE date BETWEEN '2024-01-01' AND '2024-03-31') AS q1_sales
+UNION
+SELECT 'Q2' as quarter, SUM(revenue) as total
+FROM (SELECT * FROM sales WHERE date BETWEEN '2024-04-01' AND '2024-06-30') AS q2_sales;
+```
+
+### Critical Security Keywords (Always Blocked)
+
+Even with `execute` permission, these operations are **always blocked** for security:
+
+- `GRANT` / `REVOKE` - User privilege management
+- `INTO OUTFILE` / `INTO DUMPFILE` - Writing files to server
+- `LOAD DATA` - Loading data from files
+- Direct access to `mysql`, `performance_schema`, `sys` databases
+- `USER` / `PASSWORD` manipulation
 
 ---
 
