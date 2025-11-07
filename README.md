@@ -144,84 +144,7 @@ Try asking your AI:
 
 ---
 
-## 🛠️ Available Tools
-
-The MCP server provides **30 powerful tools**:
-
-### Database Discovery (4 tools)
-
-| Tool | Description |
-|------|-------------|
-| `list_databases` | Lists all databases on the MySQL server |
-| `list_tables` | Lists all tables in the current/specified database |
-| `read_table_schema` | Gets detailed schema (columns, types, keys, indexes) |
-| `get_table_relationships` | Discovers foreign key relationships |
-
-### Data Operations - CRUD (4 tools)
-
-| Tool | Description |
-|------|-------------|
-| `create_record` | Insert new records with automatic SQL generation |
-| `read_records` | Query records with filtering, pagination, and sorting |
-| `update_record` | Update records based on conditions |
-| `delete_record` | Delete records with safety checks |
-
-### Bulk Operations (3 tools)
-
-| Tool | Description | Performance |
-|------|-------------|-------------|
-| `bulk_insert` | Insert multiple records in batches for optimal performance | Up to 10,000 records per batch |
-| `bulk_update` | Update multiple records with different conditions in batches | Up to 1,000 operations per batch |
-| `bulk_delete` | Delete multiple record sets based on different conditions | Up to 1,000 operations per batch |
-
-### Custom Queries (2 tools)
-
-| Tool | Description |
-|------|-------------|
-| `run_query` | Execute read-only SELECT queries |
-| `execute_sql` | Execute write operations (INSERT, UPDATE, DELETE, or DDL with permission) |
-
-### Schema Management - DDL (4 tools)
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `create_table` | Create new tables with columns and indexes | `ddl` permission |
-| `alter_table` | Modify table structure (add/drop/modify columns, indexes) | `ddl` permission |
-| `drop_table` | Delete tables | `ddl` permission |
-| `execute_ddl` | Execute raw DDL SQL (CREATE, ALTER, DROP, TRUNCATE, RENAME) | `ddl` permission |
-
-### Utilities (4 tools)
-
-| Tool | Description |
-|------|-------------|
-| `test_connection` | Test database connectivity and measure latency |
-| `describe_connection` | Get current connection information |
-| `export_table_to_csv` | Export table data to CSV format with optional filtering, pagination, and sorting |
-| `export_query_to_csv` | Export the results of a SELECT query to CSV format |
-
-### Transaction Management (5 tools)
-
-| Tool | Description |
-|------|-------------|
-| `begin_transaction` | Start a new database transaction |
-| `commit_transaction` | Commit the current transaction |
-| `rollback_transaction` | Rollback the current transaction |
-| `get_transaction_status` | Check if a transaction is active |
-| `execute_in_transaction` | Execute SQL within a transaction context |
-
-### Stored Procedures (5 tools)
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_stored_procedures` | List all stored procedures in a database | `procedure` permission |
-| `create_stored_procedure` | Create new stored procedures with parameters | `procedure` permission |
-| `get_stored_procedure_info` | Get detailed information about a stored procedure | `procedure` permission |
-| `execute_stored_procedure` | Execute stored procedures with IN/OUT/INOUT parameters | `procedure` permission |
-| `drop_stored_procedure` | Delete stored procedures | `procedure` permission |
-
----
-
-## 🔐 Permission System
+##  Permission System
 
 ### Permission Categories
 
@@ -524,6 +447,83 @@ After (DDL enabled):
   ]
 }
 ```
+
+---
+
+## 🛠️ Available Tools
+
+The MCP server provides **30 powerful tools**:
+
+### Database Discovery (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_databases` | Lists all databases on the MySQL server |
+| `list_tables` | Lists all tables in the current/specified database |
+| `read_table_schema` | Gets detailed schema (columns, types, keys, indexes) |
+| `get_table_relationships` | Discovers foreign key relationships |
+
+### Data Operations - CRUD (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `create_record` | Insert new records with automatic SQL generation |
+| `read_records` | Query records with filtering, pagination, and sorting |
+| `update_record` | Update records based on conditions |
+| `delete_record` | Delete records with safety checks |
+
+### Bulk Operations (3 tools)
+
+| Tool | Description | Performance |
+|------|-------------|-------------|
+| `bulk_insert` | Insert multiple records in batches for optimal performance | Up to 10,000 records per batch |
+| `bulk_update` | Update multiple records with different conditions in batches | Up to 1,000 operations per batch |
+| `bulk_delete` | Delete multiple record sets based on different conditions | Up to 1,000 operations per batch |
+
+### Custom Queries (2 tools)
+
+| Tool | Description |
+|------|-------------|
+| `run_query` | Execute read-only SELECT queries |
+| `execute_sql` | Execute write operations (INSERT, UPDATE, DELETE, or DDL with permission) |
+
+### Schema Management - DDL (4 tools)
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `create_table` | Create new tables with columns and indexes | `ddl` permission |
+| `alter_table` | Modify table structure (add/drop/modify columns, indexes) | `ddl` permission |
+| `drop_table` | Delete tables | `ddl` permission |
+| `execute_ddl` | Execute raw DDL SQL (CREATE, ALTER, DROP, TRUNCATE, RENAME) | `ddl` permission |
+
+### Utilities (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `test_connection` | Test database connectivity and measure latency |
+| `describe_connection` | Get current connection information |
+| `export_table_to_csv` | Export table data to CSV format with optional filtering, pagination, and sorting |
+| `export_query_to_csv` | Export the results of a SELECT query to CSV format |
+
+### Transaction Management (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `begin_transaction` | Start a new database transaction |
+| `commit_transaction` | Commit the current transaction |
+| `rollback_transaction` | Rollback the current transaction |
+| `get_transaction_status` | Check if a transaction is active |
+| `execute_in_transaction` | Execute SQL within a transaction context |
+
+### Stored Procedures (5 tools)
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_stored_procedures` | List all stored procedures in a database | `procedure` permission |
+| `create_stored_procedure` | Create new stored procedures with parameters | `procedure` permission |
+| `get_stored_procedure_info` | Get detailed information about a stored procedure | `procedure` permission |
+| `execute_stored_procedure` | Execute stored procedures with IN/OUT/INOUT parameters | `procedure` permission |
+| `drop_stored_procedure` | Delete stored procedures | `procedure` permission |
 
 ---
 
