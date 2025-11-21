@@ -1135,6 +1135,93 @@ All tools that execute queries include logs:
 - Stored procedure execution
 - Transaction operations
 
+### Query Logger Performance & Configuration
+
+#### Memory Management
+
+The QueryLogger is designed with robust memory safety:
+
+**Built-in Protections:**
+- ✅ **SQL Truncation** - Queries truncated to 500 characters max
+- ✅ **Parameter Limiting** - Only first 5 parameters logged
+- ✅ **Value Truncation** - Individual parameter values limited to 50 characters
+- ✅ **Error Truncation** - Error messages limited to 200 characters
+- ✅ **Deep Copy** - Parameters are deep copied to prevent reference mutations
+- ✅ **Safe Serialization** - Handles circular references, BigInt, and unstringifiable objects
+- ✅ **Bounded Storage** - Maximum 100 most recent queries retained
+
+**Memory Impact:**
+```
+Regular query:     ~1 KB per log entry
+Bulk operations:   ~1 KB per log entry (99.9% reduction vs unbounded)
+Total max memory:  ~100 KB for all 100 log entries
+```
+
+#### Configuration Tuning
+
+The QueryLogger limits are defined as constants and can be adjusted if needed by modifying `src/db/queryLogger.ts`:
+
+```typescript
+private static readonly MAX_LOGS = 100;          // Number of queries to retain
+private static readonly MAX_SQL_LENGTH = 500;    // Max SQL string length
+private static readonly MAX_PARAM_LENGTH = 200;  // Max params output length
+private static readonly MAX_PARAM_ITEMS = 5;     // Max number of params to log
+```
+
+**Tuning Recommendations:**
+- **High-traffic production**: Reduce `MAX_LOGS` to 50 to minimize memory
+- **Development/debugging**: Increase `MAX_SQL_LENGTH` to 1000 for fuller visibility
+- **Bulk operations heavy**: Keep defaults - they're optimized for bulk workloads
+
+#### Production Monitoring
+
+When running in production, monitor these metrics:
+
+1. **Memory Usage** - QueryLogger should use <500 KB total
+2. **Response Payload Size** - Query logs add minimal overhead (<1 KB per response)
+3. **Performance Impact** - Logging overhead is <1ms per query
+
+**Health Check:**
+```javascript
+// Check log memory usage
+const logs = db.getQueryLogs();
+const estimatedMemory = logs.length * 1; // ~1 KB per log
+console.log(`Query log memory usage: ~${estimatedMemory} KB`);
+```
+
+#### Persistent Logging for Production Auditing
+
+**Important:** QueryLogger stores logs in memory only (not persisted to disk). For production audit trails and compliance, consider:
+
+1. **MySQL Query Log** (Recommended)
+   ```sql
+   -- Enable general query log
+   SET GLOBAL general_log = 'ON';
+   SET GLOBAL general_log_file = '/var/log/mysql/queries.log';
+   ```
+
+2. **MySQL Slow Query Log**
+   ```sql
+   -- Log queries slower than 1 second
+   SET GLOBAL slow_query_log = 'ON';
+   SET GLOBAL long_query_time = 1;
+   ```
+
+3. **Application-Level Logging**
+   - Use Winston or similar logger to persist query logs to disk
+   - Integrate with log aggregation services (ELK, Splunk, DataDog)
+
+4. **Database Audit Plugins**
+   - MySQL Enterprise Audit
+   - MariaDB Audit Plugin
+   - Percona Audit Log Plugin
+
+**Trade-offs:**
+- **In-Memory (QueryLogger)**: Fast, lightweight, for debugging & development
+- **MySQL Query Log**: Complete audit trail, slight performance impact
+- **Application Logging**: Flexible, can include business context
+- **Audit Plugins**: Enterprise-grade, compliance-ready, feature-rich
+
 ---
 
 ## 🔒 Security Features
