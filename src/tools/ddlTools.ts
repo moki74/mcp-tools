@@ -25,7 +25,7 @@ export class DdlTools {
       columns: string[];
       unique?: boolean;
     }>;
-  }): Promise<{ status: string; data?: any; error?: string }> {
+  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     try {
       const { table_name, columns, indexes } = params;
 
@@ -59,12 +59,14 @@ export class DdlTools {
       await this.db.query(query);
 
       // Create indexes if specified
+      let queryCount = 1;
       if (indexes && indexes.length > 0) {
         for (const index of indexes) {
           const indexType = index.unique ? 'UNIQUE INDEX' : 'INDEX';
           const indexColumns = index.columns.map(c => `\`${c}\``).join(', ');
           const indexQuery = `CREATE ${indexType} \`${index.name}\` ON \`${table_name}\` (${indexColumns})`;
           await this.db.query(indexQuery);
+          queryCount++;
         }
       }
 
@@ -73,12 +75,14 @@ export class DdlTools {
         data: {
           message: `Table '${table_name}' created successfully`,
           table_name
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(queryCount)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(10)
       };
     }
   }
@@ -99,7 +103,7 @@ export class DdlTools {
       index_columns?: string[];
       unique?: boolean;
     }>;
-  }): Promise<{ status: string; data?: any; error?: string }> {
+  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     try {
       const { table_name, operations } = params;
 
@@ -168,12 +172,14 @@ export class DdlTools {
           message: `Table '${table_name}' altered successfully`,
           table_name,
           operations_count: operations.length
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(operations.length)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(10)
       };
     }
   }
@@ -184,7 +190,7 @@ export class DdlTools {
   async dropTable(params: { 
     table_name: string;
     if_exists?: boolean;
-  }): Promise<{ status: string; data?: any; error?: string }> {
+  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     try {
       const { table_name, if_exists } = params;
 
@@ -198,12 +204,14 @@ export class DdlTools {
         data: {
           message: `Table '${table_name}' dropped successfully`,
           table_name
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -213,7 +221,7 @@ export class DdlTools {
    */
   async executeDdl(params: { 
     query: string;
-  }): Promise<{ status: string; data?: any; error?: string }> {
+  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     try {
       const { query } = params;
 
@@ -239,12 +247,14 @@ export class DdlTools {
         data: {
           message: 'DDL query executed successfully',
           affected_rows: result.affectedRows || 0
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

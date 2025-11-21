@@ -120,6 +120,7 @@ export class TransactionTools {
     status: 'success' | 'error';
     data?: any;
     error?: string;
+    queryLog?: string;
   }> {
     try {
       if (!params.transactionId) {
@@ -144,12 +145,14 @@ export class TransactionTools {
       
       return {
         status: 'success',
-        data: result
+        data: result,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

@@ -5,6 +5,111 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.12] - 2025-11-21
+
+### Added
+- **Explicit LLM instruction field** - Added `⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT` field that explicitly instructs the LLM to always display SQL query information to users
+- **Mandatory display directive** - Clear instruction stating "ALWAYS display the SQL query execution details below to the user in your response"
+
+### Technical Changes
+- Response now includes three fields in order:
+  1. `⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT` - Direct instruction to the LLM
+  2. `⚠️ SQL_QUERY_EXECUTED` - The SQL query details
+  3. `📊 RESULTS` - The query results
+- This approach ensures LLMs understand that SQL query information is not optional context
+
+## [1.4.11] - 2025-11-21
+
+### Changed
+- **SQL query as data field (BREAKING)** - Restructured response to embed SQL query directly in the data JSON as `⚠️ SQL_QUERY_EXECUTED` field
+- **Results wrapped** - Actual query results now under `📊 RESULTS` field
+- **LLM-proof approach** - By making SQL query part of the data structure itself, LLMs cannot filter it out when describing results
+
+### Technical Changes
+- Response format changed from `{data: [...]}` to `{"⚠️ SQL_QUERY_EXECUTED": "...", "📊 RESULTS": [...]}`
+- SQL query information is now a required part of the response structure, not optional metadata
+- This forces AI assistants to acknowledge and communicate SQL query details to users
+
+## [1.4.10] - 2025-11-21
+
+### Improved  
+- **SQL query embedded in data structure** - SQL query is now embedded as a field in the response JSON, forcing LLMs to include it when describing results
+- **Visual field names** - Using emoji-prefixed field names (`⚠️ SQL_QUERY_EXECUTED` and `📊 RESULTS`) to make SQL query information stand out
+- **Guaranteed visibility** - By making SQL query part of the actual data structure instead of metadata, LLMs must process and describe it
+
+### Technical Changes
+- Changed response structure to wrap data in object with SQL query as a top-level field
+- SQL query appears as `"⚠️ SQL_QUERY_EXECUTED"` field containing formatted query details
+- Results appear as `"📊 RESULTS"` field containing the actual query results
+- This approach treats SQL execution details as primary data, not optional metadata
+- Forces LLMs to acknowledge and describe the SQL query when processing tool responses
+
+## [1.4.9] - 2025-11-21
+
+### Improved
+- **Multi-block content response** - SQL query and results are now returned as separate MCP content blocks for better visibility in client UIs
+- **Enhanced MCP client compatibility** - Completely redesigned query log output format for better rendering in Kilocode and other MCP clients
+- **Visual query log hierarchy** - Added clear visual separators using box-drawing characters (━) for better readability
+- **Prominent SQL display** - SQL queries are now displayed at the TOP of responses with clear emoji indicators (✅/❌)
+- **Better information architecture** - Query execution details (time, timestamp, status) now prominently displayed before SQL
+- **Improved emoji usage** - Added contextual emojis (📝 for SQL, 📋 for parameters, ⏱️ for time, 🕐 for timestamp) for quick visual scanning
+- **Response structure optimization** - Query logs appear as FIRST content block, results as second block
+- **Enhanced error visibility** - Error messages now include ❌ emoji for immediate identification
+- **Explicit LLM instructions** - Added explicit notes instructing LLMs to display SQL query information to users
+
+### Technical Changes
+- **Breaking improvement**: Changed response structure from single text content to multiple content blocks (MCP spec compliant)
+- First content block contains SQL query execution details
+- Second content block contains query results
+- Updated `QueryLogger.formatLogs()` with new visual hierarchy using Unicode box-drawing characters
+- Modified `mcp-server.ts` response builder to use separate content blocks
+- Added explicit user-facing notes to SQL query blocks
+- Improved line spacing and formatting for better readability across different client UIs
+
+### Fixed
+- Query logs now render properly in Kilocode without markdown parsing issues
+- SQL query information is structurally separated from results for better LLM and UI handling
+- Visual hierarchy prevents information from being buried in JSON output
+
+## [1.4.8] - 2025-11-21
+
+### Added
+- **Enhanced human-readable SQL query formatting** - All SQL queries in logs are now automatically formatted with proper line breaks, indentation, and structure for better readability
+- **Markdown-friendly query logs** - Query logs use markdown syntax (###, ```, **bold**, ---) for optimal rendering in AI agent UIs
+- **SQL syntax highlighting** - SQL queries wrapped in ```sql code blocks for syntax highlighting support
+- **Formatted parameter display** - Query parameters now displayed with JSON pretty-printing for better readability
+- **Universal query logging** - Extended query log output to ALL 30 tools (previously only available in query and CRUD operations)
+- **Structured log separators** - Added markdown horizontal rules (---) to clearly delineate query sections
+
+### Enhanced Tools with Query Logging
+- ✅ Database Discovery: `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`
+- ✅ DDL Operations: `create_table`, `alter_table`, `drop_table`, `execute_ddl`
+- ✅ Transaction Management: `execute_in_transaction`
+- ✅ Stored Procedures: `list_stored_procedures`, `get_stored_procedure_info`, `execute_stored_procedure`, `create_stored_procedure`, `drop_stored_procedure`, `show_create_procedure`
+- ✅ Data Export: `export_table_to_csv`, `export_query_to_csv`
+- ✅ Utilities: `get_table_relationships`
+
+### Technical Changes
+- Enhanced `QueryLogger.formatSQL()` method for intelligent SQL formatting with keyword detection and line breaking
+- Added `formatLogs()` method with visual enhancements replacing previous compact format
+- Retained `formatLogsCompact()` for backward compatibility
+- Updated return type signatures for all 30 tools to include `queryLog?: string`
+- Improved query log output consistency across all tool categories
+- **Fixed MCP server handler** - Query logs are now properly included in LLM responses (previously only data was forwarded)
+- Added visual separator header "📝 SQL QUERY LOG" in MCP responses for better readability
+
+### Fixed
+- **Critical: Query logs now visible to AI agents** - Fixed MCP server handler to properly forward `queryLog` field to LLM responses
+- Query logs now appear in both success and error responses
+
+### Improved
+- **SQL readability** - Complex queries with multiple columns, JOINs, and conditions are now formatted for easy reading
+- **UI rendering** - Switched from Unicode box characters to markdown for better compatibility with AI agent interfaces (Kilocode, Claude Desktop, etc.)
+- **Developer experience** - Logs are now optimized for human consumption with markdown formatting that renders beautifully in chat interfaces
+- **Debugging efficiency** - Clean markdown structure makes it faster to identify query patterns and issues
+- **Documentation** - Comprehensive README updates with markdown-friendly examples of the new query log format
+- **Error transparency** - Failed queries now also show the SQL that was attempted with proper formatting
+
 ## [1.4.7] - 2025-11-21
 
 ### Added

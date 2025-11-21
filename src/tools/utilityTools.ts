@@ -60,7 +60,7 @@ export class UtilityTools {
   /**
    * Detects and describes foreign key relationships between tables
    */
-  async getTableRelationships(params: { table_name: string }): Promise<{ status: string; data?: any; error?: string }> {
+  async getTableRelationships(params: { table_name: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     // Validate input
     if (!validateGetTableRelationships(params)) {
       return {
@@ -112,12 +112,14 @@ export class UtilityTools {
         data: {
           as_parent: parentRelationships,
           as_child: childRelationships
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(2)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(2)
       };
     }
   }

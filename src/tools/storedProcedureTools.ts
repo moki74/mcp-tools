@@ -59,7 +59,7 @@ export class StoredProcedureTools {
   /**
    * List all stored procedures in the current database
    */
-  async listStoredProcedures(params: { database?: string }): Promise<{ status: string; data?: any[]; error?: string }> {
+  async listStoredProcedures(params: { database?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
     try {
       // Validate input
       if (!validateListStoredProcedures(params)) {
@@ -101,12 +101,14 @@ export class StoredProcedureTools {
       
       return {
         status: 'success',
-        data: results
+        data: results,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -114,7 +116,7 @@ export class StoredProcedureTools {
   /**
    * Get detailed information about a specific stored procedure
    */
-  async getStoredProcedureInfo(params: { procedure_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string }> {
+  async getStoredProcedureInfo(params: { procedure_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     try {
       // Validate input
       if (!validateGetStoredProcedureInfo(params)) {
@@ -177,7 +179,8 @@ export class StoredProcedureTools {
       if (procedureInfo.length === 0) {
         return {
           status: 'error',
-          error: `Stored procedure '${procedure_name}' not found in database '${database}'`
+          error: `Stored procedure '${procedure_name}' not found in database '${database}'`,
+          queryLog: this.db.getFormattedQueryLogs(2)
         };
       }
 
@@ -186,12 +189,14 @@ export class StoredProcedureTools {
         data: {
           ...procedureInfo[0],
           parameters: parameters
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(2)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(2)
       };
     }
   }

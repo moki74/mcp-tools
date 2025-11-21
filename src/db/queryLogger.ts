@@ -125,9 +125,64 @@ export class QueryLogger {
   }
 
   /**
-   * Get logs as formatted string for output
+   * Format SQL for better readability
+   */
+  private static formatSQL(sql: string): string {
+    // Add line breaks for better readability
+    return sql
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/\b(SELECT|FROM|WHERE|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|GROUP BY|ORDER BY|HAVING|LIMIT|UNION|INSERT INTO|UPDATE|DELETE FROM|SET|VALUES|CREATE|ALTER|DROP|TRUNCATE|BEGIN|COMMIT|ROLLBACK|CALL)\b/gi, '\n$1')
+      .replace(/,\s*/g, ',\n  ') // Add line breaks after commas
+      .trim();
+  }
+
+  /**
+   * Get logs as formatted string for output with enhanced human readability
+   * Optimized for Kilocode and other MCP clients
    */
   static formatLogs(logs: QueryLog[]): string {
+    if (logs.length === 0) return '';
+    
+    return logs.map((log, index) => {
+      // Format the SQL for better readability
+      const formattedSQL = this.formatSQL(log.sql);
+      
+      // Format parameters
+      let paramStr = '';
+      if (log.params && log.params.length > 0) {
+        try {
+          const paramsJson = JSON.stringify(log.params, null, 2);
+          paramStr = paramsJson.length > this.MAX_PARAM_LENGTH 
+            ? `\n📋 Parameters:\n${paramsJson.substring(0, this.MAX_PARAM_LENGTH)}...`
+            : `\n📋 Parameters:\n${paramsJson}`;
+        } catch (error) {
+          paramStr = '\n📋 Parameters: [Error serializing]';
+        }
+      }
+      
+      // Format error if present
+      const errorStr = log.error ? `\n❌ Error: ${log.error}` : '';
+      
+      // Format status with emoji for better visibility
+      const statusEmoji = log.status === 'success' ? '✅' : '❌';
+      const statusText = log.status === 'success' ? 'SUCCESS' : 'ERROR';
+      
+      // Build the formatted log entry with clear visual hierarchy
+      return `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${statusEmoji} SQL Query #${index + 1} - ${statusText} 
+⏱️  Execution Time: ${log.duration}ms
+🕐 Timestamp: ${log.timestamp}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 SQL Query:
+${formattedSQL}${paramStr}${errorStr}`;
+    }).join('\n\n');
+  }
+
+  /**
+   * Get logs as compact formatted string (for backward compatibility)
+   */
+  static formatLogsCompact(logs: QueryLog[]): string {
     if (logs.length === 0) return '';
     
     return logs.map((log, index) => {

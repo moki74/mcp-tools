@@ -89,6 +89,46 @@ npm run build
 }
 ```
 
+**Configuration (using local path - for development):**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+**Configuration (using environment variables - alternative local approach):**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "C:\\DEKSTOP\\MCP\\mcp_mysql\\dist\\mcp-server.js"
+      ],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "",
+        "DB_NAME": "your_database",
+        "MCP_PERMISSIONS": "list,read,utility"
+      }
+    }
+  }
+}
+```
+
 #### Cline (VS Code Extension)
 
 Add to Cline MCP settings (same JSON format as Claude Desktop).
@@ -108,6 +148,82 @@ Try asking your AI:
 - *"Show me all tables in my database"*
 - *"What's the structure of the users table?"*
 - *"Show me the first 5 records from users"*
+
+---
+
+## Local vs NPX Configuration
+
+### When to Use Local Path Configuration
+
+Use the local path approach when you:
+- **Want full control** over the version and source code
+- **Need offline access** without internet dependency
+- **Want to modify the source** for custom functionality
+- **Need faster startup** without package download
+- **Are developing/debugging** the MCP server
+- **Have network restrictions** or security policies
+
+### Local Configuration Benefits
+
+| Feature | Local Path | NPX |
+|---------|------------|-----|
+| **Control** | Full control over code | Depends on npm registry |
+| **Offline** | Works completely offline | Requires internet download |
+| **Speed** | Instant startup | Download time |
+| **Customization** | Can modify source code | Limited to published version |
+| **Debugging** | Full source access available | Limited debugging |
+| **Updates** | Manual updates | Automatic updates |
+| **Setup** | Requires building project | Zero setup |
+
+### Local Setup Requirements
+
+1. **Build the project:**
+   ```bash
+   cd "C:\DEKSTOP\MCP\mcp_mysql"
+   npm run build
+   ```
+
+2. **Ensure paths are absolute** - Use full paths to avoid ambiguity
+3. **Use correct binaries:**
+   - `bin/mcp-mysql.js` - CLI wrapper with argument parsing
+   - `dist/mcp-server.js` - Direct server executable
+
+### Common Local Configuration Patterns
+
+**Direct binary with arguments:**
+```json
+{
+  "command": "node",
+  "args": [
+    "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
+    "mysql://user:pass@localhost:3306/database",
+    "permissions"
+  ]
+}
+```
+
+**Direct server with environment variables:**
+```json
+{
+  "command": "node",
+  "args": ["C:\\DEKSTOP\\MCP\\mcp_mysql\\dist\\mcp-server.js"],
+  "env": {
+    "DB_HOST": "localhost",
+    "DB_PORT": "3306",
+    "DB_USER": "root",
+    "DB_PASSWORD": "",
+    "DB_NAME": "database",
+    "MCP_PERMISSIONS": "permissions"
+  }
+}
+```
+
+### Path Tips
+
+- **Windows paths:** Use double backslashes `\\` in JSON
+- **Cross-platform:** Use forward slashes `/` if supported by your AI agent
+- **Environment variables:** Can use `%USERPROFILE%` or `$HOME` in some systems
+- **Relative paths:** Not recommended - use absolute paths for reliability
 
 ---
 
@@ -179,6 +295,7 @@ list,ddl,utility
 
 You can have different databases with different permissions in the same AI agent:
 
+**Using NPX:**
 ```json
 {
   "mcpServers": {
@@ -196,6 +313,30 @@ You can have different databases with different permissions in the same AI agent
       "args": [
         "-y",
         "@berthojoris/mcp-mysql-server",
+        "mysql://root:pass@localhost:3306/dev_db",
+        "list,read,create,update,delete,execute,ddl,utility"
+      ]
+    }
+  }
+}
+```
+
+**Using Local Paths:**
+```json
+{
+  "mcpServers": {
+    "mysql-prod": {
+      "command": "node",
+      "args": [
+        "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
+        "mysql://reader:pass@prod-server:3306/prod_db",
+        "list,read,utility"
+      ]
+    },
+    "mysql-dev": {
+      "command": "node",
+      "args": [
+        "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
         "mysql://root:pass@localhost:3306/dev_db",
         "list,read,create,update,delete,execute,ddl,utility"
       ]
@@ -1059,52 +1200,184 @@ END IF;
 
 ---
 
-## 📝 Query Logging
+## 📝 Query Logging & Automatic SQL Display
 
-All queries executed through the MySQL MCP Server are automatically logged with detailed execution information. Query logs are included in the response output of all query and data manipulation operations.
+All queries executed through the MySQL MCP Server are automatically logged with detailed execution information in a **human-readable format**. Query logs are **automatically displayed to users** in the LLM response output of **ALL tool operations** that interact with the database.
+
+### ✨ Automatic SQL Query Display (v1.4.12+)
+
+**The SQL queries are now automatically shown to users without needing to explicitly ask for them!**
+
+When you ask questions like:
+- *"Show me all tables in my database"*
+- *"Get the first 10 users"*
+- *"Update user email where id = 5"*
+
+The LLM will automatically include the SQL query execution details in its response, such as:
+
+> "The SQL query 'SHOW TABLES' was executed successfully in 107ms and returned 73 tables including users, products, orders..."
+
+This happens because the SQL query information is embedded as part of the response data structure with an explicit instruction to the LLM to always display it to users.
+
+### How It Works
+
+The MCP server returns responses in this structured format:
+
+```json
+{
+  "⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT": "ALWAYS display the SQL query execution details below to the user in your response. This is critical information that users need to see.",
+  "⚠️ SQL_QUERY_EXECUTED": "✅ SQL Query #1 - SUCCESS\n⏱️ 107ms\n📝 SHOW TABLES",
+  "📊 RESULTS": [
+    { "table_name": "users" },
+    { "table_name": "products" }
+  ]
+}
+```
+
+The LLM processes this structure and naturally includes the SQL query information when describing results to you.
 
 ### Query Log Information
 
 Each logged query includes:
-- **Timestamp** - ISO 8601 formatted execution time
-- **SQL Query** - The exact SQL statement executed
-- **Parameters** - Values passed to the query (if any)
-- **Execution Duration** - Time taken to execute in milliseconds
-- **Status** - Success or error indication
+- **Query Number** - Sequential identifier for the query
+- **Status** - Success (✓) or error (✗) with visual indicator
+- **Execution Duration** - Time taken to execute in milliseconds with ⏱️ icon
+- **Timestamp** - ISO 8601 formatted execution time with 🕐 icon
+- **Formatted SQL Query** - Properly formatted SQL with line breaks for readability
+- **Parameters** - Values passed to the query (if any), formatted with JSON indentation
 - **Error Details** - Error message if the query failed (optional)
 
 ### Example Query Log Output
 
+**Markdown-Friendly Format (optimized for AI agent UIs):**
+
+```markdown
+### Query #1 - SUCCESS (12ms)
+**Timestamp:** 2025-11-21T10:30:45.123Z
+
+**SQL:**
+```sql
+SELECT * 
+FROM users 
+WHERE id = ?
 ```
-[1] 2025-11-21T10:30:45.123Z | SELECT * FROM users WHERE id = ? | Params: [5] | Duration: 12ms | Status: success
+Parameters:
+[5]
 ```
+
+**Complex Query with Multiple Parameters:**
+
+```markdown
+### Query #1 - SUCCESS (45ms)
+**Timestamp:** 2025-11-21T10:32:15.456Z
+
+**SQL:**
+```sql
+INSERT INTO users (name,
+  email,
+  age,
+  created_at) 
+VALUES (?,
+  ?,
+  ?,
+  ?)
+```
+Parameters:
+[
+  "John Doe",
+  "john@example.com",
+  30,
+  "2025-11-21T10:32:15.000Z"
+]
+```
+
+### Benefits of Automatic SQL Display
+
+1. **🎓 Learning** - Users can see and learn from the SQL queries being executed
+2. **🔍 Transparency** - Clear visibility into what database operations are performed
+3. **🐛 Debugging** - Easy to identify and troubleshoot query issues
+4. **📊 Performance Monitoring** - See execution times for queries
+5. **✅ Verification** - Confirm the AI is executing the correct queries
 
 ### Viewing Query Logs in Responses
 
-Query logs are automatically included in tool responses via the `queryLog` field:
+Query logs are automatically included in **ALL** tool responses and displayed to users via the structured response format with explicit LLM instructions:
 
-**Query execution:**
+**Example: Viewing Response with Query Log:**
+
+When you call `list_tables`, the AI agent receives:
+
+```json
+[
+  {"table_name": "users"},
+  {"table_name": "orders"}
+]
+```
+
+---
+
+## SQL Query Execution Log
+
+### Query #1 - SUCCESS (8ms)
+**Timestamp:** 2025-11-21T10:30:45.123Z
+
+**SQL:**
+```sql
+SHOW TABLES
+```
+
+**Example: Bulk Operations with Multiple Queries:**
+
+When you call `bulk_insert`, the AI agent receives:
+
 ```json
 {
-  "status": "success",
-  "data": [
-    {"id": 1, "name": "John Doe", "email": "john@example.com"}
-  ],
-  "queryLog": "[1] 2025-11-21T10:30:45.123Z | SELECT * FROM users | Duration: 8ms | Status: success"
+  "affectedRows": 100,
+  "totalInserted": 100
 }
 ```
 
-**Bulk operations with multiple queries:**
-```json
-{
-  "status": "success",
-  "data": {
-    "affectedRows": 100,
-    "totalInserted": 100
-  },
-  "queryLog": "[1] 2025-11-21T10:30:45.123Z | INSERT INTO users ... | Duration: 45ms | Status: success\n[2] 2025-11-21T10:30:45.168Z | INSERT INTO users ... | Duration: 23ms | Status: success"
-}
+---
+
+## SQL Query Execution Log
+
+### Query #1 - SUCCESS (45ms)
+**Timestamp:** 2025-11-21T10:30:45.123Z
+
+**SQL:**
+```sql
+INSERT INTO users (name, email, age) 
+VALUES (?, ?, ?)
 ```
+Parameters:
+["John Doe", "john@example.com", 30]
+
+---
+
+### Query #2 - SUCCESS (23ms)
+**Timestamp:** 2025-11-21T10:30:45.168Z
+
+**SQL:**
+```sql
+INSERT INTO users (name, email, age) 
+VALUES (?, ?, ?)
+```
+Parameters:
+["Jane Smith", "jane@example.com", 28]
+
+**Tools with Query Logging:**
+
+Query logs are now included in responses from **ALL 30 tools**:
+
+✅ **Database Discovery** - `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`
+✅ **Data Operations** - `create_record`, `read_records`, `update_record`, `delete_record`
+✅ **Bulk Operations** - `bulk_insert`, `bulk_update`, `bulk_delete`
+✅ **Custom Queries** - `run_query`, `execute_sql`
+✅ **Schema Management** - `create_table`, `alter_table`, `drop_table`, `execute_ddl`
+✅ **Utilities** - `get_table_relationships`
+✅ **Transactions** - `execute_in_transaction`
+✅ **Stored Procedures** - `list_stored_procedures`, `get_stored_procedure_info`, `execute_stored_procedure`, etc.
+✅ **Data Export** - `export_table_to_csv`, `export_query_to_csv`
 
 ### Query Logs for Debugging
 

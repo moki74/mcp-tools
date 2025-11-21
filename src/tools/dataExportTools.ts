@@ -22,7 +22,7 @@ export class DataExportTools {
     pagination?: Pagination;
     sorting?: Sorting;
     include_headers?: boolean;
-  }): Promise<{ status: string; data?: any; error?: string }> {
+  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     try {
       const { table_name, filters = [], pagination, sorting, include_headers = true } = params;
       
@@ -196,7 +196,7 @@ export class DataExportTools {
     query: string; 
     params?: any[];
     include_headers?: boolean;
-  }): Promise<{ status: string; data?: any; error?: string }> {
+  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     try {
       const { query, params: queryParams = [], include_headers = true } = params;
       
@@ -227,7 +227,8 @@ export class DataExportTools {
           data: {
             csv: include_headers ? '' : '',
             row_count: 0
-          }
+          },
+          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
 
@@ -261,12 +262,14 @@ export class DataExportTools {
         data: {
           csv: csv,
           row_count: results.length
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

@@ -13,7 +13,7 @@ export class DatabaseTools {
    * List only the connected database (security restriction)
    * This prevents access to other databases on the MySQL server
    */
-  async listDatabases(): Promise<{ status: string; data?: string[]; error?: string }> {
+  async listDatabases(): Promise<{ status: string; data?: string[]; error?: string; queryLog?: string }> {
     try {
       // Only return the database specified in the connection string
       // This is a security measure to prevent access to other databases
@@ -31,18 +31,21 @@ export class DatabaseTools {
       if (!currentDatabase) {
         return {
           status: 'error',
-          error: 'No database selected. Please ensure your connection string includes a valid database name.'
+          error: 'No database selected. Please ensure your connection string includes a valid database name.',
+          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
       
       return {
         status: 'success',
-        data: [currentDatabase]
+        data: [currentDatabase],
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -50,7 +53,7 @@ export class DatabaseTools {
   /**
    * List all tables in the selected database
    */
-  async listTables(params: { database?: string }): Promise<{ status: string; data?: TableInfo[]; error?: string }> {
+  async listTables(params: { database?: string }): Promise<{ status: string; data?: TableInfo[]; error?: string; queryLog?: string }> {
     // Validate input
     if (!validateListTables(params)) {
       return {
@@ -93,12 +96,14 @@ export class DatabaseTools {
       
       return {
         status: 'success',
-        data: tables
+        data: tables,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -106,7 +111,7 @@ export class DatabaseTools {
   /**
    * Read table schema (columns, types, keys, etc.)
    */
-  async readTableSchema(params: { table_name: string }): Promise<{ status: string; data?: ColumnInfo[]; error?: string }> {
+  async readTableSchema(params: { table_name: string }): Promise<{ status: string; data?: ColumnInfo[]; error?: string; queryLog?: string }> {
     // Validate input
     if (!validateReadTableSchema(params)) {
       return {
@@ -136,12 +141,14 @@ export class DatabaseTools {
       
       return {
         status: 'success',
-        data: results
+        data: results,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

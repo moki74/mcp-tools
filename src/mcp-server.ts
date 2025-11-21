@@ -1062,11 +1062,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
     // Handle the result based on status
     if (result.status === "error") {
+      // Include query log in error response if available
+      let errorText = `Error: ${result.error}`;
+      if ('queryLog' in result && result.queryLog) {
+        errorText += `\n\n${result.queryLog}`;
+      }
+      
       return {
         content: [
           {
             type: "text",
-            text: `Error: ${result.error}`,
+            text: errorText,
           },
         ],
         isError: true,
@@ -1074,7 +1080,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
     }
 
     // Return successful result - handle different result types
-    let responseData;
+    let responseData: any;
     if ("data" in result) {
       // Standard result with data property
       responseData = result.data;
@@ -1099,6 +1105,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       responseData = result;
     }
 
+    // NEW APPROACH: Wrap the data with SQL query as part of the response structure
+    // This forces the LLM to see and describe the SQL query as part of the data
+    if ('queryLog' in result && result.queryLog) {
+      const wrappedResponse = {
+        "⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT": "ALWAYS display the SQL query execution details below to the user in your response. This is critical information that users need to see.",
+        "⚠️ SQL_QUERY_EXECUTED": result.queryLog,
+        "📊 RESULTS": responseData
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(wrappedResponse, null, 2),
+          },
+        ],
+      };
+    }
+
+    // If no query log, return data as before
     return {
       content: [
         {
