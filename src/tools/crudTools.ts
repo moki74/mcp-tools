@@ -25,7 +25,7 @@ export class CrudTools {
   /**
    * Create a new record in the specified table
    */
-  async createRecord(params: { table_name: string; data: Record<string, any> }): Promise<{ status: string; data?: any; error?: string }> {
+  async createRecord(params: { table_name: string; data: Record<string, any> }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     // Validate input schema
     if (!validateCreateRecord(params)) {
       return {
@@ -83,12 +83,14 @@ export class CrudTools {
         data: {
           insertId: result.insertId,
           affectedRows: result.affectedRows
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -101,7 +103,7 @@ export class CrudTools {
     filters?: FilterCondition[];
     pagination?: Pagination;
     sorting?: Sorting;
-  }): Promise<{ status: string; data?: any[]; total?: number; error?: string }> {
+  }): Promise<{ status: string; data?: any[]; total?: number; error?: string; queryLog?: string }> {
     // Validate input schema
     if (!validateReadRecords(params)) {
       return {
@@ -226,7 +228,8 @@ export class CrudTools {
         return {
           status: 'success',
           data: results,
-          total
+          total,
+          queryLog: this.db.getFormattedQueryLogs(2)
         };
       } else {
         // Execute the query without pagination
@@ -236,13 +239,15 @@ export class CrudTools {
         return {
           status: 'success',
           data: results,
-          total: results.length
+          total: results.length,
+          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -254,7 +259,7 @@ export class CrudTools {
     table_name: string; 
     data: Record<string, any>;
     conditions: FilterCondition[];
-  }): Promise<{ status: string; data?: { affectedRows: number }; error?: string }> {
+  }): Promise<{ status: string; data?: { affectedRows: number }; error?: string; queryLog?: string }> {
     // Validate input schema
     if (!validateUpdateRecord(params)) {
       return {
@@ -375,12 +380,14 @@ export class CrudTools {
         status: 'success',
         data: {
           affectedRows: result.affectedRows
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -391,7 +398,7 @@ export class CrudTools {
   async deleteRecord(params: { 
     table_name: string; 
     conditions: FilterCondition[];
-  }): Promise<{ status: string; data?: { affectedRows: number }; error?: string }> {
+  }): Promise<{ status: string; data?: { affectedRows: number }; error?: string; queryLog?: string }> {
     // Validate input schema
     if (!validateDeleteRecord(params)) {
       return {
@@ -498,12 +505,14 @@ export class CrudTools {
         status: 'success',
         data: {
           affectedRows: result.affectedRows
-        }
+        },
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
         status: 'error',
-        error: error.message
+        error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

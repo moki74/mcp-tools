@@ -17,7 +17,7 @@ export class QueryTools {
   async runQuery(queryParams: {
     query: string;
     params?: any[];
-  }): Promise<{ status: string; data?: any[]; error?: string }> {
+  }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
     // Validate input schema
     if (!validateRunQuery(queryParams)) {
       return {
@@ -72,11 +72,13 @@ export class QueryTools {
       return {
         status: "success",
         data: results,
+        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -88,7 +90,7 @@ export class QueryTools {
   async executeSql(queryParams: {
     query: string;
     params?: any[];
-  }): Promise<{ status: string; data?: any; error?: string }> {
+  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
     // Validate input schema
     if (!validateRunQuery(queryParams)) {
       return {
@@ -140,11 +142,13 @@ export class QueryTools {
           affectedRows: result.affectedRows || 0,
           insertId: result.insertId || null,
         },
+        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
+        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }

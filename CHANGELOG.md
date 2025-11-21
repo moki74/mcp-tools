@@ -5,6 +5,20 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.7] - 2025-11-21
+
+### Added
+- **Query logging on output** - All query executions are now logged with detailed information including SQL, parameters, execution duration, and status
+- `QueryLogger` utility class for tracking and formatting query logs
+- Query logs are included in responses from query tools (runQuery, executeSql) and CRUD operations (create_record, read_records, update_record, delete_record)
+- Query logs include: timestamp, SQL query, parameters used, execution time in milliseconds, and success/error status
+
+### Technical Changes
+- New `src/db/queryLogger.ts` module for query logging functionality
+- Updated `src/db/connection.ts` to log all query executions with timing information
+- Updated all query tool responses to include `queryLog` field with formatted log output
+- Enhanced debugging capability by tracking the last 100 queries in memory
+
 ## [1.4.6] - 2025-11-21
 
 ### Changed

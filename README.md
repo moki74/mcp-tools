@@ -1059,6 +1059,84 @@ END IF;
 
 ---
 
+## 📝 Query Logging
+
+All queries executed through the MySQL MCP Server are automatically logged with detailed execution information. Query logs are included in the response output of all query and data manipulation operations.
+
+### Query Log Information
+
+Each logged query includes:
+- **Timestamp** - ISO 8601 formatted execution time
+- **SQL Query** - The exact SQL statement executed
+- **Parameters** - Values passed to the query (if any)
+- **Execution Duration** - Time taken to execute in milliseconds
+- **Status** - Success or error indication
+- **Error Details** - Error message if the query failed (optional)
+
+### Example Query Log Output
+
+```
+[1] 2025-11-21T10:30:45.123Z | SELECT * FROM users WHERE id = ? | Params: [5] | Duration: 12ms | Status: success
+```
+
+### Viewing Query Logs in Responses
+
+Query logs are automatically included in tool responses via the `queryLog` field:
+
+**Query execution:**
+```json
+{
+  "status": "success",
+  "data": [
+    {"id": 1, "name": "John Doe", "email": "john@example.com"}
+  ],
+  "queryLog": "[1] 2025-11-21T10:30:45.123Z | SELECT * FROM users | Duration: 8ms | Status: success"
+}
+```
+
+**Bulk operations with multiple queries:**
+```json
+{
+  "status": "success",
+  "data": {
+    "affectedRows": 100,
+    "totalInserted": 100
+  },
+  "queryLog": "[1] 2025-11-21T10:30:45.123Z | INSERT INTO users ... | Duration: 45ms | Status: success\n[2] 2025-11-21T10:30:45.168Z | INSERT INTO users ... | Duration: 23ms | Status: success"
+}
+```
+
+### Query Logs for Debugging
+
+Query logs are valuable for:
+- **Performance Analysis** - Track which queries are slow (high duration)
+- **Troubleshooting** - Review exact parameters sent to queries
+- **Auditing** - See what operations were performed and when
+- **Optimization** - Identify patterns in query execution
+- **Error Investigation** - Review failed queries and their errors
+
+### Query Log Limitations
+
+- Logs are stored in memory (not persisted to disk)
+- Maximum of 100 most recent queries are retained
+- Logs are cleared when the MCP server restarts
+- For production audit trails, consider using MySQL's built-in query logging
+
+### Tools with Query Logging
+
+All tools that execute queries include logs:
+- `run_query` - SELECT query execution
+- `executeSql` - Write operations (INSERT, UPDATE, DELETE)
+- `create_record` - Single record insertion
+- `read_records` - Record querying with filters
+- `update_record` - Record updates
+- `delete_record` - Record deletion
+- Bulk operations (`bulk_insert`, `bulk_update`, `bulk_delete`)
+- Stored procedure execution
+- Transaction operations
+
+---
+
 ## 🔒 Security Features
 
 ### Built-in Security
@@ -1281,6 +1359,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **Transaction support (BEGIN, COMMIT, ROLLBACK)** - **COMPLETED!**
 - ✅ **Stored procedure execution** - **COMPLETED!**
 - ✅ **Bulk operations (batch insert/update/delete)** - **COMPLETED!**
+- ✅ **Add query log on output** - **COMPLETED!**
 - [ ] Query result caching
 - [ ] Advanced query optimization hints
 

@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../config/config';
+import { QueryLogger } from './queryLogger';
 
 class DatabaseConnection {
   private static instance: DatabaseConnection;
@@ -36,10 +37,15 @@ class DatabaseConnection {
   }
 
   public async query<T>(sql: string, params?: any[]): Promise<T> {
+    const startTime = Date.now();
     try {
       const [results] = await this.pool.query(sql, params);
+      const duration = Date.now() - startTime;
+      QueryLogger.log(sql, params, duration, 'success');
       return results as T;
-    } catch (error) {
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+      QueryLogger.log(sql, params, duration, 'error', error.message);
       throw new Error(`Query execution failed: ${error}`);
     }
   }
@@ -123,6 +129,18 @@ class DatabaseConnection {
     return this.activeTransactions.has(transactionId);
   }
 
+  public getQueryLogs() {
+    return QueryLogger.getLogs();
+  }
+
+  public getLastQueryLog() {
+    return QueryLogger.getLastLog();
+  }
+
+  public getFormattedQueryLogs(count: number = 1) {
+    return QueryLogger.formatLogs(QueryLogger.getLastLogs(count));
+  }
+
   public async executeInTransaction<T>(
     transactionId: string, 
     sql: string, 
@@ -133,10 +151,15 @@ class DatabaseConnection {
       throw new Error(`No active transaction found with ID: ${transactionId}`);
     }
 
+    const startTime = Date.now();
     try {
       const [results] = await connection.query(sql, params);
+      const duration = Date.now() - startTime;
+      QueryLogger.log(sql, params, duration, 'success');
       return results as T;
-    } catch (error) {
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+      QueryLogger.log(sql, params, duration, 'error', error.message);
       throw new Error(`Query execution in transaction failed: ${error}`);
     }
   }
