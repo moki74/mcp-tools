@@ -1,23 +1,38 @@
 import DatabaseConnection from "../db/connection";
 import SecurityLayer from "../security/securityLayer";
 import { validateRunQuery } from "../validation/schemas";
+import {
+  QueryOptimizer,
+  QueryHints,
+  QueryAnalysis,
+} from "../optimization/queryOptimizer";
 
 export class QueryTools {
   private db: DatabaseConnection;
   private security: SecurityLayer;
+  private optimizer: QueryOptimizer;
 
   constructor(security: SecurityLayer) {
     this.db = DatabaseConnection.getInstance();
     this.security = security;
+    this.optimizer = QueryOptimizer.getInstance();
   }
 
   /**
-   * Execute a safe read-only SELECT query
+   * Execute a safe read-only SELECT query with optional optimizer hints
    */
   async runQuery(queryParams: {
     query: string;
     params?: any[];
-  }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+    hints?: QueryHints;
+    useCache?: boolean;
+  }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+    queryLog?: string;
+    optimizedQuery?: string;
+  }> {
     // Validate input schema
     if (!validateRunQuery(queryParams)) {
       return {
@@ -27,7 +42,7 @@ export class QueryTools {
     }
 
     try {
-      const { query, params = [] } = queryParams;
+      const { query, params = [], hints, useCache = true } = queryParams;
 
       // Check if user has execute permission to bypass dangerous keyword checks
       const hasExecutePermission = this.security.hasExecutePermission();
@@ -63,16 +78,28 @@ export class QueryTools {
         };
       }
 
+      // Apply optimizer hints if provided
+      let finalQuery = query;
+      let optimizedQuery: string | undefined;
+      if (hints) {
+        finalQuery = this.optimizer.applyHints(query, hints);
+        if (finalQuery !== query) {
+          optimizedQuery = finalQuery;
+        }
+      }
+
       // Execute the query with sanitized parameters
       const results = await this.db.query<any[]>(
-        query,
+        finalQuery,
         paramValidation.sanitizedParams!,
+        useCache,
       );
 
       return {
         status: "success",
         data: results,
         queryLog: this.db.getFormattedQueryLogs(1),
+        optimizedQuery,
       };
     } catch (error: any) {
       return {
@@ -84,13 +111,29 @@ export class QueryTools {
   }
 
   /**
+   * Analyze a query and get optimization suggestions
+   */
+  analyzeQuery(query: string): QueryAnalysis {
+    return this.optimizer.analyzeQuery(query);
+  }
+
+  /**
+   * Get suggested hints for a specific optimization goal
+   */
+  getSuggestedHints(goal: "SPEED" | "MEMORY" | "STABILITY"): QueryHints {
+    return this.optimizer.getSuggestedHints(goal);
+  }
+
+  /**
    * Execute write operations (INSERT, UPDATE, DELETE) with validation
    * Note: DDL operations are blocked by the security layer for safety
    */
-  async executeSql(queryParams: {
-    query: string;
-    params?: any[];
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async executeSql(queryParams: { query: string; params?: any[] }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+    queryLog?: string;
+  }> {
     // Validate input schema
     if (!validateRunQuery(queryParams)) {
       return {

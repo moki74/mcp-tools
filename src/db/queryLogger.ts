@@ -3,8 +3,9 @@ export interface QueryLog {
   params?: any[];
   duration: number;
   timestamp: string;
-  status: 'success' | 'error';
+  status: "success" | "error";
   error?: string;
+  cacheHit?: boolean;
 }
 
 export class QueryLogger {
@@ -19,31 +20,35 @@ export class QueryLogger {
    */
   private static safeStringify(value: any, maxLength: number = 100): string {
     try {
-      if (value === null) return 'null';
-      if (value === undefined) return 'undefined';
-      if (typeof value === 'string') {
-        return value.length > maxLength ? value.substring(0, maxLength) + '...' : value;
+      if (value === null) return "null";
+      if (value === undefined) return "undefined";
+      if (typeof value === "string") {
+        return value.length > maxLength
+          ? value.substring(0, maxLength) + "..."
+          : value;
       }
-      if (typeof value === 'number' || typeof value === 'boolean') {
+      if (typeof value === "number" || typeof value === "boolean") {
         return String(value);
       }
-      if (typeof value === 'bigint') {
-        return value.toString() + 'n';
+      if (typeof value === "bigint") {
+        return value.toString() + "n";
       }
       if (Array.isArray(value)) {
-        if (value.length === 0) return '[]';
-        const items = value.slice(0, 3).map(v => this.safeStringify(v, 30));
-        return value.length > 3 
-          ? `[${items.join(', ')}, ... +${value.length - 3} more]`
-          : `[${items.join(', ')}]`;
+        if (value.length === 0) return "[]";
+        const items = value.slice(0, 3).map((v) => this.safeStringify(v, 30));
+        return value.length > 3
+          ? `[${items.join(", ")}, ... +${value.length - 3} more]`
+          : `[${items.join(", ")}]`;
       }
-      if (typeof value === 'object') {
+      if (typeof value === "object") {
         const str = JSON.stringify(value);
-        return str.length > maxLength ? str.substring(0, maxLength) + '...}' : str;
+        return str.length > maxLength
+          ? str.substring(0, maxLength) + "...}"
+          : str;
       }
       return String(value);
     } catch (error) {
-      return '[Unstringifiable]';
+      return "[Unstringifiable]";
     }
   }
 
@@ -52,7 +57,10 @@ export class QueryLogger {
    */
   private static truncateSQL(sql: string): string {
     if (sql.length <= this.MAX_SQL_LENGTH) return sql;
-    return sql.substring(0, this.MAX_SQL_LENGTH) + `... [truncated ${sql.length - this.MAX_SQL_LENGTH} chars]`;
+    return (
+      sql.substring(0, this.MAX_SQL_LENGTH) +
+      `... [truncated ${sql.length - this.MAX_SQL_LENGTH} chars]`
+    );
   }
 
   /**
@@ -60,30 +68,42 @@ export class QueryLogger {
    */
   private static sanitizeParams(params: any[] | undefined): any[] | undefined {
     if (!params || params.length === 0) return undefined;
-    
+
     // Only keep first N params to prevent memory issues
     const limitedParams = params.slice(0, this.MAX_PARAM_ITEMS);
-    
+
     // Create deep copy to prevent reference issues
     try {
       return JSON.parse(JSON.stringify(limitedParams));
     } catch (error) {
       // If JSON serialization fails, create safe string representations
-      return limitedParams.map(p => this.safeStringify(p, 50));
+      return limitedParams.map((p) => this.safeStringify(p, 50));
     }
   }
 
   /**
    * Log a query execution
    */
-  static log(sql: string, params: any[] | undefined, duration: number, status: 'success' | 'error', error?: string): void {
+  static log(
+    sql: string,
+    params: any[] | undefined,
+    duration: number,
+    status: "success" | "error",
+    error?: string,
+    cacheHit?: boolean,
+  ): void {
     const log: QueryLog = {
       sql: this.truncateSQL(sql),
       params: this.sanitizeParams(params),
       duration,
       timestamp: new Date().toISOString(),
       status,
-      error: error ? (error.length > 200 ? error.substring(0, 200) + '...' : error) : undefined
+      cacheHit: cacheHit,
+      error: error
+        ? error.length > 200
+          ? error.substring(0, 200) + "..."
+          : error
+        : undefined,
     };
 
     this.logs.push(log);
@@ -130,9 +150,12 @@ export class QueryLogger {
   private static formatSQL(sql: string): string {
     // Add line breaks for better readability
     return sql
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/\b(SELECT|FROM|WHERE|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|GROUP BY|ORDER BY|HAVING|LIMIT|UNION|INSERT INTO|UPDATE|DELETE FROM|SET|VALUES|CREATE|ALTER|DROP|TRUNCATE|BEGIN|COMMIT|ROLLBACK|CALL)\b/gi, '\n$1')
-      .replace(/,\s*/g, ',\n  ') // Add line breaks after commas
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .replace(
+        /\b(SELECT|FROM|WHERE|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|GROUP BY|ORDER BY|HAVING|LIMIT|UNION|INSERT INTO|UPDATE|DELETE FROM|SET|VALUES|CREATE|ALTER|DROP|TRUNCATE|BEGIN|COMMIT|ROLLBACK|CALL)\b/gi,
+        "\n$1",
+      )
+      .replace(/,\s*/g, ",\n  ") // Add line breaks after commas
       .trim();
   }
 
@@ -141,64 +164,76 @@ export class QueryLogger {
    * Optimized for Kilocode and other MCP clients
    */
   static formatLogs(logs: QueryLog[]): string {
-    if (logs.length === 0) return '';
-    
-    return logs.map((log, index) => {
-      // Format the SQL for better readability
-      const formattedSQL = this.formatSQL(log.sql);
-      
-      // Format parameters
-      let paramStr = '';
-      if (log.params && log.params.length > 0) {
-        try {
-          const paramsJson = JSON.stringify(log.params, null, 2);
-          paramStr = paramsJson.length > this.MAX_PARAM_LENGTH 
-            ? `\n📋 Parameters:\n${paramsJson.substring(0, this.MAX_PARAM_LENGTH)}...`
-            : `\n📋 Parameters:\n${paramsJson}`;
-        } catch (error) {
-          paramStr = '\n📋 Parameters: [Error serializing]';
+    if (logs.length === 0) return "";
+
+    return logs
+      .map((log, index) => {
+        // Format the SQL for better readability
+        const formattedSQL = this.formatSQL(log.sql);
+
+        // Format parameters
+        let paramStr = "";
+        if (log.params && log.params.length > 0) {
+          try {
+            const paramsJson = JSON.stringify(log.params, null, 2);
+            paramStr =
+              paramsJson.length > this.MAX_PARAM_LENGTH
+                ? `\n📋 Parameters:\n${paramsJson.substring(0, this.MAX_PARAM_LENGTH)}...`
+                : `\n📋 Parameters:\n${paramsJson}`;
+          } catch (error) {
+            paramStr = "\n📋 Parameters: [Error serializing]";
+          }
         }
-      }
-      
-      // Format error if present
-      const errorStr = log.error ? `\n❌ Error: ${log.error}` : '';
-      
-      // Format status with emoji for better visibility
-      const statusEmoji = log.status === 'success' ? '✅' : '❌';
-      const statusText = log.status === 'success' ? 'SUCCESS' : 'ERROR';
-      
-      // Build the formatted log entry with clear visual hierarchy
-      return `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${statusEmoji} SQL Query #${index + 1} - ${statusText} 
+
+        // Format error if present
+        const errorStr = log.error ? `\n❌ Error: ${log.error}` : "";
+
+        // Format status with emoji for better visibility
+        const statusEmoji = log.status === "success" ? "✅" : "❌";
+        const statusText = log.status === "success" ? "SUCCESS" : "ERROR";
+
+        // Format cache hit indicator
+        const cacheStr = log.cacheHit
+          ? "\n💾 Cache: HIT (served from cache)"
+          : "";
+        const cacheLabel = log.cacheHit ? " [CACHED]" : "";
+
+        // Build the formatted log entry with clear visual hierarchy
+        return `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${statusEmoji} SQL Query #${index + 1} - ${statusText}${cacheLabel}
 ⏱️  Execution Time: ${log.duration}ms
-🕐 Timestamp: ${log.timestamp}
+🕐 Timestamp: ${log.timestamp}${cacheStr}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📝 SQL Query:
 ${formattedSQL}${paramStr}${errorStr}`;
-    }).join('\n\n');
+      })
+      .join("\n\n");
   }
 
   /**
    * Get logs as compact formatted string (for backward compatibility)
    */
   static formatLogsCompact(logs: QueryLog[]): string {
-    if (logs.length === 0) return '';
-    
-    return logs.map((log, index) => {
-      let paramStr = '';
-      if (log.params && log.params.length > 0) {
-        try {
-          const paramsJson = JSON.stringify(log.params);
-          paramStr = paramsJson.length > this.MAX_PARAM_LENGTH 
-            ? ` | Params: ${paramsJson.substring(0, this.MAX_PARAM_LENGTH)}...`
-            : ` | Params: ${paramsJson}`;
-        } catch (error) {
-          paramStr = ' | Params: [Error serializing]';
+    if (logs.length === 0) return "";
+
+    return logs
+      .map((log, index) => {
+        let paramStr = "";
+        if (log.params && log.params.length > 0) {
+          try {
+            const paramsJson = JSON.stringify(log.params);
+            paramStr =
+              paramsJson.length > this.MAX_PARAM_LENGTH
+                ? ` | Params: ${paramsJson.substring(0, this.MAX_PARAM_LENGTH)}...`
+                : ` | Params: ${paramsJson}`;
+          } catch (error) {
+            paramStr = " | Params: [Error serializing]";
+          }
         }
-      }
-      const errorStr = log.error ? ` | Error: ${log.error}` : '';
-      return `[${index + 1}] ${log.timestamp} | ${log.sql}${paramStr} | Duration: ${log.duration}ms | Status: ${log.status}${errorStr}`;
-    }).join('\n');
+        const errorStr = log.error ? ` | Error: ${log.error}` : "";
+        return `[${index + 1}] ${log.timestamp} | ${log.sql}${paramStr} | Duration: ${log.duration}ms | Status: ${log.status}${errorStr}`;
+      })
+      .join("\n");
   }
 }

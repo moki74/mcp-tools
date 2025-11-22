@@ -339,7 +339,7 @@ const TOOLS: Tool[] = [
   {
     name: "run_query",
     description:
-      "Runs a read-only SQL SELECT query with optional parameters. Only SELECT statements are allowed.",
+      "Runs a read-only SQL SELECT query with optional parameters, optimizer hints, and caching support. Only SELECT statements are allowed.",
     inputSchema: {
       type: "object",
       properties: {
@@ -351,6 +351,50 @@ const TOOLS: Tool[] = [
           type: "array",
           description: "Optional array of parameters for parameterized queries",
           items: {},
+        },
+        hints: {
+          type: "object",
+          description: "Optional MySQL optimizer hints to apply to the query",
+          properties: {
+            maxExecutionTime: {
+              type: "number",
+              description: "Maximum execution time in milliseconds",
+            },
+            forceIndex: {
+              oneOf: [
+                { type: "string" },
+                { type: "array", items: { type: "string" } },
+              ],
+              description: "Force usage of specific index(es)",
+            },
+            ignoreIndex: {
+              oneOf: [
+                { type: "string" },
+                { type: "array", items: { type: "string" } },
+              ],
+              description: "Ignore specific index(es)",
+            },
+            straightJoin: {
+              type: "boolean",
+              description: "Use STRAIGHT_JOIN to force join order",
+            },
+            noCache: {
+              type: "boolean",
+              description: "Disable query cache for this query",
+            },
+            sqlBigResult: {
+              type: "boolean",
+              description: "Optimize for large result sets",
+            },
+            sqlSmallResult: {
+              type: "boolean",
+              description: "Optimize for small result sets",
+            },
+          },
+        },
+        useCache: {
+          type: "boolean",
+          description: "Whether to use query result caching (default: true)",
         },
       },
       required: ["query"],
@@ -847,6 +891,105 @@ const TOOLS: Tool[] = [
       required: ["query"],
     },
   },
+  // Cache Management Tools
+  {
+    name: "get_cache_stats",
+    description:
+      "Get query cache statistics including hit rate, size, and configuration.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "get_cache_config",
+    description: "Get current cache configuration settings.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "configure_cache",
+    description:
+      "Configure cache settings including TTL, max size, and enable/disable.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        enabled: {
+          type: "boolean",
+          description: "Enable or disable the query cache",
+        },
+        ttlMs: {
+          type: "number",
+          description: "Cache time-to-live in milliseconds (default: 60000)",
+        },
+        maxSize: {
+          type: "number",
+          description: "Maximum number of cached entries (default: 100)",
+        },
+        maxMemoryMB: {
+          type: "number",
+          description: "Maximum memory usage in MB (default: 50)",
+        },
+      },
+    },
+  },
+  {
+    name: "clear_cache",
+    description: "Clear all entries from the query cache.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "invalidate_table_cache",
+    description: "Invalidate all cached queries related to a specific table.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to invalidate cache for",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  // Query Optimization Tools
+  {
+    name: "analyze_query",
+    description:
+      "Analyze a SQL query and get optimization suggestions including recommended indexes and hints.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "SQL query to analyze",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "get_optimization_hints",
+    description:
+      "Get suggested MySQL optimizer hints for a specific optimization goal (SPEED, MEMORY, or STABILITY).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        goal: {
+          type: "string",
+          enum: ["SPEED", "MEMORY", "STABILITY"],
+          description:
+            "Optimization goal: SPEED for faster queries, MEMORY for lower memory usage, STABILITY for consistent performance",
+        },
+      },
+      required: ["goal"],
+    },
+  },
 ];
 
 // Create the MCP server
@@ -1056,6 +1199,47 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         );
         break;
 
+      // Cache Management Tools
+      case "get_cache_stats":
+        result = mysqlMCP.getCacheStats();
+        break;
+
+      case "get_cache_config":
+        result = mysqlMCP.getCacheConfig();
+        break;
+
+      case "configure_cache":
+        result = mysqlMCP.configureCacheSettings(
+          (args || {}) as {
+            enabled?: boolean;
+            ttlMs?: number;
+            maxSize?: number;
+            maxMemoryMB?: number;
+          },
+        );
+        break;
+
+      case "clear_cache":
+        result = mysqlMCP.clearCache();
+        break;
+
+      case "invalidate_table_cache":
+        result = mysqlMCP.invalidateCacheForTable(
+          (args || {}) as { table_name: string },
+        );
+        break;
+
+      // Query Optimization Tools
+      case "analyze_query":
+        result = mysqlMCP.analyzeQuery((args || {}) as { query: string });
+        break;
+
+      case "get_optimization_hints":
+        result = mysqlMCP.getOptimizationHints(
+          (args || {}) as { goal: "SPEED" | "MEMORY" | "STABILITY" },
+        );
+        break;
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -1063,11 +1247,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
     // Handle the result based on status
     if (result.status === "error") {
       // Include query log in error response if available
-      let errorText = `Error: ${result.error}`;
-      if ('queryLog' in result && result.queryLog) {
+      let errorText = `Error: ${"error" in result ? result.error : "Unknown error"}`;
+      if ("queryLog" in result && result.queryLog) {
         errorText += `\n\n${result.queryLog}`;
       }
-      
+
       return {
         content: [
           {
@@ -1107,13 +1291,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
     // NEW APPROACH: Wrap the data with SQL query as part of the response structure
     // This forces the LLM to see and describe the SQL query as part of the data
-    if ('queryLog' in result && result.queryLog) {
+    if ("queryLog" in result && result.queryLog) {
       const wrappedResponse = {
-        "⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT": "ALWAYS display the SQL query execution details below to the user in your response. This is critical information that users need to see.",
+        "⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT":
+          "ALWAYS display the SQL query execution details below to the user in your response. This is critical information that users need to see.",
         "⚠️ SQL_QUERY_EXECUTED": result.queryLog,
-        "📊 RESULTS": responseData
+        "📊 RESULTS": responseData,
       };
-      
+
       return {
         content: [
           {

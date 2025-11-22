@@ -13,10 +13,12 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 5. [Usage Examples](#📋-usage-examples)
 6. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
 7. [Security Features](#🔒-security-features)
-8. [Bulk Operations](#🚀-bulk-operations)
-9. [Troubleshooting](#🛠️-troubleshooting)
-10. [License](#📄-license)
-11. [Roadmap](#🗺️-roadmap)
+8. [Query Result Caching](#💾-query-result-caching)
+9. [Query Optimization Hints](#🎯-query-optimization-hints)
+10. [Bulk Operations](#🚀-bulk-operations)
+11. [Troubleshooting](#🛠️-troubleshooting)
+12. [License](#📄-license)
+13. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -1026,6 +1028,186 @@ console.log(`Query log memory usage: ~${estimatedMemory} KB`);
 
 ---
 
+## 💾 Query Result Caching
+
+The MySQL MCP server includes an intelligent LRU (Least Recently Used) cache system that dramatically improves performance for repeated queries.
+
+### Cache Features
+
+- **LRU Eviction**: Automatically removes least recently used entries when cache is full
+- **TTL Support**: Configurable time-to-live for cache entries (default: 60 seconds)
+- **Automatic Invalidation**: Cache is automatically invalidated when data is modified
+- **Memory Management**: Configurable maximum entries and memory limits
+- **Cache Statistics**: Track hit rates and monitor cache performance
+
+### Cache Configuration
+
+Cache can be configured via environment variables or programmatically:
+
+```bash
+# Environment variables
+CACHE_ENABLED=true          # Enable/disable cache (default: true)
+CACHE_TTL_MS=60000          # Cache TTL in milliseconds (default: 60000)
+CACHE_MAX_SIZE=100          # Maximum cached entries (default: 100)
+CACHE_MAX_MEMORY_MB=50      # Maximum memory in MB (default: 50)
+```
+
+### Cache Management Tools
+
+#### Get Cache Statistics
+```json
+{
+  "tool": "get_cache_stats"
+}
+```
+
+Returns:
+```json
+{
+  "totalHits": 150,
+  "totalMisses": 50,
+  "hitRate": 0.75,
+  "currentSize": 45,
+  "maxSize": 100,
+  "ttlMs": 60000,
+  "enabled": true
+}
+```
+
+#### Configure Cache
+```json
+{
+  "tool": "configure_cache",
+  "arguments": {
+    "enabled": true,
+    "ttlMs": 120000,
+    "maxSize": 200
+  }
+}
+```
+
+#### Clear Cache
+```json
+{
+  "tool": "clear_cache"
+}
+```
+
+#### Invalidate Table Cache
+```json
+{
+  "tool": "invalidate_table_cache",
+  "arguments": {
+    "table_name": "users"
+  }
+}
+```
+
+### Cache Behavior
+
+- **SELECT queries only**: Only SELECT queries are cached
+- **Automatic invalidation**: INSERT, UPDATE, DELETE operations automatically invalidate related cache entries
+- **Per-query control**: Use `useCache: false` in `run_query` to bypass cache for specific queries
+
+---
+
+## 🎯 Query Optimization Hints
+
+The MySQL MCP server provides advanced query optimization tools that help you improve query performance using MySQL 8.0+ optimizer hints.
+
+### Optimization Features
+
+- **Optimizer Hints**: Apply MySQL 8.0+ optimizer hints to queries
+- **Query Analysis**: Analyze queries and get optimization suggestions
+- **Goal-Based Hints**: Get suggested hints based on optimization goals (SPEED, MEMORY, STABILITY)
+
+### Using Optimizer Hints
+
+When running queries with `run_query`, you can include optimizer hints:
+
+```json
+{
+  "tool": "run_query",
+  "arguments": {
+    "query": "SELECT * FROM orders WHERE customer_id = ?",
+    "params": [123],
+    "hints": {
+      "maxExecutionTime": 5000,
+      "forceIndex": "idx_customer_id",
+      "straightJoin": true
+    }
+  }
+}
+```
+
+### Available Hint Options
+
+| Hint | Type | Description |
+|------|------|-------------|
+| `maxExecutionTime` | number | Maximum execution time in milliseconds |
+| `forceIndex` | string/array | Force usage of specific index(es) |
+| `ignoreIndex` | string/array | Ignore specific index(es) |
+| `straightJoin` | boolean | Force join order as specified in query |
+| `noCache` | boolean | Disable query cache for this query |
+| `sqlBigResult` | boolean | Optimize for large result sets |
+| `sqlSmallResult` | boolean | Optimize for small result sets |
+
+### Query Analysis Tool
+
+Analyze a query to get optimization suggestions:
+
+```json
+{
+  "tool": "analyze_query",
+  "arguments": {
+    "query": "SELECT o.*, c.name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.status = 'pending' ORDER BY o.created_at"
+  }
+}
+```
+
+Returns analysis with suggestions:
+```json
+{
+  "originalQuery": "SELECT o.*, c.name FROM orders o JOIN customers c...",
+  "queryType": "SELECT",
+  "tables": ["orders", "customers"],
+  "hasJoins": true,
+  "hasSubqueries": false,
+  "hasGroupBy": false,
+  "hasOrderBy": true,
+  "hasLimit": false,
+  "estimatedComplexity": "MEDIUM",
+  "suggestions": [
+    {
+      "type": "STRUCTURE",
+      "priority": "MEDIUM",
+      "description": "ORDER BY without LIMIT may cause full result set sorting",
+      "suggestedAction": "Consider adding LIMIT clause to improve performance"
+    }
+  ]
+}
+```
+
+### Get Optimization Hints by Goal
+
+Get suggested hints for a specific optimization goal:
+
+```json
+{
+  "tool": "get_optimization_hints",
+  "arguments": {
+    "goal": "SPEED"
+  }
+}
+```
+
+Available goals:
+- **SPEED**: Optimize for faster query execution
+- **MEMORY**: Optimize for lower memory usage
+- **STABILITY**: Optimize for consistent, predictable performance
+
+---
+
 ## 🚀 Bulk Operations
 
 The MySQL MCP server includes powerful bulk operation tools designed for high-performance data processing. These tools are optimized for handling large datasets efficiently.
@@ -1202,8 +1384,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **Stored procedure execution** - **COMPLETED!**
 - ✅ **Bulk operations (batch insert/update/delete)** - **COMPLETED!**
 - ✅ **Add query log on output** - **COMPLETED!**
-- [ ] Query result caching
-- [ ] Advanced query optimization hints
+- ✅ **Query result caching** - **COMPLETED!**
+- ✅ **Advanced query optimization hints** - **COMPLETED!**
 
 ### Enterprise Features
 - [ ] **Database backup and restore tools**
@@ -1225,7 +1407,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ### Recommended Implementation Order
 
 #### **Phase 1: Performance & Monitoring** 🚀
-- [ ] **Query result caching** - Dramatically improve response times for repeated queries
+- ✅ **Query result caching** - Dramatically improve response times for repeated queries - **COMPLETED!**
 - [ ] **Performance metrics** - Track query execution times and database performance
 - [ ] **Connection pool monitoring** - Monitor database connection health and usage
 - [ ] **Database health checks** - Comprehensive system health monitoring
@@ -1239,7 +1421,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 #### **Phase 3: Enterprise Features** 🏢
 - [ ] **Audit logging and compliance** - Track all database operations for security
 - [ ] **Schema versioning and migrations** - Version control for database schema changes
-- [ ] **Query optimization** - Automatic query analysis and optimization suggestions
+- ✅ **Query optimization** - Automatic query analysis and optimization suggestions - **COMPLETED!**
 - [ ] **Advanced security features** - Enhanced access control and monitoring
 
 #### **Phase 4: Multi-Database Support** 🌐
@@ -1250,16 +1432,16 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 #### **Implementation Priority Matrix**
 
-| Feature | Impact | Effort | Priority |
-|---------|--------|--------|----------|
-| Query Result Caching | High | Medium | 1 |
-| Database Backup/Restore | High | High | 2 |
-| Performance Monitoring | High | Medium | 3 |
-| Data Migration | High | High | 4 |
-| Query Optimization | Medium | Medium | 5 |
-| PostgreSQL Adapter | High | High | 6 |
-| Audit Logging | Medium | Low | 7 |
-| Schema Versioning | Medium | Medium | 8 |
+| Feature | Impact | Effort | Priority | Status |
+|---------|--------|--------|----------|--------|
+| Query Result Caching | High | Medium | 1 | ✅ COMPLETED |
+| Database Backup/Restore | High | High | 2 | Pending |
+| Performance Monitoring | High | Medium | 3 | Pending |
+| Data Migration | High | High | 4 | Pending |
+| Query Optimization | Medium | Medium | 5 | ✅ COMPLETED |
+| PostgreSQL Adapter | High | High | 6 | Pending |
+| Audit Logging | Medium | Low | 7 | Pending |
+| Schema Versioning | Medium | Medium | 8 | Pending |
 
 ---
 
