@@ -5,6 +5,23 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.3] - 2025-11-23
+
+### Fixed
+- **Missing tools in toolCategoryMap** - Added 42 missing tools to the permission system
+  - View tools: listViews, getViewInfo, createView, alterView, dropView, showCreateView
+  - Trigger tools: listTriggers, getTriggerInfo, createTrigger, dropTrigger, showCreateTrigger
+  - Function tools: listFunctions, getFunctionInfo, createFunction, dropFunction, showCreateFunction, executeFunction
+  - Index tools: listIndexes, getIndexInfo, createIndex, dropIndex, analyzeIndex
+  - Constraint tools: listForeignKeys, listConstraints, addForeignKey, dropForeignKey, addUniqueConstraint, dropConstraint, addCheckConstraint
+  - Maintenance tools: analyzeTable, optimizeTable, checkTable, repairTable, truncateTable, getTableStatus, flushTable, getTableSize
+  - Server tools: showProcessList, killProcess, showStatus, showVariables, explainQuery, showEngineStatus, getServerInfo, showBinaryLogs, showReplicationStatus
+
+- **Security keyword false positives in run_query** - Refined dangerous keywords to avoid blocking common table/column names
+  - Removed generic keywords: `USER`, `PASSWORD`, `MYSQL`, `SYS` that blocked legitimate queries
+  - Added specific security patterns: `MYSQL.USER`, `MYSQL.DB`, `CREATE USER`, `DROP USER`, `ALTER USER`, `SET PASSWORD`, `LOAD_FILE`, `INFORMATION_SCHEMA.USER_PRIVILEGES`
+  - Queries like `SELECT * FROM users` or `SELECT user, password FROM accounts` now work correctly
+
 ## [1.6.2] - 2025-11-22
 
 ### Fixed

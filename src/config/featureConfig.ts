@@ -81,6 +81,66 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   // Query optimization tools
   analyzeQuery: ToolCategory.UTILITY,
   getOptimizationHints: ToolCategory.UTILITY,
+
+  // View tools
+  listViews: ToolCategory.LIST,
+  getViewInfo: ToolCategory.LIST,
+  createView: ToolCategory.DDL,
+  alterView: ToolCategory.DDL,
+  dropView: ToolCategory.DDL,
+  showCreateView: ToolCategory.LIST,
+
+  // Trigger tools
+  listTriggers: ToolCategory.LIST,
+  getTriggerInfo: ToolCategory.LIST,
+  createTrigger: ToolCategory.DDL,
+  dropTrigger: ToolCategory.DDL,
+  showCreateTrigger: ToolCategory.LIST,
+
+  // Function tools
+  listFunctions: ToolCategory.LIST,
+  getFunctionInfo: ToolCategory.LIST,
+  createFunction: ToolCategory.PROCEDURE,
+  dropFunction: ToolCategory.PROCEDURE,
+  showCreateFunction: ToolCategory.LIST,
+  executeFunction: ToolCategory.PROCEDURE,
+
+  // Index tools
+  listIndexes: ToolCategory.LIST,
+  getIndexInfo: ToolCategory.LIST,
+  createIndex: ToolCategory.DDL,
+  dropIndex: ToolCategory.DDL,
+  analyzeIndex: ToolCategory.UTILITY,
+
+  // Constraint tools
+  listForeignKeys: ToolCategory.LIST,
+  listConstraints: ToolCategory.LIST,
+  addForeignKey: ToolCategory.DDL,
+  dropForeignKey: ToolCategory.DDL,
+  addUniqueConstraint: ToolCategory.DDL,
+  dropConstraint: ToolCategory.DDL,
+  addCheckConstraint: ToolCategory.DDL,
+
+  // Table maintenance tools
+  analyzeTable: ToolCategory.UTILITY,
+  optimizeTable: ToolCategory.UTILITY,
+  checkTable: ToolCategory.UTILITY,
+  repairTable: ToolCategory.UTILITY,
+  truncateTable: ToolCategory.DDL,
+  getTableStatus: ToolCategory.LIST,
+  flushTable: ToolCategory.UTILITY,
+  getTableSize: ToolCategory.LIST,
+
+  // Process and server management tools
+  showProcessList: ToolCategory.LIST,
+  killProcess: ToolCategory.EXECUTE,
+  showStatus: ToolCategory.LIST,
+  showVariables: ToolCategory.LIST,
+  explainQuery: ToolCategory.UTILITY,
+  showEngineStatus: ToolCategory.LIST,
+  getServerInfo: ToolCategory.LIST,
+  showBinaryLogs: ToolCategory.LIST,
+  showReplicationStatus: ToolCategory.LIST,
 };
 
 /**

@@ -14,17 +14,22 @@ export class SecurityLayer {
 
     // Define dangerous SQL keywords that should ALWAYS be blocked (critical security threats)
     // These are blocked even with 'execute' permission
+    // Note: Avoid blocking common table/column names like "user" or "password"
     this.dangerousKeywords = [
       "GRANT",
       "REVOKE",
       "INTO OUTFILE",
       "INTO DUMPFILE",
       "LOAD DATA",
-      "MYSQL",
+      "LOAD_FILE",
+      "INFORMATION_SCHEMA.USER_PRIVILEGES",
+      "MYSQL.USER",
+      "MYSQL.DB",
       "PERFORMANCE_SCHEMA",
-      "SYS",
-      "USER",
-      "PASSWORD",
+      "CREATE USER",
+      "DROP USER",
+      "ALTER USER",
+      "SET PASSWORD",
     ];
 
     // Define basic allowed SQL operations
