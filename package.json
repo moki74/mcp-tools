@@ -1,11 +1,11 @@
 {
   "name": "@berthojoris/mcp-mysql-server",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "description": "Model Context Protocol server for MySQL database integration with dynamic per-project permissions and data export capabilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "mcp-mysql": "./bin/mcp-mysql.js"
+    "mcp-mysql": "bin/mcp-mysql.js"
   },
   "scripts": {
     "build": "tsc",
@@ -39,7 +39,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/berthojoris/mysql-mcp.git"
+    "url": "git+https://github.com/berthojoris/mysql-mcp.git"
   },
   "bugs": {
     "url": "https://github.com/berthojoris/mysql-mcp/issues"
@@ -49,6 +49,7 @@
     "dist",
     "bin",
     "README.md",
+    "DOCUMENTATIONS.md",
     "CHANGELOG.md",
     "LICENSE",
     "manifest.json"

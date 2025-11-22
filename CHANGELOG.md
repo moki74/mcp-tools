@@ -5,6 +5,36 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.13] - 2025-11-22
+
+### Changed
+- **Documentation restructuring** - Split comprehensive README.md into two files for better organization and maintainability
+  - **README.md (569 lines)** - Now focused on quick start, installation, configuration, and tool overview
+  - **DOCUMENTATIONS.md (1269 lines)** - Contains detailed documentation for all features including DDL operations, transactions, stored procedures, query logging, security, bulk operations, troubleshooting, and roadmap
+- **Improved navigation** - Added clear reference in README.md pointing to DOCUMENTATIONS.md with table of contents
+- **Better user experience** - Users can now quickly get started with README.md and deep dive into DOCUMENTATIONS.md when needed
+
+### Added
+- **DOCUMENTATIONS.md** - New comprehensive documentation file with detailed coverage of:
+  - DDL Operations (create, alter, drop tables)
+  - Data Export Tools (CSV export)
+  - Transaction Management (ACID transactions)
+  - Stored Procedures (create, execute, manage)
+  - Usage Examples (real-world scenarios)
+  - Query Logging & Automatic SQL Display
+  - Security Features and best practices
+  - Bulk Operations (high-performance batch processing)
+  - Troubleshooting guide
+  - License information
+  - Roadmap and future features
+- **Table of Contents** - Added comprehensive table of contents in DOCUMENTATIONS.md for easy navigation
+
+### Technical Changes
+- README.md reduced from 1,787 lines to 568 lines (68% reduction)
+- All detailed documentation moved to DOCUMENTATIONS.md (1,269 lines)
+- DOCUMENTATIONS.md added to npm package files list for distribution
+- Both documentation files are now included in the npm package
+
 ## [1.4.12] - 2025-11-21
 
 ### Added
