@@ -5,6 +5,25 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.16] - 2025-11-22
+
+### Added
+- **get_table_size tool** - Added get_table_size tool to manifest.json and documentation
+  - Tool was implemented in server code but missing from manifest causing "Unknown tool" error
+  - Added proper input/output schema to manifest.json
+  - Enhanced documentation with usage examples and parameter details
+  - Updated version in manifest.json to match server code (1.4.4)
+
+### Fixed
+- **Manifest synchronization** - Fixed manifest.json to include all implemented tools
+  - Many tools were implemented in server code but missing from manifest.json
+  - get_table_size tool now properly exposed to MCP clients
+  - Version number synchronized between manifest and server code
+
+### Documentation
+- Enhanced Table Maintenance section with complete get_table_size examples
+- Added proper usage patterns and parameter documentation
+
 ## [1.4.15] - 2025-11-22
 
 ### Fixed

@@ -838,10 +838,23 @@ Table maintenance tools help optimize performance and fix issues.
 
 ### Getting Table Size Information
 
+**User:** *"Get size information for all tables in the database"*
+
 ```json
 {
   "tool": "get_table_size",
   "arguments": {}
+}
+```
+
+**User:** *"Get size information for a specific table"*
+
+```json
+{
+  "tool": "get_table_size",
+  "arguments": {
+    "table_name": "orders"
+  }
 }
 ```
 
@@ -863,6 +876,11 @@ Table maintenance tools help optimize performance and fix issues.
   }
 }
 ```
+
+**Usage:**
+- Get size information for all tables (no arguments)
+- Get size for specific table (use `table_name` parameter)
+- Optional `database` parameter to specify different database
 
 ---
 

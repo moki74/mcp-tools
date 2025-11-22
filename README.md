@@ -463,7 +463,7 @@ After (DDL enabled):
 
 ## 🛠️ Available Tools
 
-The MCP server provides **72 powerful tools**:
+The MCP server provides **73 powerful tools**:
 
 ### Database Discovery (4 tools)
 

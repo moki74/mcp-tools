@@ -1,7 +1,7 @@
 {
   "name": "mysql-mcp",
   "description": "A Model Context Protocol for MySQL database interaction",
-  "version": "1.2.6",
+  "version": "1.4.4",
   "tools": [
     {
       "name": "list_databases",
@@ -34,7 +34,7 @@
       "output_schema": {
         "type": "object",
         "properties": {
-          "columns": { 
+          "columns": {
             "type": "array",
             "items": {
               "type": "object",
@@ -48,7 +48,7 @@
             }
           },
           "primary_key": { "type": ["string", "null"] },
-          "indexes": { 
+          "indexes": {
             "type": "array",
             "items": { "type": "string" }
           }
@@ -239,6 +239,48 @@
                 "column": { "type": "string" },
                 "referenced_column": { "type": "string" }
               }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "get_table_size",
+      "description": "Gets size information for one or all tables including data and index sizes.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table_name": {
+            "type": "string",
+            "description": "Optional: specific table name (omit for all tables)"
+          },
+          "database": {
+            "type": "string",
+            "description": "Optional: specific database name"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "tables": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "table_name": { "type": "string" },
+                "row_count": { "type": "number" },
+                "data_size_bytes": { "type": "number" },
+                "index_size_bytes": { "type": "number" },
+                "total_size_mb": { "type": "string" }
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total_tables": { "type": "number" },
+              "total_size_mb": { "type": "string" }
             }
           }
         }
