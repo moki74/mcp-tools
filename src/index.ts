@@ -6,6 +6,13 @@ import { DdlTools } from "./tools/ddlTools";
 import { TransactionTools } from "./tools/transactionTools";
 import { StoredProcedureTools } from "./tools/storedProcedureTools";
 import { DataExportTools } from "./tools/dataExportTools";
+import { ViewTools } from "./tools/viewTools";
+import { TriggerTools } from "./tools/triggerTools";
+import { FunctionTools } from "./tools/functionTools";
+import { IndexTools } from "./tools/indexTools";
+import { ConstraintTools } from "./tools/constraintTools";
+import { MaintenanceTools } from "./tools/maintenanceTools";
+import { ProcessTools } from "./tools/processTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -23,6 +30,13 @@ export class MySQLMCP {
   private transactionTools: TransactionTools;
   private storedProcedureTools: StoredProcedureTools;
   private dataExportTools: DataExportTools;
+  private viewTools: ViewTools;
+  private triggerTools: TriggerTools;
+  private functionTools: FunctionTools;
+  private indexTools: IndexTools;
+  private constraintTools: ConstraintTools;
+  private maintenanceTools: MaintenanceTools;
+  private processTools: ProcessTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -37,6 +51,13 @@ export class MySQLMCP {
     this.transactionTools = new TransactionTools();
     this.storedProcedureTools = new StoredProcedureTools(this.security);
     this.dataExportTools = new DataExportTools(this.security);
+    this.viewTools = new ViewTools(this.security);
+    this.triggerTools = new TriggerTools(this.security);
+    this.functionTools = new FunctionTools(this.security);
+    this.indexTools = new IndexTools(this.security);
+    this.constraintTools = new ConstraintTools(this.security);
+    this.maintenanceTools = new MaintenanceTools(this.security);
+    this.processTools = new ProcessTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -523,6 +544,369 @@ export class MySQLMCP {
         hints,
       },
     };
+  }
+
+  // ==========================================
+  // View Tools
+  // ==========================================
+
+  async listViews(params: { database?: string }) {
+    const check = this.checkToolEnabled("listViews");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.viewTools.listViews(params);
+  }
+
+  async getViewInfo(params: { view_name: string; database?: string }) {
+    const check = this.checkToolEnabled("getViewInfo");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.viewTools.getViewInfo(params);
+  }
+
+  async createView(params: any) {
+    const check = this.checkToolEnabled("createView");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.viewTools.createView(params);
+  }
+
+  async alterView(params: any) {
+    const check = this.checkToolEnabled("alterView");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.viewTools.alterView(params);
+  }
+
+  async dropView(params: {
+    view_name: string;
+    if_exists?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("dropView");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.viewTools.dropView(params);
+  }
+
+  async showCreateView(params: { view_name: string; database?: string }) {
+    const check = this.checkToolEnabled("showCreateView");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.viewTools.showCreateView(params);
+  }
+
+  // ==========================================
+  // Trigger Tools
+  // ==========================================
+
+  async listTriggers(params: { database?: string; table_name?: string }) {
+    const check = this.checkToolEnabled("listTriggers");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.triggerTools.listTriggers(params);
+  }
+
+  async getTriggerInfo(params: { trigger_name: string; database?: string }) {
+    const check = this.checkToolEnabled("getTriggerInfo");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.triggerTools.getTriggerInfo(params);
+  }
+
+  async createTrigger(params: any) {
+    const check = this.checkToolEnabled("createTrigger");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.triggerTools.createTrigger(params);
+  }
+
+  async dropTrigger(params: {
+    trigger_name: string;
+    if_exists?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("dropTrigger");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.triggerTools.dropTrigger(params);
+  }
+
+  async showCreateTrigger(params: { trigger_name: string; database?: string }) {
+    const check = this.checkToolEnabled("showCreateTrigger");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.triggerTools.showCreateTrigger(params);
+  }
+
+  // ==========================================
+  // Function Tools
+  // ==========================================
+
+  async listFunctions(params: { database?: string }) {
+    const check = this.checkToolEnabled("listFunctions");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.functionTools.listFunctions(params);
+  }
+
+  async getFunctionInfo(params: { function_name: string; database?: string }) {
+    const check = this.checkToolEnabled("getFunctionInfo");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.functionTools.getFunctionInfo(params);
+  }
+
+  async createFunction(params: any) {
+    const check = this.checkToolEnabled("createFunction");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.functionTools.createFunction(params);
+  }
+
+  async dropFunction(params: {
+    function_name: string;
+    if_exists?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("dropFunction");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.functionTools.dropFunction(params);
+  }
+
+  async showCreateFunction(params: {
+    function_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("showCreateFunction");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.functionTools.showCreateFunction(params);
+  }
+
+  async executeFunction(params: {
+    function_name: string;
+    parameters?: any[];
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("executeFunction");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.functionTools.executeFunction(params);
+  }
+
+  // ==========================================
+  // Index Tools
+  // ==========================================
+
+  async listIndexes(params: { table_name: string; database?: string }) {
+    const check = this.checkToolEnabled("listIndexes");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.indexTools.listIndexes(params);
+  }
+
+  async getIndexInfo(params: {
+    table_name: string;
+    index_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("getIndexInfo");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.indexTools.getIndexInfo(params);
+  }
+
+  async createIndex(params: any) {
+    const check = this.checkToolEnabled("createIndex");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.indexTools.createIndex(params);
+  }
+
+  async dropIndex(params: {
+    table_name: string;
+    index_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("dropIndex");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.indexTools.dropIndex(params);
+  }
+
+  async analyzeIndex(params: { table_name: string; database?: string }) {
+    const check = this.checkToolEnabled("analyzeIndex");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.indexTools.analyzeIndex(params);
+  }
+
+  // ==========================================
+  // Constraint Tools
+  // ==========================================
+
+  async listForeignKeys(params: { table_name: string; database?: string }) {
+    const check = this.checkToolEnabled("listForeignKeys");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.constraintTools.listForeignKeys(params);
+  }
+
+  async listConstraints(params: { table_name: string; database?: string }) {
+    const check = this.checkToolEnabled("listConstraints");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.constraintTools.listConstraints(params);
+  }
+
+  async addForeignKey(params: any) {
+    const check = this.checkToolEnabled("addForeignKey");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.constraintTools.addForeignKey(params);
+  }
+
+  async dropForeignKey(params: {
+    table_name: string;
+    constraint_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("dropForeignKey");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.constraintTools.dropForeignKey(params);
+  }
+
+  async addUniqueConstraint(params: any) {
+    const check = this.checkToolEnabled("addUniqueConstraint");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.constraintTools.addUniqueConstraint(params);
+  }
+
+  async dropConstraint(params: {
+    table_name: string;
+    constraint_name: string;
+    constraint_type: "UNIQUE" | "CHECK";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("dropConstraint");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.constraintTools.dropConstraint(params);
+  }
+
+  async addCheckConstraint(params: any) {
+    const check = this.checkToolEnabled("addCheckConstraint");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.constraintTools.addCheckConstraint(params);
+  }
+
+  // ==========================================
+  // Table Maintenance Tools
+  // ==========================================
+
+  async analyzeTable(params: { table_name: string; database?: string }) {
+    const check = this.checkToolEnabled("analyzeTable");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.analyzeTable(params);
+  }
+
+  async optimizeTable(params: { table_name: string; database?: string }) {
+    const check = this.checkToolEnabled("optimizeTable");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.optimizeTable(params);
+  }
+
+  async checkTable(params: {
+    table_name: string;
+    check_type?: "QUICK" | "FAST" | "MEDIUM" | "EXTENDED" | "CHANGED";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("checkTable");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.checkTable(params);
+  }
+
+  async repairTable(params: {
+    table_name: string;
+    quick?: boolean;
+    extended?: boolean;
+    use_frm?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("repairTable");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.repairTable(params);
+  }
+
+  async truncateTable(params: { table_name: string; database?: string }) {
+    const check = this.checkToolEnabled("truncateTable");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.truncateTable(params);
+  }
+
+  async getTableStatus(params: { table_name?: string; database?: string }) {
+    const check = this.checkToolEnabled("getTableStatus");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.getTableStatus(params);
+  }
+
+  async flushTable(params: {
+    table_name?: string;
+    with_read_lock?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("flushTable");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.flushTable(params);
+  }
+
+  async getTableSize(params: { table_name?: string; database?: string }) {
+    const check = this.checkToolEnabled("getTableSize");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.maintenanceTools.getTableSize(params);
+  }
+
+  // ==========================================
+  // Process Management Tools
+  // ==========================================
+
+  async showProcessList(params?: { full?: boolean }) {
+    const check = this.checkToolEnabled("showProcessList");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.showProcessList(params);
+  }
+
+  async killProcess(params: {
+    process_id: number;
+    type?: "CONNECTION" | "QUERY";
+  }) {
+    const check = this.checkToolEnabled("killProcess");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.killProcess(params);
+  }
+
+  async showStatus(params?: { like?: string; global?: boolean }) {
+    const check = this.checkToolEnabled("showStatus");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.showStatus(params);
+  }
+
+  async showVariables(params?: { like?: string; global?: boolean }) {
+    const check = this.checkToolEnabled("showVariables");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.showVariables(params);
+  }
+
+  async explainQuery(params: {
+    query: string;
+    format?: "TRADITIONAL" | "JSON" | "TREE";
+    analyze?: boolean;
+  }) {
+    const check = this.checkToolEnabled("explainQuery");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.explainQuery(params);
+  }
+
+  async showEngineStatus(params?: { engine?: string }) {
+    const check = this.checkToolEnabled("showEngineStatus");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.showEngineStatus(params);
+  }
+
+  async getServerInfo() {
+    const check = this.checkToolEnabled("getServerInfo");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.getServerInfo();
+  }
+
+  async showBinaryLogs() {
+    const check = this.checkToolEnabled("showBinaryLogs");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.showBinaryLogs();
+  }
+
+  async showReplicationStatus(params?: {
+    type?: "MASTER" | "REPLICA" | "SLAVE";
+  }) {
+    const check = this.checkToolEnabled("showReplicationStatus");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.processTools.showReplicationStatus(params);
   }
 }
 

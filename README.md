@@ -463,7 +463,7 @@ After (DDL enabled):
 
 ## 🛠️ Available Tools
 
-The MCP server provides **30 powerful tools**:
+The MCP server provides **72 powerful tools**:
 
 ### Database Discovery (4 tools)
 
@@ -485,9 +485,7 @@ The MCP server provides **30 powerful tools**:
 
 ### Bulk Operations (3 tools)
 
-| Tool | Description | 
-
-| Performance |
+| Tool | Description | Performance |
 |------|-------------|-------------|
 | `bulk_insert` | Insert multiple records in batches for optimal performance | Up to 10,000 records per batch |
 | `bulk_update` | Update multiple records with different conditions in batches | Up to 1,000 operations per batch |
@@ -528,7 +526,7 @@ The MCP server provides **30 powerful tools**:
 | `get_transaction_status` | Check if a transaction is active |
 | `execute_in_transaction` | Execute SQL within a transaction context |
 
-### Stored Procedures (5 tools)
+### Stored Procedures (6 tools)
 
 | Tool | Description | Requires |
 |------|-------------|----------|
@@ -537,6 +535,105 @@ The MCP server provides **30 powerful tools**:
 | `get_stored_procedure_info` | Get detailed information about a stored procedure | `procedure` permission |
 | `execute_stored_procedure` | Execute stored procedures with IN/OUT/INOUT parameters | `procedure` permission |
 | `drop_stored_procedure` | Delete stored procedures | `procedure` permission |
+| `show_create_procedure` | Show CREATE statement for a stored procedure | `procedure` permission |
+
+### Views Management (6 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_views` | List all views in the database | `list` permission |
+| `get_view_info` | Get detailed information about a view | `list` permission |
+| `create_view` | Create a new view with SELECT definition | `ddl` permission |
+| `alter_view` | Alter an existing view definition | `ddl` permission |
+| `drop_view` | Drop a view | `ddl` permission |
+| `show_create_view` | Show CREATE statement for a view | `list` permission |
+
+### Triggers Management (5 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_triggers` | List all triggers in the database | `list` permission |
+| `get_trigger_info` | Get detailed information about a trigger | `list` permission |
+| `create_trigger` | Create a new trigger on a table | `ddl` permission |
+| `drop_trigger` | Drop a trigger | `ddl` permission |
+| `show_create_trigger` | Show CREATE statement for a trigger | `list` permission |
+
+### Functions Management (6 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_functions` | List all user-defined functions | `list` permission |
+| `get_function_info` | Get detailed information about a function | `list` permission |
+| `create_function` | Create a new user-defined function | `ddl` permission |
+| `drop_function` | Drop a function | `ddl` permission |
+| `show_create_function` | Show CREATE statement for a function | `list` permission |
+| `execute_function` | Execute a function and return its result | `read` permission |
+
+### Index Management (5 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_indexes` | List all indexes for a table | `list` permission |
+| `get_index_info` | Get detailed information about an index | `list` permission |
+| `create_index` | Create a new index (BTREE, HASH, FULLTEXT, SPATIAL) | `ddl` permission |
+| `drop_index` | Drop an index from a table | `ddl` permission |
+| `analyze_index` | Analyze index statistics | `utility` permission |
+
+### Constraint Management (7 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_foreign_keys` | List all foreign keys for a table | `list` permission |
+| `list_constraints` | List all constraints (PK, FK, UNIQUE, CHECK) | `list` permission |
+| `add_foreign_key` | Add a foreign key constraint | `ddl` permission |
+| `drop_foreign_key` | Drop a foreign key constraint | `ddl` permission |
+| `add_unique_constraint` | Add a unique constraint | `ddl` permission |
+| `drop_constraint` | Drop a UNIQUE or CHECK constraint | `ddl` permission |
+| `add_check_constraint` | Add a CHECK constraint (MySQL 8.0.16+) | `ddl` permission |
+
+### Table Maintenance (8 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `analyze_table` | Update index statistics for optimizer | `utility` permission |
+| `optimize_table` | Reclaim unused space and defragment | `utility` permission |
+| `check_table` | Check table for errors | `utility` permission |
+| `repair_table` | Repair corrupted table (MyISAM, ARCHIVE, CSV) | `utility` permission |
+| `truncate_table` | Remove all rows quickly | `ddl` permission |
+| `get_table_status` | Get detailed table status and statistics | `list` permission |
+| `flush_table` | Close and reopen table(s) | `utility` permission |
+| `get_table_size` | Get size information for tables | `list` permission |
+
+### Process & Server Management (9 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `show_process_list` | Show all running MySQL processes | `utility` permission |
+| `kill_process` | Kill a MySQL process/connection | `utility` permission |
+| `show_status` | Show MySQL server status variables | `utility` permission |
+| `show_variables` | Show MySQL server configuration variables | `utility` permission |
+| `explain_query` | Show query execution plan (EXPLAIN) | `utility` permission |
+| `show_engine_status` | Show storage engine status (InnoDB) | `utility` permission |
+| `get_server_info` | Get comprehensive server information | `utility` permission |
+| `show_binary_logs` | Show binary log files | `utility` permission |
+| `show_replication_status` | Show replication status | `utility` permission |
+
+### Cache Management (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `get_cache_stats` | Get query cache statistics |
+| `get_cache_config` | Get current cache configuration |
+| `configure_cache` | Configure cache settings (TTL, max size) |
+| `clear_cache` | Clear all cached query results |
+| `invalidate_table_cache` | Invalidate cache for a specific table |
+
+### Query Optimization (2 tools)
+
+| Tool | Description |
+|------|-------------|
+| `analyze_query` | Analyze query and get optimization suggestions |
+| `get_optimization_hints` | Get optimizer hints for SPEED, MEMORY, or STABILITY goals |
 
 ---
 

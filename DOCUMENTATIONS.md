@@ -10,15 +10,22 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 2. [Data Export Tools](#📤-data-export-tools)
 3. [Transaction Management](#💰-transaction-management)
 4. [Stored Procedures](#🔧-stored-procedures)
-5. [Usage Examples](#📋-usage-examples)
-6. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
-7. [Security Features](#🔒-security-features)
-8. [Query Result Caching](#💾-query-result-caching)
-9. [Query Optimization Hints](#🎯-query-optimization-hints)
-10. [Bulk Operations](#🚀-bulk-operations)
-11. [Troubleshooting](#🛠️-troubleshooting)
-12. [License](#📄-license)
-13. [Roadmap](#🗺️-roadmap)
+5. [Views Management](#👁️-views-management) - NEW!
+6. [Triggers Management](#⚡-triggers-management) - NEW!
+7. [Functions Management](#🔢-functions-management) - NEW!
+8. [Index Management](#📇-index-management) - NEW!
+9. [Constraint Management](#🔗-constraint-management) - NEW!
+10. [Table Maintenance](#🔧-table-maintenance) - NEW!
+11. [Process & Server Management](#📊-process--server-management) - NEW!
+12. [Usage Examples](#📋-usage-examples)
+13. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+14. [Security Features](#🔒-security-features)
+15. [Query Result Caching](#💾-query-result-caching)
+16. [Query Optimization Hints](#🎯-query-optimization-hints)
+17. [Bulk Operations](#🚀-bulk-operations)
+18. [Troubleshooting](#🛠️-troubleshooting)
+19. [License](#📄-license)
+20. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -522,6 +529,442 @@ END IF;
 -- Aggregate data from multiple tables
 -- Apply business rules
 -- Return calculated results
+```
+
+---
+
+## 👁️ Views Management
+
+Views allow you to create virtual tables based on SQL SELECT statements. The MySQL MCP Server provides comprehensive view management tools.
+
+### View Tools Overview
+
+- **`list_views`** - List all views in the database
+- **`get_view_info`** - Get detailed information about a view including columns
+- **`create_view`** - Create a new view with SELECT definition
+- **`alter_view`** - Alter an existing view definition
+- **`drop_view`** - Drop a view
+- **`show_create_view`** - Show the CREATE statement for a view
+
+### Creating Views
+
+**User:** *"Create a view that shows active users with their order count"*
+
+**AI will execute:**
+```json
+{
+  "tool": "create_view",
+  "arguments": {
+    "view_name": "active_users_orders",
+    "definition": "SELECT u.id, u.name, u.email, COUNT(o.id) as order_count FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE u.status = 'active' GROUP BY u.id",
+    "or_replace": true
+  }
+}
+```
+
+### View Options
+
+| Option | Description |
+|--------|-------------|
+| `or_replace` | If true, replaces existing view with same name |
+| `algorithm` | UNDEFINED, MERGE, or TEMPTABLE |
+| `security` | DEFINER or INVOKER |
+| `check_option` | CASCADED or LOCAL for updatable views |
+
+---
+
+## ⚡ Triggers Management
+
+Triggers are database callbacks that automatically execute when specific events occur on a table.
+
+### Trigger Tools Overview
+
+- **`list_triggers`** - List all triggers, optionally filtered by table
+- **`get_trigger_info`** - Get detailed information about a trigger
+- **`create_trigger`** - Create a new trigger
+- **`drop_trigger`** - Drop a trigger
+- **`show_create_trigger`** - Show the CREATE statement for a trigger
+
+### Creating Triggers
+
+**User:** *"Create a trigger that logs all updates to the users table"*
+
+**AI will execute:**
+```json
+{
+  "tool": "create_trigger",
+  "arguments": {
+    "trigger_name": "users_update_log",
+    "table_name": "users",
+    "timing": "AFTER",
+    "event": "UPDATE",
+    "body": "INSERT INTO audit_log (table_name, action, record_id, changed_at) VALUES ('users', 'UPDATE', NEW.id, NOW());"
+  }
+}
+```
+
+### Trigger Timing and Events
+
+| Timing | Events | Description |
+|--------|--------|-------------|
+| BEFORE | INSERT, UPDATE, DELETE | Execute before the operation |
+| AFTER | INSERT, UPDATE, DELETE | Execute after the operation |
+
+---
+
+## 🔢 Functions Management
+
+User-defined functions (UDFs) allow you to create reusable SQL functions that can be called in queries.
+
+### Function Tools Overview
+
+- **`list_functions`** - List all user-defined functions
+- **`get_function_info`** - Get detailed information about a function
+- **`create_function`** - Create a new function
+- **`drop_function`** - Drop a function
+- **`show_create_function`** - Show the CREATE statement
+- **`execute_function`** - Execute a function and return its result
+
+### Creating Functions
+
+**User:** *"Create a function that calculates the discount price"*
+
+**AI will execute:**
+```json
+{
+  "tool": "create_function",
+  "arguments": {
+    "function_name": "calculate_discount",
+    "parameters": [
+      {"name": "price", "data_type": "DECIMAL(10,2)"},
+      {"name": "discount_percent", "data_type": "INT"}
+    ],
+    "returns": "DECIMAL(10,2)",
+    "body": "RETURN price - (price * discount_percent / 100);",
+    "deterministic": true,
+    "comment": "Calculate discounted price"
+  }
+}
+```
+
+### Executing Functions
+
+```json
+{
+  "tool": "execute_function",
+  "arguments": {
+    "function_name": "calculate_discount",
+    "parameters": [100.00, 15]
+  }
+}
+```
+
+**Returns:** `{"result": 85.00}`
+
+---
+
+## 📇 Index Management
+
+Indexes improve query performance by allowing MySQL to find rows faster.
+
+### Index Tools Overview
+
+- **`list_indexes`** - List all indexes for a table
+- **`get_index_info`** - Get detailed information about an index
+- **`create_index`** - Create a new index
+- **`drop_index`** - Drop an index
+- **`analyze_index`** - Update index statistics
+
+### Creating Indexes
+
+**User:** *"Create an index on the email column of the users table"*
+
+**AI will execute:**
+```json
+{
+  "tool": "create_index",
+  "arguments": {
+    "table_name": "users",
+    "index_name": "idx_users_email",
+    "columns": ["email"],
+    "unique": true
+  }
+}
+```
+
+### Index Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| BTREE | Default B-tree index | General purpose, range queries |
+| HASH | Hash index | Equality comparisons only |
+| FULLTEXT | Full-text search index | Text search in CHAR, VARCHAR, TEXT columns |
+| SPATIAL | Spatial index | Geographic data (GEOMETRY types) |
+
+### Composite Indexes
+
+```json
+{
+  "tool": "create_index",
+  "arguments": {
+    "table_name": "orders",
+    "index_name": "idx_orders_user_date",
+    "columns": [
+      {"column": "user_id"},
+      {"column": "created_at", "order": "DESC"}
+    ]
+  }
+}
+```
+
+---
+
+## 🔗 Constraint Management
+
+Constraints enforce data integrity rules on tables.
+
+### Constraint Tools Overview
+
+- **`list_foreign_keys`** - List all foreign keys for a table
+- **`list_constraints`** - List all constraints (PK, FK, UNIQUE, CHECK)
+- **`add_foreign_key`** - Add a foreign key constraint
+- **`drop_foreign_key`** - Drop a foreign key constraint
+- **`add_unique_constraint`** - Add a unique constraint
+- **`drop_constraint`** - Drop a UNIQUE or CHECK constraint
+- **`add_check_constraint`** - Add a CHECK constraint (MySQL 8.0.16+)
+
+### Adding Foreign Keys
+
+**User:** *"Add a foreign key from orders.user_id to users.id"*
+
+**AI will execute:**
+```json
+{
+  "tool": "add_foreign_key",
+  "arguments": {
+    "table_name": "orders",
+    "constraint_name": "fk_orders_user",
+    "columns": ["user_id"],
+    "referenced_table": "users",
+    "referenced_columns": ["id"],
+    "on_delete": "CASCADE",
+    "on_update": "CASCADE"
+  }
+}
+```
+
+### Referential Actions
+
+| Action | Description |
+|--------|-------------|
+| CASCADE | Delete/update child rows when parent changes |
+| SET NULL | Set child foreign key to NULL |
+| RESTRICT | Prevent parent delete/update if children exist |
+| NO ACTION | Same as RESTRICT |
+| SET DEFAULT | Set to default value (not widely supported) |
+
+### Adding CHECK Constraints (MySQL 8.0.16+)
+
+```json
+{
+  "tool": "add_check_constraint",
+  "arguments": {
+    "table_name": "products",
+    "constraint_name": "chk_positive_price",
+    "expression": "price > 0"
+  }
+}
+```
+
+---
+
+## 🔧 Table Maintenance
+
+Table maintenance tools help optimize performance and fix issues.
+
+### Maintenance Tools Overview
+
+- **`analyze_table`** - Update index statistics for query optimizer
+- **`optimize_table`** - Reclaim unused space and defragment
+- **`check_table`** - Check table for errors
+- **`repair_table`** - Repair corrupted tables (MyISAM, ARCHIVE, CSV)
+- **`truncate_table`** - Remove all rows quickly
+- **`get_table_status`** - Get detailed table statistics
+- **`flush_table`** - Close and reopen tables
+- **`get_table_size`** - Get size information for tables
+
+### Analyzing Tables
+
+**User:** *"Analyze the orders table to update statistics"*
+
+```json
+{
+  "tool": "analyze_table",
+  "arguments": {
+    "table_name": "orders"
+  }
+}
+```
+
+### Optimizing Tables
+
+```json
+{
+  "tool": "optimize_table",
+  "arguments": {
+    "table_name": "orders"
+  }
+}
+```
+
+### Checking Tables for Errors
+
+```json
+{
+  "tool": "check_table",
+  "arguments": {
+    "table_name": "orders",
+    "check_type": "MEDIUM"
+  }
+}
+```
+
+**Check Types:**
+- `QUICK` - Don't scan rows for incorrect links
+- `FAST` - Only check tables that haven't been closed properly
+- `MEDIUM` - Scan rows to verify links are correct (default)
+- `EXTENDED` - Full key lookup for each row
+- `CHANGED` - Only check tables changed since last check
+
+### Getting Table Size Information
+
+```json
+{
+  "tool": "get_table_size",
+  "arguments": {}
+}
+```
+
+**Returns:**
+```json
+{
+  "tables": [
+    {
+      "table_name": "orders",
+      "row_count": 150000,
+      "data_size_bytes": 15728640,
+      "index_size_bytes": 5242880,
+      "total_size_mb": "20.00"
+    }
+  ],
+  "summary": {
+    "total_tables": 25,
+    "total_size_mb": "150.50"
+  }
+}
+```
+
+---
+
+## 📊 Process & Server Management
+
+Monitor and manage MySQL server processes and configuration.
+
+### Process Tools Overview
+
+- **`show_process_list`** - Show all running processes/connections
+- **`kill_process`** - Kill a process or query
+- **`show_status`** - Show server status variables
+- **`show_variables`** - Show server configuration variables
+- **`explain_query`** - Show query execution plan
+- **`show_engine_status`** - Show storage engine status
+- **`get_server_info`** - Get comprehensive server information
+- **`show_binary_logs`** - Show binary log files
+- **`show_replication_status`** - Show replication status
+
+### Showing Process List
+
+**User:** *"Show me all running MySQL processes"*
+
+```json
+{
+  "tool": "show_process_list",
+  "arguments": {
+    "full": true
+  }
+}
+```
+
+### Killing a Process
+
+```json
+{
+  "tool": "kill_process",
+  "arguments": {
+    "process_id": 12345,
+    "type": "QUERY"
+  }
+}
+```
+
+**Types:**
+- `CONNECTION` - Kill the entire connection
+- `QUERY` - Kill only the current query, keep connection
+
+### Explaining Queries
+
+**User:** *"Explain this query to see its execution plan"*
+
+```json
+{
+  "tool": "explain_query",
+  "arguments": {
+    "query": "SELECT * FROM orders WHERE user_id = 5 ORDER BY created_at DESC",
+    "format": "JSON",
+    "analyze": true
+  }
+}
+```
+
+**Formats:**
+- `TRADITIONAL` - Tabular output (default)
+- `JSON` - JSON format with detailed information
+- `TREE` - Tree-like output showing query plan
+
+### Getting Server Information
+
+```json
+{
+  "tool": "get_server_info",
+  "arguments": {}
+}
+```
+
+**Returns:**
+```json
+{
+  "version": "8.0.32",
+  "connection_id": 12345,
+  "current_user": "app_user@localhost",
+  "database": "myapp",
+  "uptime": "86400",
+  "uptime_formatted": "1d 0h 0m",
+  "threads_connected": "5",
+  "threads_running": "1",
+  "questions": "1000000"
+}
+```
+
+### Showing Server Variables
+
+```json
+{
+  "tool": "show_variables",
+  "arguments": {
+    "like": "max_%",
+    "global": true
+  }
+}
 ```
 
 ---
@@ -1387,11 +1830,21 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **Query result caching** - **COMPLETED!**
 - ✅ **Advanced query optimization hints** - **COMPLETED!**
 
+### Essential Database Objects (v1.6.0)
+- ✅ **Views Management** - Create, alter, drop, and query database views - **COMPLETED!**
+- ✅ **Triggers Management** - Full trigger lifecycle management - **COMPLETED!**
+- ✅ **Functions Management** - Stored function creation and execution - **COMPLETED!**
+
+### Administration Features (v1.6.0)
+- ✅ **Index Management** - Create, drop, and analyze indexes - **COMPLETED!**
+- ✅ **Foreign Keys & Constraints** - Constraint management with referential integrity - **COMPLETED!**
+- ✅ **Table Maintenance** - Analyze, optimize, check, repair tables - **COMPLETED!**
+- ✅ **Process Management** - Server processes, status, and query analysis - **COMPLETED!**
+
 ### Enterprise Features
 - [ ] **Database backup and restore tools**
 - [ ] **Data export/import utilities** (CSV, JSON, SQL dumps)
 - [ ] **Performance monitoring and metrics**
-- [ ] **Query performance analysis**
 - [ ] **Connection pool monitoring**
 - [ ] **Audit logging and compliance**
 - [ ] **Data migration utilities**
@@ -1435,13 +1888,20 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Feature | Impact | Effort | Priority | Status |
 |---------|--------|--------|----------|--------|
 | Query Result Caching | High | Medium | 1 | ✅ COMPLETED |
-| Database Backup/Restore | High | High | 2 | Pending |
-| Performance Monitoring | High | Medium | 3 | Pending |
-| Data Migration | High | High | 4 | Pending |
-| Query Optimization | Medium | Medium | 5 | ✅ COMPLETED |
-| PostgreSQL Adapter | High | High | 6 | Pending |
-| Audit Logging | Medium | Low | 7 | Pending |
-| Schema Versioning | Medium | Medium | 8 | Pending |
+| Views Management | High | Medium | 2 | ✅ COMPLETED |
+| Triggers Management | High | Medium | 3 | ✅ COMPLETED |
+| Functions Management | High | Medium | 4 | ✅ COMPLETED |
+| Index Management | High | Medium | 5 | ✅ COMPLETED |
+| Foreign Keys & Constraints | High | Medium | 6 | ✅ COMPLETED |
+| Table Maintenance | High | Low | 7 | ✅ COMPLETED |
+| Process Management | High | Medium | 8 | ✅ COMPLETED |
+| Query Optimization | Medium | Medium | 9 | ✅ COMPLETED |
+| Database Backup/Restore | High | High | 10 | Pending |
+| Performance Monitoring | High | Medium | 11 | Pending |
+| Data Migration | High | High | 12 | Pending |
+| PostgreSQL Adapter | High | High | 13 | Pending |
+| Audit Logging | Medium | Low | 14 | Pending |
+| Schema Versioning | Medium | Medium | 15 | Pending |
 
 ---
 
