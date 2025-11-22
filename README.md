@@ -7,16 +7,16 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 ---
 
-## ðŸŒŸ Features
+## 🌟 Features
 
-- âœ… **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
-- 📝’ **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
-- ðŸ› ï¸ **30 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations)
-- ðŸŽ›ï¸ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
-- ðŸ—ï¸ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
-- 💰 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
-- ðŸŒ **Dual Mode** - Run as MCP server OR as REST API
-- ðŸ“Š **Rich Metadata** - Table schemas, relationships, connection info
+- ✅ **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
+- 🔐 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
+- 🛠️ **30 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations)
+- 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
+- 🗃️ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
+- 💎 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
+- 🌐 **Dual Mode** - Run as MCP server OR as REST API
+- 📊 **Rich Metadata** - Table schemas, relationships, connection info
 - ⚡ **TypeScript** - Fully typed with TypeScript definitions
 
 ---
@@ -254,7 +254,7 @@ Control access with these permission categories:
 {
   "args": [
     "mysql://user:pass@localhost:3306/db",
-    "list,read,utility"  // â† Permissions here
+    "list,read,utility"  // ← Permissions here
   ]
 }
 ```
@@ -356,7 +356,7 @@ The MySQL MCP Server provides clear, user-friendly error messages when operation
 When a tool is called without the required permission, you'll receive a detailed error message like:
 
 ```
-âŒ Permission denied: Cannot use tool 'create_table'. This tool requires 'ddl' permission.
+❌ Permission denied: Cannot use tool 'create_table'. This tool requires 'ddl' permission.
 
 Current permissions: list,read,utility
 To enable this tool, add 'ddl' to your permissions configuration.
@@ -375,7 +375,7 @@ Tool description: Create new tables with columns and indexes
 
 **Error response when DDL not enabled:**
 ```
-âŒ Permission denied: Cannot use tool 'create_table'. This tool requires 'ddl' permission.
+❌ Permission denied: Cannot use tool 'create_table'. This tool requires 'ddl' permission.
 
 Current permissions: list,read,utility
 To enable this tool, add 'ddl' to your permissions configuration.
@@ -392,7 +392,7 @@ Tool description: Create new tables with columns and indexes
 
 **Error response when CREATE not enabled:**
 ```
-âŒ Permission denied: Cannot use tool 'create_record'. This tool requires 'create' permission.
+❌ Permission denied: Cannot use tool 'create_record'. This tool requires 'create' permission.
 
 Current permissions: list,read,utility
 To enable this tool, add 'create' to your permissions configuration.
@@ -409,7 +409,7 @@ Tool description: Insert new records with automatic SQL generation
 
 **Error response when UPDATE not enabled:**
 ```
-âŒ Permission denied: Cannot use tool 'update_record'. This tool requires 'update' permission.
+❌ Permission denied: Cannot use tool 'update_record'. This tool requires 'update' permission.
 
 Current permissions: list,read,utility
 To enable this tool, add 'update' to your permissions configuration.
@@ -461,7 +461,7 @@ After (DDL enabled):
 
 ---
 
-## ðŸ› ï¸ Available Tools
+## 🛠️ Available Tools
 
 The MCP server provides **30 powerful tools**:
 
@@ -485,7 +485,9 @@ The MCP server provides **30 powerful tools**:
 
 ### Bulk Operations (3 tools)
 
-| Tool | Description | Performance |
+| Tool | Description | 
+
+| Performance |
 |------|-------------|-------------|
 | `bulk_insert` | Insert multiple records in batches for optimal performance | Up to 10,000 records per batch |
 | `bulk_update` | Update multiple records with different conditions in batches | Up to 1,000 operations per batch |
@@ -538,21 +540,21 @@ The MCP server provides **30 powerful tools**:
 
 ---
 
-## ðŸ“š Detailed Documentation
+## 📚 Detailed Documentation
 
 For comprehensive documentation on all features, please see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)** which includes:
 
-- ðŸ—ï¸ **DDL Operations** - Create, alter, and drop tables
-- ðŸ“¤ **Data Export Tools** - Export data to CSV format
-- 💰 **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
+- 🗃️ **DDL Operations** - Create, alter, and drop tables
+- 📤 **Data Export Tools** - Export data to CSV format
+- 💎 **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
 - 🔧 **Stored Procedures** - Create and execute stored procedures with IN/OUT/INOUT parameters
-- ðŸ“‹ **Usage Examples** - Real-world examples for all tools
-- ðŸ“ **Query Logging & Automatic SQL Display** - See all SQL queries executed automatically
-- 📝’ **Security Features** - Built-in security and best practices
+- 📋 **Usage Examples** - Real-world examples for all tools
+- 🔍 **Query Logging & Automatic SQL Display** - See all SQL queries executed automatically
+- 🔐 **Security Features** - Built-in security and best practices
 - 🚀 **Bulk Operations** - High-performance batch processing
-- ðŸ› ï¸ **Troubleshooting** - Common issues and solutions
-- ðŸ“„ **License** - MIT License details
-- ðŸ—ºï¸ **Roadmap** - Upcoming features and improvements
+- 🛠️ **Troubleshooting** - Common issues and solutions
+- 📄 **License** - MIT License details
+- 🗺️ **Roadmap** - Upcoming features and improvements
 
 ---
 
@@ -562,7 +564,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with â¤ï¸ for the AI community**
+**Made with ❤️ for the AI community**
 
 *Help AI agents interact with MySQL databases safely and efficiently!*
-
