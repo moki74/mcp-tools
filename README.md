@@ -10,18 +10,18 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 ## ðŸŒŸ Features
 
 - âœ… **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
-- ðŸ”’ **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
+- 📝’ **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
 - ðŸ› ï¸ **30 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations)
 - ðŸŽ›ï¸ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
 - ðŸ—ï¸ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
-- ðŸ’° **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
+- 💰 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
 - ðŸŒ **Dual Mode** - Run as MCP server OR as REST API
 - ðŸ“Š **Rich Metadata** - Table schemas, relationships, connection info
-- âš¡ **TypeScript** - Fully typed with TypeScript definitions
+- ⚡ **TypeScript** - Fully typed with TypeScript definitions
 
 ---
 
-## ðŸ“¦ Installation
+## 📦 Installation
 
 ### Option 1: Quick Start (npx)
 
@@ -40,7 +40,7 @@ mcp-mysql mysql://user:pass@localhost:3306/db "list,read,utility"
 
 ---
 
-## ðŸš€ Quick Start
+## 🚀 Quick Start
 
 ### 1. Set Up Environment
 
@@ -347,7 +347,7 @@ You can have different databases with different permissions in the same AI agent
 
 ---
 
-## ðŸš« Permission Error Handling
+## 🚫 Permission Error Handling
 
 The MySQL MCP Server provides clear, user-friendly error messages when operations are attempted without proper permissions. This helps users understand exactly what permissions are needed and how to enable them.
 
@@ -422,11 +422,11 @@ Tool description: Update existing records based on conditions
 
 ### Permission Error Benefits
 
-1. **ðŸŽ¯ Clear Guidance** - Exact permission needed and how to add it
-2. **ðŸ“‹ Current State** - Shows what permissions are currently active
-3. **ðŸ’¡ Example Configuration** - Ready-to-use configuration example
-4. **ðŸ“– Tool Context** - Explains what the tool does
-5. **ðŸ”’ Security** - Prevents unauthorized operations while being helpful
+1. **🎯 Clear Guidance** - Exact permission needed and how to add it
+2. **📋 Current State** - Shows what permissions are currently active
+3. **💡 Example Configuration** - Ready-to-use configuration example
+4. **📖 Tool Context** - Explains what the tool does
+5. **🔐 Security** - Prevents unauthorized operations while being helpful
 
 ### Troubleshooting Permission Errors
 
@@ -544,19 +544,19 @@ For comprehensive documentation on all features, please see **[DOCUMENTATIONS.md
 
 - ðŸ—ï¸ **DDL Operations** - Create, alter, and drop tables
 - ðŸ“¤ **Data Export Tools** - Export data to CSV format
-- ðŸ’° **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
-- ðŸ”§ **Stored Procedures** - Create and execute stored procedures with IN/OUT/INOUT parameters
+- 💰 **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
+- 🔧 **Stored Procedures** - Create and execute stored procedures with IN/OUT/INOUT parameters
 - ðŸ“‹ **Usage Examples** - Real-world examples for all tools
 - ðŸ“ **Query Logging & Automatic SQL Display** - See all SQL queries executed automatically
-- ðŸ”’ **Security Features** - Built-in security and best practices
-- ðŸš€ **Bulk Operations** - High-performance batch processing
+- 📝’ **Security Features** - Built-in security and best practices
+- 🚀 **Bulk Operations** - High-performance batch processing
 - ðŸ› ï¸ **Troubleshooting** - Common issues and solutions
 - ðŸ“„ **License** - MIT License details
 - ðŸ—ºï¸ **Roadmap** - Upcoming features and improvements
 
 ---
 
-## ðŸ“„ License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 

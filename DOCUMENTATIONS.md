@@ -6,17 +6,17 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 ## Table of Contents
 
-1. [DDL Operations](#-ddl-operations)
-2. [Data Export Tools](#-data-export-tools)
-3. [Transaction Management](#-transaction-management)
-4. [Stored Procedures](#-stored-procedures)
-5. [Usage Examples](#-usage-examples)
-6. [Query Logging & Automatic SQL Display](#-query-logging--automatic-sql-display)
-7. [Security Features](#-security-features)
-8. [Bulk Operations](#-bulk-operations)
-9. [Troubleshooting](#-troubleshooting)
-10. [License](#-license)
-11. [Roadmap](#️-roadmap)
+1. [DDL Operations](#🏗️-ddl-operations)
+2. [Data Export Tools](#📤-data-export-tools)
+3. [Transaction Management](#💰-transaction-management)
+4. [Stored Procedures](#🔧-stored-procedures)
+5. [Usage Examples](#📋-usage-examples)
+6. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+7. [Security Features](#🔒-security-features)
+8. [Bulk Operations](#🚀-bulk-operations)
+9. [Troubleshooting](#🛠️-troubleshooting)
+10. [License](#📄-license)
+11. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -1101,7 +1101,7 @@ Each bulk operation returns performance metrics:
 
 ---
 
-##  Troubleshooting
+## 🛠️ Troubleshooting
 
 ### MCP Server Not Connecting
 
