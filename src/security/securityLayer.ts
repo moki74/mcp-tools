@@ -188,7 +188,9 @@ export class SecurityLayer {
     // When bypassDangerousCheck is true (user has 'execute' permission), skip this check
     if (!bypassDangerousCheck) {
       for (const keyword of this.dangerousKeywords) {
-        if (cleanQuery.includes(keyword)) {
+        // Use word boundary regex to avoid false positives (e.g., "USER" matching "USERS")
+        const keywordRegex = new RegExp(`\\b${keyword}\\b`, "i");
+        if (keywordRegex.test(cleanQuery)) {
           return {
             valid: false,
             error: `Dangerous keyword detected: ${keyword}. This requires 'execute' permission.`,

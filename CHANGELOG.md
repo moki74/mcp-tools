@@ -5,6 +5,18 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2025-11-22
+
+### Fixed
+- **Security keyword false positive bug** - Fixed issue where `run_query` rejected valid SELECT queries containing table names like "users"
+  - The dangerous keyword check was using substring matching (`includes()`) which caused "USER" to match "USERS"
+  - Changed to word boundary regex matching (`\bKEYWORD\b`) to only match whole words
+  - `SELECT * FROM users` now works correctly while `SELECT USER()` is still blocked as intended
+
+### Changed
+- **Updated tool count in README.md** - Corrected tool count from 30/73 to 85 powerful tools
+  - Accurate count of all available MCP tools across all categories
+
 ## [1.4.16] - 2025-11-22
 
 ### Added
