@@ -5,6 +5,18 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.14] - 2025-11-22
+
+### Fixed
+- **Emoji encoding issues** - Fixed emoji rendering issues in README.md and DOCUMENTATIONS.md
+  - Replaced escaped Unicode sequences with proper emoji characters
+  - Fixed broken emoji displays throughout documentation
+  - Improved visual consistency across all documentation sections
+
+### Documentation
+- All emojis in section headers and feature lists now display correctly
+- Enhanced readability with proper emoji rendering
+
 ## [1.4.13] - 2025-11-22
 
 ### Changed
