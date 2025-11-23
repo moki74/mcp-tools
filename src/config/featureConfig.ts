@@ -155,6 +155,13 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   exportTableToSql: ToolCategory.UTILITY,
   importFromCSV: ToolCategory.CREATE,
   importFromJSON: ToolCategory.CREATE,
+
+  // Data migration tools
+  copyTableData: ToolCategory.CREATE,
+  moveTableData: ToolCategory.DELETE,
+  cloneTable: ToolCategory.DDL,
+  compareTableStructure: ToolCategory.LIST,
+  syncTableData: ToolCategory.UPDATE,
 };
 
 /**

@@ -11,7 +11,7 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 - ✅ **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
 - 🔐 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
-- 🛠️ **95 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations, backup/restore, import/export)
+- 🛠️ **100 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations, backup/restore, import/export, data migration)
 - 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
 - 🗃️ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
 - 💎 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
@@ -349,7 +349,7 @@ You can have different databases with different permissions in the same AI agent
 
 ## 🛠️ Available Tools
 
-The MCP server provides **95 powerful tools**:
+The MCP server provides **100 powerful tools**:
 
 ### Database Discovery (4 tools)
 
@@ -531,7 +531,7 @@ The MCP server provides **95 powerful tools**:
 | `get_create_table_statement` | Get CREATE TABLE statement for a table | `list` permission |
 | `get_database_schema` | Get complete database schema (tables, views, procedures, functions, triggers) | `list` permission |
 
-### Data Import/Export (5 tools) - NEW!
+### Data Import/Export (5 tools)
 
 | Tool | Description | Requires |
 |------|-------------|----------|
@@ -540,6 +540,16 @@ The MCP server provides **95 powerful tools**:
 | `export_table_to_sql` | Export table data to SQL INSERT statements | `utility` permission |
 | `import_from_csv` | Import data from CSV string into a table | `create` permission |
 | `import_from_json` | Import data from JSON array into a table | `create` permission |
+
+### Data Migration (5 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `copy_table_data` | Copy data from one table to another with optional column mapping | `create` permission |
+| `move_table_data` | Move data (copy + delete from source) | `create`, `delete` permission |
+| `clone_table` | Clone table structure with optional data | `ddl` permission |
+| `compare_table_structure` | Compare structure of two tables and identify differences | `list` permission |
+| `sync_table_data` | Synchronize data between tables (insert_only, update_only, upsert) | `update` permission |
 
 ---
 
@@ -551,6 +561,7 @@ For comprehensive documentation on all features, please see **[DOCUMENTATIONS.md
 - 📤 **Data Export Tools** - Export data to CSV, JSON, and SQL formats
 - 📥 **Data Import Tools** - Import data from CSV and JSON sources
 - 💾 **Database Backup & Restore** - Full backup/restore with SQL dumps
+- 🔄 **Data Migration Tools** - Copy, move, clone, compare, and sync table data
 - 💎 **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
 - 🔧 **Stored Procedures** - Create and execute stored procedures with IN/OUT/INOUT parameters
 - 📋 **Usage Examples** - Real-world examples for all tools

@@ -14,6 +14,7 @@ import { ConstraintTools } from "./tools/constraintTools";
 import { MaintenanceTools } from "./tools/maintenanceTools";
 import { ProcessTools } from "./tools/processTools";
 import { BackupRestoreTools } from "./tools/backupRestoreTools";
+import { MigrationTools } from "./tools/migrationTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -39,6 +40,7 @@ export class MySQLMCP {
   private maintenanceTools: MaintenanceTools;
   private processTools: ProcessTools;
   private backupRestoreTools: BackupRestoreTools;
+  private migrationTools: MigrationTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -61,6 +63,7 @@ export class MySQLMCP {
     this.maintenanceTools = new MaintenanceTools(this.security);
     this.processTools = new ProcessTools(this.security);
     this.backupRestoreTools = new BackupRestoreTools(this.security);
+    this.migrationTools = new MigrationTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -524,6 +527,79 @@ export class MySQLMCP {
       return { status: "error", error: check.error };
     }
     return await this.backupRestoreTools.getDatabaseSchema(params);
+  }
+
+  // Data Migration Tools
+  async copyTableData(params: {
+    source_table: string;
+    target_table: string;
+    column_mapping?: Record<string, string>;
+    filters?: any[];
+    batch_size?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("copyTableData");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.migrationTools.copyTableData(params);
+  }
+
+  async moveTableData(params: {
+    source_table: string;
+    target_table: string;
+    column_mapping?: Record<string, string>;
+    filters?: any[];
+    batch_size?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("moveTableData");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.migrationTools.moveTableData(params);
+  }
+
+  async cloneTable(params: {
+    source_table: string;
+    new_table_name: string;
+    include_data?: boolean;
+    include_indexes?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("cloneTable");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.migrationTools.cloneTable(params);
+  }
+
+  async compareTableStructure(params: {
+    table1: string;
+    table2: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("compareTableStructure");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.migrationTools.compareTableStructure(params);
+  }
+
+  async syncTableData(params: {
+    source_table: string;
+    target_table: string;
+    key_column: string;
+    columns_to_sync?: string[];
+    sync_mode?: "insert_only" | "update_only" | "upsert";
+    batch_size?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("syncTableData");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.migrationTools.syncTableData(params);
   }
 
   // Get feature configuration status

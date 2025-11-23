@@ -8,26 +8,27 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 1. [DDL Operations](#🏗️-ddl-operations)
 2. [Data Export Tools](#📤-data-export-tools)
-3. [Data Import Tools](#📥-data-import-tools) - NEW!
-4. [Database Backup & Restore](#💾-database-backup--restore) - NEW!
-5. [Transaction Management](#💰-transaction-management)
-6. [Stored Procedures](#🔧-stored-procedures)
-7. [Views Management](#👁️-views-management)
-8. [Triggers Management](#⚡-triggers-management)
-9. [Functions Management](#🔢-functions-management)
-10. [Index Management](#📇-index-management)
-11. [Constraint Management](#🔗-constraint-management)
-12. [Table Maintenance](#🔧-table-maintenance)
-13. [Process & Server Management](#📊-process--server-management)
-14. [Usage Examples](#📋-usage-examples)
-15. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
-16. [Security Features](#🔒-security-features)
-17. [Query Result Caching](#💾-query-result-caching)
-18. [Query Optimization Hints](#🎯-query-optimization-hints)
-19. [Bulk Operations](#🚀-bulk-operations)
-20. [Troubleshooting](#🛠️-troubleshooting)
-21. [License](#📄-license)
-22. [Roadmap](#🗺️-roadmap)
+3. [Data Import Tools](#📥-data-import-tools)
+4. [Database Backup & Restore](#💾-database-backup--restore)
+5. [Data Migration Tools](#🔄-data-migration-tools) - NEW!
+6. [Transaction Management](#💰-transaction-management)
+7. [Stored Procedures](#🔧-stored-procedures)
+8. [Views Management](#👁️-views-management)
+9. [Triggers Management](#⚡-triggers-management)
+10. [Functions Management](#🔢-functions-management)
+11. [Index Management](#📇-index-management)
+12. [Constraint Management](#🔗-constraint-management)
+13. [Table Maintenance](#🔧-table-maintenance)
+14. [Process & Server Management](#📊-process--server-management)
+15. [Usage Examples](#📋-usage-examples)
+16. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+17. [Security Features](#🔒-security-features)
+18. [Query Result Caching](#💾-query-result-caching)
+19. [Query Optimization Hints](#🎯-query-optimization-hints)
+20. [Bulk Operations](#🚀-bulk-operations)
+21. [Troubleshooting](#🛠️-troubleshooting)
+22. [License](#📄-license)
+23. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -478,6 +479,294 @@ Get a complete overview of all database objects:
 - **Foreign key handling** - `SET FOREIGN_KEY_CHECKS=0` included in dumps
 - **Binary data support** - Proper escaping for BLOB and binary columns
 - **Character encoding** - UTF-8 encoding preserved in exports
+
+---
+
+## 🔄 Data Migration Tools
+
+The MySQL MCP Server provides powerful data migration utilities for copying, moving, and synchronizing data between tables.
+
+### Data Migration Tools Overview
+
+| Tool | Description | Permission |
+|------|-------------|------------|
+| `copy_table_data` | Copy data from one table to another | `create` |
+| `move_table_data` | Move data (copy + delete from source) | `create`, `delete` |
+| `clone_table` | Clone table structure with optional data | `ddl` |
+| `compare_table_structure` | Compare structure of two tables | `list` |
+| `sync_table_data` | Synchronize data between tables | `update` |
+
+### Copy Table Data
+
+Copy data from one table to another with optional column mapping and filtering.
+
+```json
+{
+  "tool": "copy_table_data",
+  "arguments": {
+    "source_table": "users",
+    "target_table": "users_backup",
+    "batch_size": 1000
+  }
+}
+```
+
+**With Column Mapping:**
+```json
+{
+  "tool": "copy_table_data",
+  "arguments": {
+    "source_table": "old_customers",
+    "target_table": "customers",
+    "column_mapping": {
+      "customer_name": "name",
+      "customer_email": "email",
+      "customer_phone": "phone"
+    }
+  }
+}
+```
+
+**With Filters:**
+```json
+{
+  "tool": "copy_table_data",
+  "arguments": {
+    "source_table": "orders",
+    "target_table": "archived_orders",
+    "filters": [
+      { "field": "status", "operator": "eq", "value": "completed" },
+      { "field": "created_at", "operator": "lt", "value": "2024-01-01" }
+    ]
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Data copied successfully",
+    "rows_copied": 5000,
+    "source_table": "orders",
+    "target_table": "archived_orders"
+  }
+}
+```
+
+### Move Table Data
+
+Move data from one table to another (copies data then deletes from source).
+
+```json
+{
+  "tool": "move_table_data",
+  "arguments": {
+    "source_table": "active_sessions",
+    "target_table": "expired_sessions",
+    "filters": [
+      { "field": "expires_at", "operator": "lt", "value": "2024-01-01" }
+    ]
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Data moved successfully",
+    "rows_moved": 1500,
+    "source_table": "active_sessions",
+    "target_table": "expired_sessions"
+  }
+}
+```
+
+### Clone Table
+
+Clone a table structure with or without data.
+
+```json
+{
+  "tool": "clone_table",
+  "arguments": {
+    "source_table": "products",
+    "new_table_name": "products_staging",
+    "include_data": false,
+    "include_indexes": true
+  }
+}
+```
+
+**Clone with Data:**
+```json
+{
+  "tool": "clone_table",
+  "arguments": {
+    "source_table": "users",
+    "new_table_name": "users_test",
+    "include_data": true
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Table cloned successfully",
+    "source_table": "products",
+    "new_table": "products_staging",
+    "include_data": false,
+    "include_indexes": true
+  }
+}
+```
+
+### Compare Table Structure
+
+Compare the structure of two tables to identify differences.
+
+```json
+{
+  "tool": "compare_table_structure",
+  "arguments": {
+    "table1": "users",
+    "table2": "users_backup"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "table1": "users",
+    "table2": "users_backup",
+    "identical": false,
+    "differences": {
+      "columns_only_in_table1": ["last_login", "avatar_url"],
+      "columns_only_in_table2": [],
+      "column_type_differences": [
+        {
+          "column": "email",
+          "table1_type": "VARCHAR(255)",
+          "table2_type": "VARCHAR(100)"
+        }
+      ],
+      "index_differences": {
+        "only_in_table1": ["idx_last_login"],
+        "only_in_table2": []
+      }
+    }
+  }
+}
+```
+
+### Sync Table Data
+
+Synchronize data between two tables based on a key column. Supports three modes:
+- **insert_only**: Only insert new records that don't exist in target
+- **update_only**: Only update existing records in target
+- **upsert**: Both insert new and update existing records (default)
+
+```json
+{
+  "tool": "sync_table_data",
+  "arguments": {
+    "source_table": "products_master",
+    "target_table": "products_replica",
+    "key_column": "product_id",
+    "sync_mode": "upsert"
+  }
+}
+```
+
+**Sync Specific Columns:**
+```json
+{
+  "tool": "sync_table_data",
+  "arguments": {
+    "source_table": "inventory_main",
+    "target_table": "inventory_cache",
+    "key_column": "sku",
+    "columns_to_sync": ["quantity", "price", "updated_at"],
+    "sync_mode": "update_only"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Sync completed successfully",
+    "source_table": "products_master",
+    "target_table": "products_replica",
+    "rows_inserted": 150,
+    "rows_updated": 3200,
+    "sync_mode": "upsert"
+  }
+}
+```
+
+### Migration Best Practices
+
+1. **Backup before migration** - Always backup target tables before large migrations
+2. **Use filters** - Migrate data in chunks using filters to avoid timeouts
+3. **Test with small batches** - Test migration logic with small datasets first
+4. **Verify data integrity** - Use `compare_table_structure` before migration
+5. **Monitor performance** - Adjust `batch_size` based on table size and server capacity
+
+### Common Migration Patterns
+
+**Pattern 1: Archive Old Data**
+```json
+// Move old orders to archive table
+{
+  "tool": "move_table_data",
+  "arguments": {
+    "source_table": "orders",
+    "target_table": "orders_archive",
+    "filters": [
+      { "field": "created_at", "operator": "lt", "value": "2023-01-01" }
+    ]
+  }
+}
+```
+
+**Pattern 2: Create Staging Table**
+```json
+// Clone structure for staging
+{
+  "tool": "clone_table",
+  "arguments": {
+    "source_table": "products",
+    "new_table_name": "products_staging",
+    "include_data": false
+  }
+}
+```
+
+**Pattern 3: Replicate Data Across Tables**
+```json
+// Keep replica in sync with master
+{
+  "tool": "sync_table_data",
+  "arguments": {
+    "source_table": "users_master",
+    "target_table": "users_read_replica",
+    "key_column": "id",
+    "sync_mode": "upsert"
+  }
+}
+```
 
 ---
 
@@ -2095,10 +2384,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ### Enterprise Features
 - ✅ **Database backup and restore tools** - **COMPLETED!**
 - ✅ **Data export/import utilities** (CSV, JSON, SQL dumps) - **COMPLETED!**
+- ✅ **Data migration utilities** - **COMPLETED!**
 - [ ] **Performance monitoring and metrics**
 - [ ] **Connection pool monitoring**
 - [ ] **Audit logging and compliance**
-- [ ] **Data migration utilities**
 - [ ] **Schema versioning and migrations**
 
 ### Database Adapters
@@ -2118,7 +2407,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 #### **Phase 2: Data Management** 📊
 - ✅ **Database backup and restore tools** - Essential for production data safety - **COMPLETED!**
-- [ ] **Data migration utilities** - Move data between databases and environments
+- ✅ **Data migration utilities** - Move data between databases and environments - **COMPLETED!**
 - ✅ **Enhanced export/import** - Support for JSON, SQL dump formats - **COMPLETED!**
 - [ ] **Query history & analytics** - Track and analyze database usage patterns
 
@@ -2149,9 +2438,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Query Optimization | Medium | Medium | 9 | ✅ COMPLETED |
 | Database Backup/Restore | High | High | 10 | ✅ COMPLETED |
 | Data Export/Import (JSON, SQL) | High | Medium | 11 | ✅ COMPLETED |
-| Performance Monitoring | High | Medium | 12 | Pending |
-| Data Migration | High | High | 13 | Pending |
-| PostgreSQL Adapter | High | High | 13 | Pending |
+| Data Migration | High | High | 12 | ✅ COMPLETED |
+| Performance Monitoring | High | Medium | 13 | Pending |
+| PostgreSQL Adapter | High | High | 14 | Pending |
 | Audit Logging | Medium | Low | 14 | Pending |
 | Schema Versioning | Medium | Medium | 15 | Pending |
 

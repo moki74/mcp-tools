@@ -2259,6 +2259,202 @@ const TOOLS: Tool[] = [
       required: ["table_name", "json_data"],
     },
   },
+  // Data Migration Tools
+  {
+    name: "copy_table_data",
+    description:
+      "Copy data from one table to another with optional column mapping and filtering. Requires 'create' permission.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        source_table: {
+          type: "string",
+          description: "Name of the source table to copy from",
+        },
+        target_table: {
+          type: "string",
+          description: "Name of the target table to copy to",
+        },
+        column_mapping: {
+          type: "object",
+          description:
+            "Optional: map source columns to target columns {source_col: target_col}",
+          additionalProperties: { type: "string" },
+        },
+        filters: {
+          type: "array",
+          description: "Optional: array of filter conditions for source data",
+          items: {
+            type: "object",
+            properties: {
+              field: { type: "string" },
+              operator: {
+                type: "string",
+                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
+              },
+              value: {},
+            },
+            required: ["field", "operator", "value"],
+          },
+        },
+        batch_size: {
+          type: "number",
+          description: "Number of rows per batch insert (default: 1000)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["source_table", "target_table"],
+    },
+  },
+  {
+    name: "move_table_data",
+    description:
+      "Move data from one table to another (copy then delete from source). Requires 'create' and 'delete' permissions.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        source_table: {
+          type: "string",
+          description: "Name of the source table to move from",
+        },
+        target_table: {
+          type: "string",
+          description: "Name of the target table to move to",
+        },
+        column_mapping: {
+          type: "object",
+          description:
+            "Optional: map source columns to target columns {source_col: target_col}",
+          additionalProperties: { type: "string" },
+        },
+        filters: {
+          type: "array",
+          description: "Optional: array of filter conditions for source data",
+          items: {
+            type: "object",
+            properties: {
+              field: { type: "string" },
+              operator: {
+                type: "string",
+                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
+              },
+              value: {},
+            },
+            required: ["field", "operator", "value"],
+          },
+        },
+        batch_size: {
+          type: "number",
+          description: "Number of rows per batch (default: 1000)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["source_table", "target_table"],
+    },
+  },
+  {
+    name: "clone_table",
+    description:
+      "Clone a table structure with optional data. Requires 'ddl' permission.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        source_table: {
+          type: "string",
+          description: "Name of the source table to clone",
+        },
+        new_table_name: {
+          type: "string",
+          description: "Name of the new table to create",
+        },
+        include_data: {
+          type: "boolean",
+          description: "Include table data in the clone (default: false)",
+        },
+        include_indexes: {
+          type: "boolean",
+          description: "Include indexes in the clone (default: true)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["source_table", "new_table_name"],
+    },
+  },
+  {
+    name: "compare_table_structure",
+    description:
+      "Compare the structure of two tables and identify differences in columns, types, and indexes.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table1: {
+          type: "string",
+          description: "Name of the first table",
+        },
+        table2: {
+          type: "string",
+          description: "Name of the second table",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table1", "table2"],
+    },
+  },
+  {
+    name: "sync_table_data",
+    description:
+      "Synchronize data between two tables based on a key column. Supports insert-only, update-only, or upsert modes.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        source_table: {
+          type: "string",
+          description: "Name of the source table",
+        },
+        target_table: {
+          type: "string",
+          description: "Name of the target table",
+        },
+        key_column: {
+          type: "string",
+          description: "Primary key or unique column to match records",
+        },
+        columns_to_sync: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Optional: specific columns to sync (default: all columns)",
+        },
+        sync_mode: {
+          type: "string",
+          enum: ["insert_only", "update_only", "upsert"],
+          description:
+            "Sync mode: insert_only (new records), update_only (existing), upsert (both). Default: upsert",
+        },
+        batch_size: {
+          type: "number",
+          description: "Number of rows per batch (default: 1000)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["source_table", "target_table", "key_column"],
+    },
+  },
 ];
 
 // Create the MCP server
@@ -2695,6 +2891,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
       case "import_from_json":
         result = await mysqlMCP.importFromJSON((args || {}) as any);
+        break;
+
+      // Data Migration Tools
+      case "copy_table_data":
+        result = await mysqlMCP.copyTableData((args || {}) as any);
+        break;
+      case "move_table_data":
+        result = await mysqlMCP.moveTableData((args || {}) as any);
+        break;
+      case "clone_table":
+        result = await mysqlMCP.cloneTable((args || {}) as any);
+        break;
+      case "compare_table_structure":
+        result = await mysqlMCP.compareTableStructure((args || {}) as any);
+        break;
+      case "sync_table_data":
+        result = await mysqlMCP.syncTableData((args || {}) as any);
         break;
 
       default:
