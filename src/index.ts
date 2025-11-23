@@ -13,6 +13,7 @@ import { IndexTools } from "./tools/indexTools";
 import { ConstraintTools } from "./tools/constraintTools";
 import { MaintenanceTools } from "./tools/maintenanceTools";
 import { ProcessTools } from "./tools/processTools";
+import { BackupRestoreTools } from "./tools/backupRestoreTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -37,6 +38,7 @@ export class MySQLMCP {
   private constraintTools: ConstraintTools;
   private maintenanceTools: MaintenanceTools;
   private processTools: ProcessTools;
+  private backupRestoreTools: BackupRestoreTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -58,6 +60,7 @@ export class MySQLMCP {
     this.constraintTools = new ConstraintTools(this.security);
     this.maintenanceTools = new MaintenanceTools(this.security);
     this.processTools = new ProcessTools(this.security);
+    this.backupRestoreTools = new BackupRestoreTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -383,6 +386,144 @@ export class MySQLMCP {
       return { status: "error", error: check.error };
     }
     return await this.dataExportTools.exportQueryToCSV(params);
+  }
+
+  // Extended Data Export Tools (JSON, SQL)
+  async exportTableToJSON(params: {
+    table_name: string;
+    filters?: any[];
+    pagination?: { page: number; limit: number };
+    sorting?: { field: string; direction: "asc" | "desc" };
+    pretty?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("exportTableToJSON");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.dataExportTools.exportTableToJSON(params);
+  }
+
+  async exportQueryToJSON(params: {
+    query: string;
+    params?: any[];
+    pretty?: boolean;
+  }) {
+    const check = this.checkToolEnabled("exportQueryToJSON");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.dataExportTools.exportQueryToJSON(params);
+  }
+
+  async exportTableToSql(params: {
+    table_name: string;
+    filters?: any[];
+    include_create_table?: boolean;
+    batch_size?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("exportTableToSql");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.dataExportTools.exportTableToSql(params);
+  }
+
+  // Data Import Tools
+  async importFromCSV(params: {
+    table_name: string;
+    csv_data: string;
+    has_headers?: boolean;
+    column_mapping?: Record<string, string>;
+    skip_errors?: boolean;
+    batch_size?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("importFromCSV");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.dataExportTools.importFromCSV(params);
+  }
+
+  async importFromJSON(params: {
+    table_name: string;
+    json_data: string;
+    column_mapping?: Record<string, string>;
+    skip_errors?: boolean;
+    batch_size?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("importFromJSON");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.dataExportTools.importFromJSON(params);
+  }
+
+  // Backup and Restore Tools
+  async backupTable(params: {
+    table_name: string;
+    include_data?: boolean;
+    include_drop?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("backupTable");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.backupRestoreTools.backupTable(params);
+  }
+
+  async backupDatabase(params: {
+    include_data?: boolean;
+    include_drop?: boolean;
+    tables?: string[];
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("backupDatabase");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.backupRestoreTools.backupDatabase(params);
+  }
+
+  async restoreFromSql(params: {
+    sql_dump: string;
+    stop_on_error?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("restoreFromSql");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.backupRestoreTools.restoreFromSql(params);
+  }
+
+  async getCreateTableStatement(params: {
+    table_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("getCreateTableStatement");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.backupRestoreTools.getCreateTableStatement(params);
+  }
+
+  async getDatabaseSchema(params: {
+    database?: string;
+    include_views?: boolean;
+    include_procedures?: boolean;
+    include_functions?: boolean;
+    include_triggers?: boolean;
+  }) {
+    const check = this.checkToolEnabled("getDatabaseSchema");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.backupRestoreTools.getDatabaseSchema(params);
   }
 
   // Get feature configuration status

@@ -8,24 +8,26 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 1. [DDL Operations](#🏗️-ddl-operations)
 2. [Data Export Tools](#📤-data-export-tools)
-3. [Transaction Management](#💰-transaction-management)
-4. [Stored Procedures](#🔧-stored-procedures)
-5. [Views Management](#👁️-views-management) - NEW!
-6. [Triggers Management](#⚡-triggers-management) - NEW!
-7. [Functions Management](#🔢-functions-management) - NEW!
-8. [Index Management](#📇-index-management) - NEW!
-9. [Constraint Management](#🔗-constraint-management) - NEW!
-10. [Table Maintenance](#🔧-table-maintenance) - NEW!
-11. [Process & Server Management](#📊-process--server-management) - NEW!
-12. [Usage Examples](#📋-usage-examples)
-13. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
-14. [Security Features](#🔒-security-features)
-15. [Query Result Caching](#💾-query-result-caching)
-16. [Query Optimization Hints](#🎯-query-optimization-hints)
-17. [Bulk Operations](#🚀-bulk-operations)
-18. [Troubleshooting](#🛠️-troubleshooting)
-19. [License](#📄-license)
-20. [Roadmap](#🗺️-roadmap)
+3. [Data Import Tools](#📥-data-import-tools) - NEW!
+4. [Database Backup & Restore](#💾-database-backup--restore) - NEW!
+5. [Transaction Management](#💰-transaction-management)
+6. [Stored Procedures](#🔧-stored-procedures)
+7. [Views Management](#👁️-views-management)
+8. [Triggers Management](#⚡-triggers-management)
+9. [Functions Management](#🔢-functions-management)
+10. [Index Management](#📇-index-management)
+11. [Constraint Management](#🔗-constraint-management)
+12. [Table Maintenance](#🔧-table-maintenance)
+13. [Process & Server Management](#📊-process--server-management)
+14. [Usage Examples](#📋-usage-examples)
+15. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+16. [Security Features](#🔒-security-features)
+17. [Query Result Caching](#💾-query-result-caching)
+18. [Query Optimization Hints](#🎯-query-optimization-hints)
+19. [Bulk Operations](#🚀-bulk-operations)
+20. [Troubleshooting](#🛠️-troubleshooting)
+21. [License](#📄-license)
+22. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -245,6 +247,237 @@ Both tools support:
   }
 }
 ```
+
+---
+
+## 📥 Data Import Tools
+
+The MySQL MCP Server provides tools to import data from various formats into your database tables.
+
+### Data Import Tools Overview
+
+| Tool | Description | Permission |
+|------|-------------|------------|
+| `import_from_csv` | Import data from CSV string | `create` |
+| `import_from_json` | Import data from JSON array | `create` |
+
+### Import from CSV
+
+Import data from a CSV string into a table with optional column mapping and error handling.
+
+```json
+{
+  "tool": "import_from_csv",
+  "arguments": {
+    "table_name": "users",
+    "csv_data": "name,email,age\nJohn,john@example.com,30\nJane,jane@example.com,25",
+    "has_headers": true,
+    "skip_errors": false,
+    "batch_size": 100
+  }
+}
+```
+
+**With Column Mapping:**
+```json
+{
+  "tool": "import_from_csv",
+  "arguments": {
+    "table_name": "users",
+    "csv_data": "full_name,mail\nJohn Doe,john@example.com",
+    "has_headers": true,
+    "column_mapping": {
+      "full_name": "name",
+      "mail": "email"
+    }
+  }
+}
+```
+
+### Import from JSON
+
+Import data from a JSON array string into a table.
+
+```json
+{
+  "tool": "import_from_json",
+  "arguments": {
+    "table_name": "products",
+    "json_data": "[{\"name\":\"Widget\",\"price\":9.99},{\"name\":\"Gadget\",\"price\":19.99}]",
+    "skip_errors": false,
+    "batch_size": 100
+  }
+}
+```
+
+### Import Response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Import completed successfully",
+    "rows_imported": 150,
+    "rows_failed": 0
+  }
+}
+```
+
+### Import Best Practices
+
+1. **Validate data format** - Ensure CSV/JSON is well-formed before importing
+2. **Use batch_size** - Adjust batch size for optimal performance (default: 100)
+3. **Enable skip_errors** - For large imports, set `skip_errors: true` to continue on individual row failures
+4. **Column mapping** - Use when source column names don't match table columns
+
+---
+
+## 💾 Database Backup & Restore
+
+Enterprise-grade backup and restore functionality for MySQL databases.
+
+### Backup & Restore Tools Overview
+
+| Tool | Description | Permission |
+|------|-------------|------------|
+| `backup_table` | Backup single table to SQL dump | `utility` |
+| `backup_database` | Backup entire database to SQL dump | `utility` |
+| `restore_from_sql` | Restore from SQL dump content | `ddl` |
+| `get_create_table_statement` | Get CREATE TABLE statement | `list` |
+| `get_database_schema` | Get complete database schema | `list` |
+
+### Backup Single Table
+
+```json
+{
+  "tool": "backup_table",
+  "arguments": {
+    "table_name": "users",
+    "include_data": true,
+    "include_drop": true
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "table_name": "users",
+    "sql_dump": "-- MySQL Dump...\nDROP TABLE IF EXISTS `users`;\nCREATE TABLE...\nINSERT INTO...",
+    "row_count": 1500,
+    "include_data": true,
+    "include_drop": true
+  }
+}
+```
+
+### Backup Entire Database
+
+```json
+{
+  "tool": "backup_database",
+  "arguments": {
+    "include_data": true,
+    "include_drop": true
+  }
+}
+```
+
+**Backup Specific Tables:**
+```json
+{
+  "tool": "backup_database",
+  "arguments": {
+    "tables": ["users", "orders", "products"],
+    "include_data": true
+  }
+}
+```
+
+### Restore from SQL Dump
+
+```json
+{
+  "tool": "restore_from_sql",
+  "arguments": {
+    "sql_dump": "DROP TABLE IF EXISTS `users`;\nCREATE TABLE `users` (...);",
+    "stop_on_error": true
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Restore completed successfully",
+    "statements_executed": 25,
+    "statements_failed": 0
+  }
+}
+```
+
+### Get Database Schema
+
+Get a complete overview of all database objects:
+
+```json
+{
+  "tool": "get_database_schema",
+  "arguments": {
+    "include_views": true,
+    "include_procedures": true,
+    "include_functions": true,
+    "include_triggers": true
+  }
+}
+```
+
+### Export to JSON Format
+
+```json
+{
+  "tool": "export_table_to_json",
+  "arguments": {
+    "table_name": "users",
+    "pretty": true,
+    "filters": [
+      { "field": "status", "operator": "eq", "value": "active" }
+    ]
+  }
+}
+```
+
+### Export to SQL INSERT Statements
+
+```json
+{
+  "tool": "export_table_to_sql",
+  "arguments": {
+    "table_name": "products",
+    "include_create_table": true,
+    "batch_size": 100
+  }
+}
+```
+
+### Backup Best Practices
+
+1. **Regular backups** - Schedule regular database backups
+2. **Test restores** - Periodically test your backup restoration process
+3. **Include structure** - Always include `include_drop: true` for clean restores
+4. **Schema-only backups** - Use `include_data: false` for structure-only backups
+5. **Selective backups** - Use `tables` array to backup only critical tables
+
+### Backup Safety Features
+
+- **Transactional integrity** - Backups include transaction markers
+- **Foreign key handling** - `SET FOREIGN_KEY_CHECKS=0` included in dumps
+- **Binary data support** - Proper escaping for BLOB and binary columns
+- **Character encoding** - UTF-8 encoding preserved in exports
 
 ---
 
@@ -1860,8 +2093,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **Process Management** - Server processes, status, and query analysis - **COMPLETED!**
 
 ### Enterprise Features
-- [ ] **Database backup and restore tools**
-- [ ] **Data export/import utilities** (CSV, JSON, SQL dumps)
+- [x] **Database backup and restore tools** - **COMPLETED!**
+- [x] **Data export/import utilities** (CSV, JSON, SQL dumps) - **COMPLETED!**
 - [ ] **Performance monitoring and metrics**
 - [ ] **Connection pool monitoring**
 - [ ] **Audit logging and compliance**
@@ -1884,9 +2117,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - [ ] **Database health checks** - Comprehensive system health monitoring
 
 #### **Phase 2: Data Management** 📊
-- [ ] **Database backup and restore tools** - Essential for production data safety
+- [x] **Database backup and restore tools** - Essential for production data safety - **COMPLETED!**
 - [ ] **Data migration utilities** - Move data between databases and environments
-- [ ] **Enhanced export/import** - Support for JSON, XML, Excel formats
+- [x] **Enhanced export/import** - Support for JSON, SQL dump formats - **COMPLETED!**
 - [ ] **Query history & analytics** - Track and analyze database usage patterns
 
 #### **Phase 3: Enterprise Features** 🏢
@@ -1914,9 +2147,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Table Maintenance | High | Low | 7 | ✅ COMPLETED |
 | Process Management | High | Medium | 8 | ✅ COMPLETED |
 | Query Optimization | Medium | Medium | 9 | ✅ COMPLETED |
-| Database Backup/Restore | High | High | 10 | Pending |
-| Performance Monitoring | High | Medium | 11 | Pending |
-| Data Migration | High | High | 12 | Pending |
+| Database Backup/Restore | High | High | 10 | ✅ COMPLETED |
+| Data Export/Import (JSON, SQL) | High | Medium | 11 | ✅ COMPLETED |
+| Performance Monitoring | High | Medium | 12 | Pending |
+| Data Migration | High | High | 13 | Pending |
 | PostgreSQL Adapter | High | High | 13 | Pending |
 | Audit Logging | Medium | Low | 14 | Pending |
 | Schema Versioning | Medium | Medium | 15 | Pending |

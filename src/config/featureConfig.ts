@@ -141,6 +141,20 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   getServerInfo: ToolCategory.LIST,
   showBinaryLogs: ToolCategory.LIST,
   showReplicationStatus: ToolCategory.LIST,
+
+  // Backup and restore tools
+  backupTable: ToolCategory.UTILITY,
+  backupDatabase: ToolCategory.UTILITY,
+  restoreFromSql: ToolCategory.DDL,
+  getCreateTableStatement: ToolCategory.LIST,
+  getDatabaseSchema: ToolCategory.LIST,
+
+  // Extended data export/import tools
+  exportTableToJSON: ToolCategory.UTILITY,
+  exportQueryToJSON: ToolCategory.UTILITY,
+  exportTableToSql: ToolCategory.UTILITY,
+  importFromCSV: ToolCategory.CREATE,
+  importFromJSON: ToolCategory.CREATE,
 };
 
 /**
@@ -249,6 +263,18 @@ export class FeatureConfig {
       executeStoredProcedure: "execute stored procedures",
       exportTableToCSV: "export table data to CSV",
       exportQueryToCSV: "export query results to CSV",
+      // Backup and restore
+      backupTable: "backup table to SQL dump",
+      backupDatabase: "backup database to SQL dump",
+      restoreFromSql: "restore database from SQL dump",
+      getCreateTableStatement: "get CREATE TABLE statement",
+      getDatabaseSchema: "get database schema overview",
+      // Extended export/import
+      exportTableToJSON: "export table data to JSON",
+      exportQueryToJSON: "export query results to JSON",
+      exportTableToSql: "export table data to SQL INSERT statements",
+      importFromCSV: "import data from CSV",
+      importFromJSON: "import data from JSON",
     };
 
     const toolDescription =

@@ -1932,6 +1932,333 @@ const TOOLS: Tool[] = [
       },
     },
   },
+  // Backup and Restore Tools
+  {
+    name: "backup_table",
+    description:
+      "Backup a single table to SQL dump format including structure and optionally data.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to backup",
+        },
+        include_data: {
+          type: "boolean",
+          description: "Include table data in the backup (default: true)",
+        },
+        include_drop: {
+          type: "boolean",
+          description: "Include DROP TABLE IF EXISTS statement (default: true)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  {
+    name: "backup_database",
+    description:
+      "Backup entire database or selected tables to SQL dump format.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        include_data: {
+          type: "boolean",
+          description: "Include table data in the backup (default: true)",
+        },
+        include_drop: {
+          type: "boolean",
+          description:
+            "Include DROP TABLE IF EXISTS statements (default: true)",
+        },
+        tables: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Optional: specific tables to backup (default: all tables)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
+  {
+    name: "restore_from_sql",
+    description:
+      "Restore database from SQL dump content. Executes SQL statements from the provided dump. Requires 'ddl' permission.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        sql_dump: {
+          type: "string",
+          description: "SQL dump content to restore",
+        },
+        stop_on_error: {
+          type: "boolean",
+          description: "Stop execution on first error (default: true)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["sql_dump"],
+    },
+  },
+  {
+    name: "get_create_table_statement",
+    description: "Get the CREATE TABLE statement for a specific table.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  {
+    name: "get_database_schema",
+    description:
+      "Get complete database schema including tables, views, procedures, functions, and triggers.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+        include_views: {
+          type: "boolean",
+          description: "Include views in schema (default: true)",
+        },
+        include_procedures: {
+          type: "boolean",
+          description: "Include stored procedures in schema (default: true)",
+        },
+        include_functions: {
+          type: "boolean",
+          description: "Include functions in schema (default: true)",
+        },
+        include_triggers: {
+          type: "boolean",
+          description: "Include triggers in schema (default: true)",
+        },
+      },
+    },
+  },
+  // Extended Data Export Tools (JSON, SQL)
+  {
+    name: "export_table_to_json",
+    description:
+      "Export table data to JSON format with optional filtering, pagination, and sorting.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to export",
+        },
+        filters: {
+          type: "array",
+          description: "Array of filter conditions",
+          items: {
+            type: "object",
+            properties: {
+              field: { type: "string" },
+              operator: {
+                type: "string",
+                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
+              },
+              value: {},
+            },
+            required: ["field", "operator", "value"],
+          },
+        },
+        pagination: {
+          type: "object",
+          properties: {
+            page: { type: "number" },
+            limit: { type: "number" },
+          },
+        },
+        sorting: {
+          type: "object",
+          properties: {
+            field: { type: "string" },
+            direction: { type: "string", enum: ["asc", "desc"] },
+          },
+        },
+        pretty: {
+          type: "boolean",
+          description: "Pretty print JSON output (default: true)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  {
+    name: "export_query_to_json",
+    description: "Export the results of a SELECT query to JSON format.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "SQL SELECT query to execute and export",
+        },
+        params: {
+          type: "array",
+          description: "Optional array of parameters for parameterized queries",
+          items: {},
+        },
+        pretty: {
+          type: "boolean",
+          description: "Pretty print JSON output (default: true)",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "export_table_to_sql",
+    description:
+      "Export table data to SQL INSERT statements with optional CREATE TABLE.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to export",
+        },
+        filters: {
+          type: "array",
+          description: "Array of filter conditions",
+          items: {
+            type: "object",
+            properties: {
+              field: { type: "string" },
+              operator: {
+                type: "string",
+                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
+              },
+              value: {},
+            },
+            required: ["field", "operator", "value"],
+          },
+        },
+        include_create_table: {
+          type: "boolean",
+          description: "Include CREATE TABLE statement (default: false)",
+        },
+        batch_size: {
+          type: "number",
+          description: "Number of rows per INSERT statement (default: 100)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  // Data Import Tools
+  {
+    name: "import_from_csv",
+    description:
+      "Import data from CSV string into a table. Requires 'create' permission.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to import into",
+        },
+        csv_data: {
+          type: "string",
+          description: "CSV data as a string",
+        },
+        has_headers: {
+          type: "boolean",
+          description: "CSV has header row (default: true)",
+        },
+        column_mapping: {
+          type: "object",
+          description:
+            "Optional: map CSV columns to table columns {csv_col: table_col}",
+          additionalProperties: { type: "string" },
+        },
+        skip_errors: {
+          type: "boolean",
+          description: "Continue on row errors (default: false)",
+        },
+        batch_size: {
+          type: "number",
+          description: "Number of rows per batch insert (default: 100)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name", "csv_data"],
+    },
+  },
+  {
+    name: "import_from_json",
+    description:
+      "Import data from JSON array string into a table. Requires 'create' permission.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to import into",
+        },
+        json_data: {
+          type: "string",
+          description: "JSON array of objects as a string",
+        },
+        column_mapping: {
+          type: "object",
+          description:
+            "Optional: map JSON keys to table columns {json_key: table_col}",
+          additionalProperties: { type: "string" },
+        },
+        skip_errors: {
+          type: "boolean",
+          description: "Continue on row errors (default: false)",
+        },
+        batch_size: {
+          type: "number",
+          description: "Number of rows per batch insert (default: 100)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name", "json_data"],
+    },
+  },
 ];
 
 // Create the MCP server
@@ -2332,6 +2659,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
       case "show_replication_status":
         result = await mysqlMCP.showReplicationStatus((args || {}) as any);
+        break;
+
+      // Backup and Restore Tools
+      case "backup_table":
+        result = await mysqlMCP.backupTable((args || {}) as any);
+        break;
+      case "backup_database":
+        result = await mysqlMCP.backupDatabase((args || {}) as any);
+        break;
+      case "restore_from_sql":
+        result = await mysqlMCP.restoreFromSql((args || {}) as any);
+        break;
+      case "get_create_table_statement":
+        result = await mysqlMCP.getCreateTableStatement((args || {}) as any);
+        break;
+      case "get_database_schema":
+        result = await mysqlMCP.getDatabaseSchema((args || {}) as any);
+        break;
+
+      // Extended Data Export Tools
+      case "export_table_to_json":
+        result = await mysqlMCP.exportTableToJSON((args || {}) as any);
+        break;
+      case "export_query_to_json":
+        result = await mysqlMCP.exportQueryToJSON((args || {}) as any);
+        break;
+      case "export_table_to_sql":
+        result = await mysqlMCP.exportTableToSql((args || {}) as any);
+        break;
+
+      // Data Import Tools
+      case "import_from_csv":
+        result = await mysqlMCP.importFromCSV((args || {}) as any);
+        break;
+      case "import_from_json":
+        result = await mysqlMCP.importFromJSON((args || {}) as any);
         break;
 
       default:

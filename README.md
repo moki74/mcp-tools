@@ -11,7 +11,7 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 - ✅ **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
 - 🔐 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
-- 🛠️ **85 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations)
+- 🛠️ **95 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations, backup/restore, import/export)
 - 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
 - 🗃️ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
 - 💎 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
@@ -463,7 +463,7 @@ After (DDL enabled):
 
 ## 🛠️ Available Tools
 
-The MCP server provides **85 powerful tools**:
+The MCP server provides **95 powerful tools**:
 
 ### Database Discovery (4 tools)
 
@@ -635,6 +635,26 @@ The MCP server provides **85 powerful tools**:
 | `analyze_query` | Analyze query and get optimization suggestions |
 | `get_optimization_hints` | Get optimizer hints for SPEED, MEMORY, or STABILITY goals |
 
+### Database Backup & Restore (5 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `backup_table` | Backup single table to SQL dump format | `utility` permission |
+| `backup_database` | Backup entire database to SQL dump | `utility` permission |
+| `restore_from_sql` | Restore database from SQL dump content | `ddl` permission |
+| `get_create_table_statement` | Get CREATE TABLE statement for a table | `list` permission |
+| `get_database_schema` | Get complete database schema (tables, views, procedures, functions, triggers) | `list` permission |
+
+### Data Import/Export (5 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `export_table_to_json` | Export table data to JSON format | `utility` permission |
+| `export_query_to_json` | Export query results to JSON format | `utility` permission |
+| `export_table_to_sql` | Export table data to SQL INSERT statements | `utility` permission |
+| `import_from_csv` | Import data from CSV string into a table | `create` permission |
+| `import_from_json` | Import data from JSON array into a table | `create` permission |
+
 ---
 
 ## 📚 Detailed Documentation
@@ -642,7 +662,9 @@ The MCP server provides **85 powerful tools**:
 For comprehensive documentation on all features, please see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)** which includes:
 
 - 🗃️ **DDL Operations** - Create, alter, and drop tables
-- 📤 **Data Export Tools** - Export data to CSV format
+- 📤 **Data Export Tools** - Export data to CSV, JSON, and SQL formats
+- 📥 **Data Import Tools** - Import data from CSV and JSON sources
+- 💾 **Database Backup & Restore** - Full backup/restore with SQL dumps
 - 💎 **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
 - 🔧 **Stored Procedures** - Create and execute stored procedures with IN/OUT/INOUT parameters
 - 📋 **Usage Examples** - Real-world examples for all tools
