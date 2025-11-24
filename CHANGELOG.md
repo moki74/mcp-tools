@@ -5,6 +5,71 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2025-11-24
+
+### Added
+- **Schema Versioning & Migrations** - Complete database migration management system with 9 new tools:
+  - `initMigrationsTable` - Initialize the migrations tracking table (`_schema_migrations`)
+  - `createMigration` - Create new migration files with up/down SQL and automatic versioning
+  - `applyMigrations` - Apply pending migrations with dry-run support and transaction safety
+  - `rollbackMigration` - Rollback migrations with automatic down SQL execution
+  - `getMigrationStatus` - Get detailed status of all migrations
+  - `getSchemaVersion` - Get current schema version quickly
+  - `validateMigrations` - Validate migration checksums and detect tampering
+  - `resetFailedMigration` - Reset failed migrations for retry
+  - `generateMigrationFromDiff` - Auto-generate migrations by comparing table structures
+
+### Changed
+- **README.md Restructured** - Complete overhaul of MCP integration documentation
+  - Changed "Claude Desktop" references to "Claude Code"
+  - Added configuration examples for 12 AI tools/IDEs:
+    - Claude Code (CLI) - `.mcp.json`
+    - Cursor - `.cursor/mcp.json`
+    - Windsurf - `~/.codeium/windsurf/mcp_config.json`
+    - Cline (VS Code Extension)
+    - Gemini CLI - `~/.gemini/settings.json`
+    - Trae AI
+    - Qwen Code
+    - Droid CLI
+    - Zed IDE - `~/.config/zed/settings.json`
+    - Kilo Code (VS Code Extension)
+    - Roo Code (VS Code Extension)
+    - Continue (VS Code Extension)
+
+### Documentation
+- Added comprehensive Schema Versioning documentation to DOCUMENTATIONS.md
+- Includes tool overview, permission requirements, best practices
+- Common migration patterns with real-world examples
+- Updated roadmap to mark Schema Versioning as COMPLETED
+
+### Technical Details
+- Migration tracking table stores: version, name, description, up_sql, down_sql, checksum, execution_time, status
+- MD5 checksum validation prevents migration tampering
+- Multi-statement SQL support for complex migrations
+- Dry-run mode for safe migration testing
+- Automatic version generation using timestamp format (YYYYMMDDHHMMSS)
+
+---
+
+## [1.8.0] - 2025-11-24
+
+### Added
+- **Data Migration Tools** - Tools for data import/export and database transfer:
+  - Data import/export functionality
+  - Cross-database migration support
+
+---
+
+## [1.7.0] - 2025-11-24
+
+### Added
+- **Database Backup/Restore** - Complete backup and restore functionality:
+  - Database backup tools
+  - Database restore tools
+  - Data import/export tools
+
+---
+
 ## [1.6.3] - 2025-11-23
 
 ### Fixed
@@ -344,6 +409,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
+- **1.9.0** - Schema Versioning & Migrations (9 new tools), MCP integration for 12 AI tools
+- **1.8.0** - Data Migration Tools
+- **1.7.0** - Database Backup/Restore, Data Import/Export
+- **1.6.3** - Fixed missing tools in toolCategoryMap, security keyword refinement
+- **1.6.2** - Fixed security keyword false positive bug
+- **1.4.16** - Added get_table_size tool to manifest
 - **1.4.4** - Bug fixes: First call failure & execute permission
 - **1.4.3** - Permission error handling improvements
 - **1.4.2** - Dynamic per-project permissions
