@@ -1,145 +1,82 @@
-﻿# MySQL MCP Server
+# MySQL MCP Server
 
-A fully-featured **Model Context Protocol (MCP)** server for MySQL database integration with AI agents like Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and other MCP-compatible tools.
+<div align="center">
+
+**A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
+[![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
+
+[Installation](#-installation) · [Quick Start](#-quick-start) · [Configuration](#-ai-agent-configuration) · [Permissions](#-permission-system) · [Tools](#-available-tools) · [Documentation](DOCUMENTATIONS.md)
+
+</div>
 
 ---
 
-## 🌟 Features
+## TL;DR - Quick Setup
 
-- ✅ **Full MCP Protocol Support** - Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent
-- 🔐 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
-- 🛠️ **100 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations, backup/restore, import/export, data migration)
-- 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
-- 🗃️ **DDL Support** - Create, alter, and drop tables (when explicitly enabled)
-- 💎 **Transaction Support** - Full ACID transaction management (BEGIN, COMMIT, ROLLBACK)
-- 🌐 **Dual Mode** - Run as MCP server OR as REST API
-- 📊 **Rich Metadata** - Table schemas, relationships, connection info
-- ⚡ **TypeScript** - Fully typed with TypeScript definitions
-
----
-
-## 🔄 MySQL MCP vs Manual Database Access: A Comprehensive Comparison
-
-This MySQL MCP is a **powerful intermediary layer** between AI assistants and MySQL databases. Here's how it compares to manual database access:
-
-### Data Access & Querying
-
-| Feature | MySQL MCP | Manual Database Access |
-|---------|-----------|------------------------|
-| **Query Execution** | AI can run SELECT/INSERT/UPDATE/DELETE via natural language | Requires manual SQL writing in terminal/client |
-| **Parameterized Queries** | Automatic protection against SQL injection | Must manually parameterize |
-| **Bulk Operations** | Up to 10,000 records per batch with auto-batching | Manual scripting required |
-| **Query Caching** | Built-in LRU cache with TTL | Must implement yourself |
-
-### Data Analysis
-
-| Feature | MySQL MCP | Manual Database Access |
-|---------|-----------|------------------------|
-| **Query Analysis** | Auto-detects complexity, joins, bottlenecks | Run EXPLAIN manually, interpret yourself |
-| **Optimization Hints** | Auto-generates MySQL 8.0+ optimizer hints | Must know hint syntax |
-| **Execution Plans** | Get EXPLAIN in JSON/TREE/TRADITIONAL formats | Run EXPLAIN manually |
-| **Server Diagnostics** | 9 tools for status, processes, replication | Multiple manual commands |
-
-### Data Validation
-
-| Feature | MySQL MCP | Manual Database Access |
-|---------|-----------|------------------------|
-| **Input Validation** | Automatic type/length/format validation | Manual validation code |
-| **SQL Injection Prevention** | Multi-layer protection (identifiers, keywords, params) | Depends on your code |
-| **Permission Enforcement** | 10 granular permission categories | Configure in MySQL grants |
-| **Dangerous Query Blocking** | Blocks GRANT, DROP USER, system schema access | No automatic protection |
-
-### Schema Inspection
-
-| Feature | MySQL MCP | Manual Database Access |
-|---------|-----------|------------------------|
-| **Table Structure** | One command shows columns, keys, indexes | Multiple SHOW/DESCRIBE commands |
-| **Foreign Key Discovery** | Auto-discovers relationships | Manual INFORMATION_SCHEMA queries |
-| **Full Schema Export** | Get entire DB schema (tables, views, procs, triggers) | Multiple manual exports |
-| **Object Comparison** | Compare table structures automatically | Manual diff work |
-
-### Debugging & Diagnostics
-
-| Feature | MySQL MCP | Manual Database Access |
-|---------|-----------|------------------------|
-| **Query Logging** | Automatic logging with timing, params, status | Enable general_log manually |
-| **Formatted Output** | SQL formatted with highlighted keywords | Raw output |
-| **Process Management** | View/kill processes via simple commands | SHOW PROCESSLIST + KILL manually |
-| **Cache Monitoring** | Hit rate, memory usage, statistics | No built-in tracking |
-
-### Advanced Operations
-
-| Feature | MySQL MCP | Manual Database Access |
-|---------|-----------|------------------------|
-| **Transactions** | Begin/Commit/Rollback via commands | Manual SQL |
-| **Stored Procedures** | Create, execute, manage with parameter handling | Write DDL manually |
-| **Data Migration** | Copy, move, clone, sync tables with one command | Complex scripts required |
-| **Backup/Restore** | Full DB or table backup/restore | mysqldump + manual restore |
-| **Import/Export** | CSV, JSON, SQL formats supported | Manual scripting |
-
-### Key Benefits of Using This MCP
-
-1. **Natural Language Interface** - Ask Claude "show me all users with orders > $100" instead of writing SQL
-
-2. **Built-in Security** - 5+ validation layers protect against:
-   - SQL injection
-   - Privilege escalation
-   - Cross-database access
-   - Dangerous operations
-
-3. **Audit Trail** - Every query automatically logged with timing and parameters
-
-4. **100 Tools in 16 Categories** - Covers virtually every database task
-
-5. **Permission Granularity** - Give AI read-only access in production, full access in dev
-
-6. **Error Handling** - Detailed, human-readable error messages
-
-### Example Workflows
-
-**Without MCP (Manual):**
-```sql
--- Connect to MySQL client
-mysql -u user -p database
--- Write schema query
-DESCRIBE users;
-SHOW INDEX FROM users;
--- Write analysis query  
-EXPLAIN SELECT * FROM users WHERE email LIKE '%@gmail.com';
--- Check if safe, then run
-SELECT * FROM users WHERE email LIKE '%@gmail.com';
+```bash
+# Run directly with npx (no installation needed)
+npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/mydb "list,read,utility"
 ```
 
-**With MCP (AI-Assisted):**
-> "Show me the users table structure and find all Gmail users"
-- AI calls `read_table_schema`, `explain_query`, `read_records`
-- Returns formatted results with execution time
-- All queries logged, validated, parameterized automatically
+Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 
-### When to Use This MCP
-
-| Use Case | Recommendation |
-|----------|----------------|
-| Quick data lookups | MCP - faster, safer |
-| Complex analysis | MCP - AI can iterate and refine |
-| Schema exploration | MCP - comprehensive tools |
-| Production debugging | MCP with read-only permissions |
-| Bulk data operations | MCP - auto-batching |
-| Data migrations | MCP - 5 migration tools |
-| Learning SQL | Both - MCP shows what it executes |
-
-This MCP transforms database work from "write SQL, hope it's safe, interpret results" to "describe what you need, get validated results with full audit trail."
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/mydb", "list,read,utility"]
+    }
+  }
+}
+```
 
 ---
 
-## 📦 Installation
+## Table of Contents
 
-### Option 1: Quick Start (npx)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [AI Agent Configuration](#-ai-agent-configuration)
+  - [Standard JSON Config](#standard-json-configuration)
+  - [OpenAI Codex (TOML)](#openai-codex-cli--vs-code-extension)
+  - [Zed IDE](#zed-ide)
+  - [Environment Variables](#environment-variables-configuration)
+  - [Local Development](#local-path-configuration)
+- [Permission System](#-permission-system)
+- [Available Tools (98 total)](#-available-tools)
+- [Documentation](#-detailed-documentation)
+- [Comparison: MCP vs Manual Access](#-mysql-mcp-vs-manual-database-access)
+- [License](#-license)
 
-No installation needed! Use directly with npx:
+---
+
+## Features
+
+| Category | Description |
+|----------|-------------|
+| **Full MCP Support** | Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent |
+| **Security First** | Parameterized queries, SQL injection protection, permission-based access control |
+| **98 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
+| **Granular Permissions** | 10 permission categories for fine-grained access control per project |
+| **Transaction Support** | Full ACID transaction management (BEGIN, COMMIT, ROLLBACK) |
+| **Schema Migrations** | Version control for database schema with up/down migrations |
+| **Dual Mode** | Run as MCP server OR as REST API |
+| **TypeScript** | Fully typed with TypeScript definitions |
+
+---
+
+## Installation
+
+### Option 1: Quick Start with npx (Recommended)
+
+No installation required - run directly:
 
 ```bash
 npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db "list,read,utility"
@@ -154,11 +91,11 @@ mcp-mysql mysql://user:pass@localhost:3306/db "list,read,utility"
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Set Up Environment
+### 1. Set Up Environment (Optional)
 
-Create `.env` file (for local development):
+Create `.env` file for local development:
 
 ```env
 DB_HOST=localhost
@@ -166,66 +103,55 @@ DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=yourpassword
 DB_NAME=yourdatabase
-
-# Optional: Default permissions (can be overridden per-project)
 MCP_CONFIG=list,read,utility
 ```
 
-### 2. Build Project (if cloned)
+### 2. Build Project (If Cloned Locally)
 
 ```bash
+npm install
 npm run build
 ```
 
-### 3. Configure AI Agent
+### 3. Configure Your AI Agent
 
-This MCP server works with multiple AI coding assistants. Below are configuration examples for each platform.
+See [AI Agent Configuration](#-ai-agent-configuration) section below.
 
-#### Claude Code (CLI)
+### 4. Restart Your AI Agent
 
-Claude Code uses a `.mcp.json` file in your project root or home directory.
+Completely restart your AI agent application to load the MCP server.
 
-**Project-level config (`.mcp.json` in project root):**
+### 5. Test It!
 
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
-```
+Try asking your AI:
 
-**Global config (`~/.mcp.json`):**
+> "What databases are available?"
+> "Show me all tables in my database"
+> "What's the structure of the users table?"
+> "Show me the first 5 records from users"
 
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,create,update,delete,ddl"
-      ]
-    }
-  }
-}
-```
+---
 
-#### Cursor
+## AI Agent Configuration
 
-Cursor uses `.cursor/mcp.json` in your project root.
+### Standard JSON Configuration
 
-**Configuration (`.cursor/mcp.json`):**
+Most AI agents use a similar JSON configuration format. Use the appropriate config file for your tool:
+
+| AI Agent | Config File Location |
+|----------|---------------------|
+| **Claude Code** | `.mcp.json` (project root) or `~/.mcp.json` (global) |
+| **Cursor** | `.cursor/mcp.json` |
+| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` |
+| **Cline** | VS Code settings or Cline config file |
+| **Gemini CLI** | `~/.gemini/settings.json` |
+| **Kilo Code** | VS Code MCP settings |
+| **Roo Code** | VS Code MCP settings |
+| **Trae AI** | MCP configuration in settings |
+| **Qwen Code** | MCP configuration in settings |
+| **Droid CLI** | MCP configuration in settings |
+
+**Universal Configuration Template:**
 
 ```json
 {
@@ -243,143 +169,120 @@ Cursor uses `.cursor/mcp.json` in your project root.
 }
 ```
 
-#### Windsurf
-
-Windsurf uses `~/.codeium/windsurf/mcp_config.json`.
-
-**Configuration:**
+<details>
+<summary><strong>Multiple Database Configuration</strong></summary>
 
 ```json
 {
   "mcpServers": {
-    "mysql": {
+    "mysql-prod": {
       "command": "npx",
       "args": [
         "-y",
         "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
+        "mysql://reader:pass@prod-server:3306/prod_db",
         "list,read,utility"
+      ]
+    },
+    "mysql-dev": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://root:pass@localhost:3306/dev_db",
+        "list,read,create,update,delete,execute,ddl,utility"
       ]
     }
   }
 }
 ```
 
-#### Cline (VS Code Extension)
+</details>
 
-Add to Cline MCP settings in VS Code settings or cline config file.
+---
 
-**Configuration:**
+### OpenAI Codex CLI & VS Code Extension
 
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
+OpenAI Codex uses TOML format in `~/.codex/config.toml`.
+
+**Quick setup via CLI:**
+
+```bash
+codex mcp add mysql -- npx -y @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db list,read,utility
 ```
 
-#### Gemini CLI
+**Manual TOML configuration:**
 
-Gemini CLI uses `~/.gemini/settings.json`.
-
-**Configuration:**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
+startup_timeout_sec = 20
 ```
 
-#### Trae AI
+<details>
+<summary><strong>Advanced Codex Configuration</strong></summary>
 
-Trae AI uses MCP configuration in its settings.
+**With environment variables:**
 
-**Configuration:**
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server"]
 
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
+[mcp_servers.mysql.env]
+DB_HOST = "localhost"
+DB_PORT = "3306"
+DB_USER = "root"
+DB_PASSWORD = "your_password"
+DB_NAME = "your_database"
+MCP_PERMISSIONS = "list,read,utility"
 ```
 
-#### Qwen Code
+**Multiple databases:**
 
-Qwen Code supports MCP servers with standard configuration.
+```toml
+# Production - Read Only
+[mcp_servers.mysql-prod]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://reader:pass@prod:3306/prod_db", "list,read,utility"]
+startup_timeout_sec = 30
 
-**Configuration:**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
+# Development - Full Access
+[mcp_servers.mysql-dev]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://root:pass@localhost:3306/dev_db", "list,read,create,update,delete,execute,ddl,utility"]
 ```
 
-#### Droid CLI
+**Advanced options:**
 
-Droid CLI uses MCP configuration in its settings file.
-
-**Configuration:**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
+startup_timeout_sec = 20        # Server startup timeout (default: 10)
+tool_timeout_sec = 120          # Per-tool execution timeout (default: 60)
+enabled = true                  # Set false to disable without deleting
+# enabled_tools = ["list_tables", "read_records"]  # Optional: limit exposed tools
+# disabled_tools = ["drop_table", "delete_record"] # Optional: hide specific tools
 ```
 
-#### Zed IDE
+**Codex management commands:**
 
-Zed IDE uses `~/.config/zed/settings.json` for MCP configuration.
+```bash
+codex mcp list          # List all configured MCP servers
+codex mcp list --json   # List with JSON output
+codex mcp remove mysql  # Remove an MCP server
+codex mcp get mysql     # Get details about a specific server
+```
 
-**Configuration:**
+</details>
+
+---
+
+### Zed IDE
+
+Zed IDE uses a different structure in `~/.config/zed/settings.json`:
 
 ```json
 {
@@ -399,132 +302,36 @@ Zed IDE uses `~/.config/zed/settings.json` for MCP configuration.
 }
 ```
 
-#### OpenAI Codex CLI & VS Code Extension
+---
 
-OpenAI Codex uses `~/.codex/config.toml` for MCP configuration. This configuration is **shared between the CLI and VS Code extension**.
+### Environment Variables Configuration
 
-**Option 1: Using the Codex CLI command:**
-
-```bash
-codex mcp add mysql -- npx -y @berthojoris/mcp-mysql-server mysql://user:password@localhost:3306/database list,read,utility
-```
-
-**Option 2: Manual TOML configuration (`~/.codex/config.toml`):**
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:password@localhost:3306/database", "list,read,utility"]
-startup_timeout_sec = 20
-```
-
-**With environment variables:**
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server"]
-
-[mcp_servers.mysql.env]
-DB_HOST = "localhost"
-DB_PORT = "3306"
-DB_USER = "root"
-DB_PASSWORD = "your_password"
-DB_NAME = "your_database"
-MCP_PERMISSIONS = "list,read,utility"
-```
-
-**Multiple database configurations:**
-
-```toml
-# Production - Read Only
-[mcp_servers.mysql-prod]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://reader:pass@prod-server:3306/prod_db", "list,read,utility"]
-startup_timeout_sec = 30
-
-# Development - Full Access
-[mcp_servers.mysql-dev]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://root:pass@localhost:3306/dev_db", "list,read,create,update,delete,execute,ddl,utility"]
-```
-
-**Advanced options:**
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/database", "list,read,utility"]
-startup_timeout_sec = 20        # Server startup timeout (default: 10)
-tool_timeout_sec = 120          # Per-tool execution timeout (default: 60)
-enabled = true                  # Set false to disable without deleting
-# enabled_tools = ["list_tables", "read_records"]  # Optional: limit exposed tools
-# disabled_tools = ["drop_table", "delete_record"] # Optional: hide specific tools
-```
-
-**Codex MCP management commands:**
-
-```bash
-# List all configured MCP servers
-codex mcp list
-
-# List with JSON output
-codex mcp list --json
-
-# Remove an MCP server
-codex mcp remove mysql
-
-# Get details about a specific server
-codex mcp get mysql
-```
-
-#### Kilo Code (VS Code Extension)
-
-Kilo Code is a VS Code extension that supports MCP servers.
-
-**Configuration:**
+Alternative approach using environment variables instead of connection string:
 
 ```json
 {
   "mcpServers": {
     "mysql": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
+      "args": ["-y", "@berthojoris/mcp-mysql-server"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "your_password",
+        "DB_NAME": "your_database",
+        "MCP_PERMISSIONS": "list,read,utility"
+      }
     }
   }
 }
 ```
 
-#### Roo Code (VS Code Extension)
+---
 
-Roo Code is a VS Code extension with MCP support.
+### Local Path Configuration
 
-**Configuration:**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
-```
-
-#### Local Path Configuration (for development)
-
-If you've cloned the repository locally:
+For development or when you need full control over the source code:
 
 ```json
 {
@@ -541,246 +348,128 @@ If you've cloned the repository locally:
 }
 ```
 
-#### Environment Variables Configuration
+<details>
+<summary><strong>When to Use Local Path</strong></summary>
 
-Alternative approach using environment variables:
+Use local path configuration when you:
 
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "node",
-      "args": [
-        "/path/to/mcp_mysql/dist/mcp-server.js"
-      ],
-      "env": {
-        "DB_HOST": "localhost",
-        "DB_PORT": "3306",
-        "DB_USER": "root",
-        "DB_PASSWORD": "your_password",
-        "DB_NAME": "your_database",
-        "MCP_PERMISSIONS": "list,read,utility"
-      }
-    }
-  }
-}
-```
-
-### 4. Restart AI Agent
-
-Completely restart your AI agent application to load the MCP server.
-
-### 5. Test It!
-
-Try asking your AI:
-- *"What databases are available?"*
-- *"Show me all tables in my database"*
-- *"What's the structure of the users table?"*
-- *"Show me the first 5 records from users"*
-
----
-
-## Local vs NPX Configuration
-
-### When to Use Local Path Configuration
-
-Use the local path approach when you:
-- **Want full control** over the version and source code
-- **Need offline access** without internet dependency
-- **Want to modify the source** for custom functionality
-- **Need faster startup** without package download
-- **Are developing/debugging** the MCP server
-- **Have network restrictions** or security policies
-
-### Local Configuration Benefits
+- Want full control over the version and source code
+- Need offline access without internet dependency
+- Want to modify the source for custom functionality
+- Need faster startup without package download
+- Are developing/debugging the MCP server
+- Have network restrictions or security policies
 
 | Feature | Local Path | NPX |
 |---------|------------|-----|
 | **Control** | Full control over code | Depends on npm registry |
-| **Offline** | Works completely offline | Requires internet download |
+| **Offline** | Works completely offline | Requires internet |
 | **Speed** | Instant startup | Download time |
-| **Customization** | Can modify source code | Limited to published version |
-| **Debugging** | Full source access available | Limited debugging |
+| **Customization** | Can modify source | Limited to published version |
 | **Updates** | Manual updates | Automatic updates |
-| **Setup** | Requires building project | Zero setup |
+| **Setup** | Requires building | Zero setup |
 
-### Local Setup Requirements
+**Setup requirements:**
 
-1. **Build the project:**
-   ```bash
-   cd "C:\DEKSTOP\MCP\mcp_mysql"
-   npm run build
-   ```
-
-2. **Ensure paths are absolute** - Use full paths to avoid ambiguity
-3. **Use correct binaries:**
-   - `bin/mcp-mysql.js` - CLI wrapper with argument parsing
-   - `dist/mcp-server.js` - Direct server executable
-
-### Common Local Configuration Patterns
-
-**Direct binary with arguments:**
-```json
-{
-  "command": "node",
-  "args": [
-    "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
-    "mysql://user:pass@localhost:3306/database",
-    "permissions"
-  ]
-}
+```bash
+cd /path/to/mcp_mysql
+npm install
+npm run build
 ```
 
-**Direct server with environment variables:**
-```json
-{
-  "command": "node",
-  "args": ["C:\\DEKSTOP\\MCP\\mcp_mysql\\dist\\mcp-server.js"],
-  "env": {
-    "DB_HOST": "localhost",
-    "DB_PORT": "3306",
-    "DB_USER": "root",
-    "DB_PASSWORD": "",
-    "DB_NAME": "database",
-    "MCP_PERMISSIONS": "permissions"
-  }
-}
-```
+**Available binaries:**
 
-### Path Tips
+- `bin/mcp-mysql.js` - CLI wrapper with argument parsing
+- `dist/mcp-server.js` - Direct server executable
 
-- **Windows paths:** Use double backslashes `\\` in JSON
-- **Cross-platform:** Use forward slashes `/` if supported by your AI agent
-- **Environment variables:** Can use `%USERPROFILE%` or `$HOME` in some systems
-- **Relative paths:** Not recommended - use absolute paths for reliability
+**Path tips:**
+
+- Windows: Use double backslashes `\\` in JSON
+- Cross-platform: Use forward slashes `/` if supported
+- Always use absolute paths for reliability
+
+</details>
 
 ---
 
-## 🔐 Permission System
+## Permission System
+
+Control database access with granular permission categories:
 
 ### Permission Categories
 
-Control access with these permission categories:
+| Permission | Operations | Use Case |
+|------------|------------|----------|
+| `list` | List databases, tables, schemas | Database exploration |
+| `read` | SELECT queries, read data | Analytics, reporting |
+| `create` | INSERT new records | Data entry |
+| `update` | UPDATE existing records | Data maintenance |
+| `delete` | DELETE records | Data cleanup |
+| `execute` | Execute custom SQL (DML) + Advanced SQL | Complex operations |
+| `ddl` | CREATE/ALTER/DROP tables | Schema management |
+| `procedure` | Stored procedures (CREATE/DROP/EXECUTE) | Procedure management |
+| `transaction` | BEGIN, COMMIT, ROLLBACK | ACID operations |
+| `utility` | Connection testing, diagnostics | Troubleshooting |
 
-| Category | Operations | Example Use Case |
-|----------|------------|------------------|
-| **`list`** | List databases, tables, schemas | Database exploration |
-| **`read`** | SELECT queries, read data | Analytics, reporting |
-| **`create`** | INSERT new records | Data entry |
-| **`update`** | UPDATE existing records | Data maintenance |
-| **`delete`** | DELETE records | Data cleanup |
-| **`execute`** | Execute custom SQL (DML) + Advanced SQL features | Complex operations, advanced queries |
-| **`ddl`** | CREATE/ALTER/DROP tables | Schema management |
-| **`procedure`** | CREATE/DROP/EXECUTE stored procedures | Stored procedure management |
-| **`transaction`** | BEGIN, COMMIT, ROLLBACK transactions | ACID operations |
-| **`utility`** | Connection testing, info | Diagnostics |
+### Common Permission Sets
+
+| Environment | Permissions | Description |
+|-------------|-------------|-------------|
+| **Production (Safe)** | `list,read,utility` | Read-only access |
+| **Data Entry** | `list,read,create,utility` | Can add records |
+| **Full Data Access** | `list,read,create,update,delete,utility` | All CRUD operations |
+| **With Transactions** | `list,read,create,update,delete,transaction,utility` | CRUD + ACID |
+| **Development** | `list,read,create,update,delete,execute,ddl,transaction,utility` | Full access |
+| **DBA Tasks** | `list,ddl,utility` | Schema management only |
 
 ### Per-Project Configuration
 
-**Each project can have different permissions!** Specify as the third argument:
+Each project can have different permissions - specify as the second argument after the connection string:
 
 ```json
 {
   "args": [
     "mysql://user:pass@localhost:3306/db",
-    "list,read,utility"  // ← Permissions here
+    "list,read,utility"
   ]
-}
-```
-
-### Common Permission Sets
-
-**Production Read-Only:**
-```
-list,read,utility
-```
-
-**Data Entry:**
-```
-list,read,create,utility
-```
-
-**Full Data Access (No Schema Changes):**
-```
-list,read,create,update,delete,utility
-```
-
-**Full Data Access with Transactions:**
-```
-list,read,create,update,delete,transaction,utility
-```
-
-**Development (Full Access):**
-```
-list,read,create,update,delete,execute,ddl,transaction,utility
-```
-
-**DBA Tasks:**
-```
-list,ddl,utility
-```
-
-### Multiple Projects Example
-
-You can have different databases with different permissions in the same AI agent:
-
-**Using NPX:**
-```json
-{
-  "mcpServers": {
-    "mysql-prod": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://reader:pass@prod-server:3306/prod_db",
-        "list,read,utility"
-      ]
-    },
-    "mysql-dev": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mcp-mysql-server",
-        "mysql://root:pass@localhost:3306/dev_db",
-        "list,read,create,update,delete,execute,ddl,utility"
-      ]
-    }
-  }
-}
-```
-
-**Using Local Paths:**
-```json
-{
-  "mcpServers": {
-    "mysql-prod": {
-      "command": "node",
-      "args": [
-        "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
-        "mysql://reader:pass@prod-server:3306/prod_db",
-        "list,read,utility"
-      ]
-    },
-    "mysql-dev": {
-      "command": "node",
-      "args": [
-        "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
-        "mysql://root:pass@localhost:3306/dev_db",
-        "list,read,create,update,delete,execute,ddl,utility"
-      ]
-    }
-  }
 }
 ```
 
 ---
 
-## 🛠️ Available Tools
+## Available Tools
 
-The MCP server provides **100 powerful tools**:
+The MCP server provides **98 powerful tools** organized into categories:
 
-### Database Discovery (4 tools)
+### Quick Reference
+
+| Category | Count | Key Tools |
+|----------|-------|-----------|
+| [Database Discovery](#database-discovery) | 4 | `list_databases`, `list_tables`, `read_table_schema` |
+| [CRUD Operations](#data-operations---crud) | 4 | `create_record`, `read_records`, `update_record`, `delete_record` |
+| [Bulk Operations](#bulk-operations) | 3 | `bulk_insert`, `bulk_update`, `bulk_delete` |
+| [Custom Queries](#custom-queries) | 2 | `run_query`, `execute_sql` |
+| [Schema Management](#schema-management---ddl) | 4 | `create_table`, `alter_table`, `drop_table`, `execute_ddl` |
+| [Transactions](#transaction-management) | 5 | `begin_transaction`, `commit_transaction`, `rollback_transaction` |
+| [Stored Procedures](#stored-procedures) | 6 | `create_stored_procedure`, `execute_stored_procedure` |
+| [Views](#views-management) | 6 | `create_view`, `alter_view`, `drop_view` |
+| [Triggers](#triggers-management) | 5 | `create_trigger`, `drop_trigger` |
+| [Functions](#functions-management) | 6 | `create_function`, `execute_function` |
+| [Indexes](#index-management) | 5 | `create_index`, `drop_index`, `analyze_index` |
+| [Constraints](#constraint-management) | 7 | `add_foreign_key`, `add_unique_constraint` |
+| [Table Maintenance](#table-maintenance) | 8 | `analyze_table`, `optimize_table`, `repair_table` |
+| [Server Management](#process--server-management) | 9 | `show_process_list`, `explain_query` |
+| [Cache](#cache-management) | 5 | `get_cache_stats`, `clear_cache` |
+| [Query Optimization](#query-optimization) | 2 | `analyze_query`, `get_optimization_hints` |
+| [Backup & Restore](#database-backup--restore) | 5 | `backup_database`, `restore_from_sql` |
+| [Import/Export](#data-importexport) | 5 | `export_table_to_json`, `import_from_csv` |
+| [Data Migration](#data-migration) | 5 | `copy_table_data`, `sync_table_data` |
+| [Schema Migrations](#schema-versioning--migrations) | 9 | `create_migration`, `apply_migrations` |
+| [Utilities](#utilities) | 4 | `test_connection`, `export_table_to_csv` |
+
+---
+
+### Database Discovery
 
 | Tool | Description |
 |------|-------------|
@@ -789,7 +478,7 @@ The MCP server provides **100 powerful tools**:
 | `read_table_schema` | Gets detailed schema (columns, types, keys, indexes) |
 | `get_table_relationships` | Discovers foreign key relationships |
 
-### Data Operations - CRUD (4 tools)
+### Data Operations - CRUD
 
 | Tool | Description |
 |------|-------------|
@@ -798,40 +487,40 @@ The MCP server provides **100 powerful tools**:
 | `update_record` | Update records based on conditions |
 | `delete_record` | Delete records with safety checks |
 
-### Bulk Operations (3 tools)
+### Bulk Operations
 
 | Tool | Description | Performance |
 |------|-------------|-------------|
-| `bulk_insert` | Insert multiple records in batches for optimal performance | Up to 10,000 records per batch |
-| `bulk_update` | Update multiple records with different conditions in batches | Up to 1,000 operations per batch |
-| `bulk_delete` | Delete multiple record sets based on different conditions | Up to 1,000 operations per batch |
+| `bulk_insert` | Insert multiple records in batches | Up to 10,000 records/batch |
+| `bulk_update` | Update multiple records with different conditions | Up to 1,000 ops/batch |
+| `bulk_delete` | Delete multiple record sets | Up to 1,000 ops/batch |
 
-### Custom Queries (2 tools)
+### Custom Queries
 
 | Tool | Description |
 |------|-------------|
 | `run_query` | Execute read-only SELECT queries |
-| `execute_sql` | Execute write operations (INSERT, UPDATE, DELETE, or DDL with permission) |
+| `execute_sql` | Execute write operations (INSERT, UPDATE, DELETE, or DDL) |
 
-### Schema Management - DDL (4 tools)
+### Schema Management - DDL
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `create_table` | Create new tables with columns and indexes | `ddl` permission |
-| `alter_table` | Modify table structure (add/drop/modify columns, indexes) | `ddl` permission |
-| `drop_table` | Delete tables | `ddl` permission |
-| `execute_ddl` | Execute raw DDL SQL (CREATE, ALTER, DROP, TRUNCATE, RENAME) | `ddl` permission |
+| `create_table` | Create new tables with columns and indexes | `ddl` |
+| `alter_table` | Modify table structure | `ddl` |
+| `drop_table` | Delete tables | `ddl` |
+| `execute_ddl` | Execute raw DDL SQL | `ddl` |
 
-### Utilities (4 tools)
+### Utilities
 
 | Tool | Description |
 |------|-------------|
 | `test_connection` | Test database connectivity and measure latency |
 | `describe_connection` | Get current connection information |
-| `export_table_to_csv` | Export table data to CSV format with optional filtering, pagination, and sorting |
-| `export_query_to_csv` | Export the results of a SELECT query to CSV format |
+| `export_table_to_csv` | Export table data to CSV format |
+| `export_query_to_csv` | Export query results to CSV format |
 
-### Transaction Management (5 tools)
+### Transaction Management
 
 | Tool | Description |
 |------|-------------|
@@ -841,189 +530,210 @@ The MCP server provides **100 powerful tools**:
 | `get_transaction_status` | Check if a transaction is active |
 | `execute_in_transaction` | Execute SQL within a transaction context |
 
-### Stored Procedures (6 tools)
+### Stored Procedures
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `list_stored_procedures` | List all stored procedures in a database | `procedure` permission |
-| `create_stored_procedure` | Create new stored procedures with parameters | `procedure` permission |
-| `get_stored_procedure_info` | Get detailed information about a stored procedure | `procedure` permission |
-| `execute_stored_procedure` | Execute stored procedures with IN/OUT/INOUT parameters | `procedure` permission |
-| `drop_stored_procedure` | Delete stored procedures | `procedure` permission |
-| `show_create_procedure` | Show CREATE statement for a stored procedure | `procedure` permission |
+| `list_stored_procedures` | List all stored procedures | `procedure` |
+| `create_stored_procedure` | Create new stored procedures | `procedure` |
+| `get_stored_procedure_info` | Get procedure details | `procedure` |
+| `execute_stored_procedure` | Execute with IN/OUT/INOUT params | `procedure` |
+| `drop_stored_procedure` | Delete stored procedures | `procedure` |
+| `show_create_procedure` | Show CREATE statement | `procedure` |
 
-### Views Management (6 tools) - NEW!
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_views` | List all views in the database | `list` permission |
-| `get_view_info` | Get detailed information about a view | `list` permission |
-| `create_view` | Create a new view with SELECT definition | `ddl` permission |
-| `alter_view` | Alter an existing view definition | `ddl` permission |
-| `drop_view` | Drop a view | `ddl` permission |
-| `show_create_view` | Show CREATE statement for a view | `list` permission |
-
-### Triggers Management (5 tools) - NEW!
+### Views Management
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `list_triggers` | List all triggers in the database | `list` permission |
-| `get_trigger_info` | Get detailed information about a trigger | `list` permission |
-| `create_trigger` | Create a new trigger on a table | `ddl` permission |
-| `drop_trigger` | Drop a trigger | `ddl` permission |
-| `show_create_trigger` | Show CREATE statement for a trigger | `list` permission |
+| `list_views` | List all views in the database | `list` |
+| `get_view_info` | Get detailed view information | `list` |
+| `create_view` | Create a new view | `ddl` |
+| `alter_view` | Alter an existing view | `ddl` |
+| `drop_view` | Drop a view | `ddl` |
+| `show_create_view` | Show CREATE statement | `list` |
 
-### Functions Management (6 tools) - NEW!
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_functions` | List all user-defined functions | `list` permission |
-| `get_function_info` | Get detailed information about a function | `list` permission |
-| `create_function` | Create a new user-defined function | `ddl` permission |
-| `drop_function` | Drop a function | `ddl` permission |
-| `show_create_function` | Show CREATE statement for a function | `list` permission |
-| `execute_function` | Execute a function and return its result | `read` permission |
-
-### Index Management (5 tools) - NEW!
+### Triggers Management
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `list_indexes` | List all indexes for a table | `list` permission |
-| `get_index_info` | Get detailed information about an index | `list` permission |
-| `create_index` | Create a new index (BTREE, HASH, FULLTEXT, SPATIAL) | `ddl` permission |
-| `drop_index` | Drop an index from a table | `ddl` permission |
-| `analyze_index` | Analyze index statistics | `utility` permission |
+| `list_triggers` | List all triggers | `list` |
+| `get_trigger_info` | Get trigger details | `list` |
+| `create_trigger` | Create a new trigger | `ddl` |
+| `drop_trigger` | Drop a trigger | `ddl` |
+| `show_create_trigger` | Show CREATE statement | `list` |
 
-### Constraint Management (7 tools) - NEW!
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_foreign_keys` | List all foreign keys for a table | `list` permission |
-| `list_constraints` | List all constraints (PK, FK, UNIQUE, CHECK) | `list` permission |
-| `add_foreign_key` | Add a foreign key constraint | `ddl` permission |
-| `drop_foreign_key` | Drop a foreign key constraint | `ddl` permission |
-| `add_unique_constraint` | Add a unique constraint | `ddl` permission |
-| `drop_constraint` | Drop a UNIQUE or CHECK constraint | `ddl` permission |
-| `add_check_constraint` | Add a CHECK constraint (MySQL 8.0.16+) | `ddl` permission |
-
-### Table Maintenance (8 tools) - NEW!
+### Functions Management
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `analyze_table` | Update index statistics for optimizer | `utility` permission |
-| `optimize_table` | Reclaim unused space and defragment | `utility` permission |
-| `check_table` | Check table for errors | `utility` permission |
-| `repair_table` | Repair corrupted table (MyISAM, ARCHIVE, CSV) | `utility` permission |
-| `truncate_table` | Remove all rows quickly | `ddl` permission |
-| `get_table_status` | Get detailed table status and statistics | `list` permission |
-| `flush_table` | Close and reopen table(s) | `utility` permission |
-| `get_table_size` | Get size information for tables | `list` permission |
+| `list_functions` | List all user-defined functions | `list` |
+| `get_function_info` | Get function details | `list` |
+| `create_function` | Create a new function | `ddl` |
+| `drop_function` | Drop a function | `ddl` |
+| `show_create_function` | Show CREATE statement | `list` |
+| `execute_function` | Execute and return result | `read` |
 
-### Process & Server Management (9 tools) - NEW!
+### Index Management
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `show_process_list` | Show all running MySQL processes | `utility` permission |
-| `kill_process` | Kill a MySQL process/connection | `utility` permission |
-| `show_status` | Show MySQL server status variables | `utility` permission |
-| `show_variables` | Show MySQL server configuration variables | `utility` permission |
-| `explain_query` | Show query execution plan (EXPLAIN) | `utility` permission |
-| `show_engine_status` | Show storage engine status (InnoDB) | `utility` permission |
-| `get_server_info` | Get comprehensive server information | `utility` permission |
-| `show_binary_logs` | Show binary log files | `utility` permission |
-| `show_replication_status` | Show replication status | `utility` permission |
+| `list_indexes` | List all indexes for a table | `list` |
+| `get_index_info` | Get index details | `list` |
+| `create_index` | Create index (BTREE, HASH, FULLTEXT, SPATIAL) | `ddl` |
+| `drop_index` | Drop an index | `ddl` |
+| `analyze_index` | Analyze index statistics | `utility` |
 
-### Cache Management (5 tools)
+### Constraint Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_foreign_keys` | List all foreign keys | `list` |
+| `list_constraints` | List all constraints (PK, FK, UNIQUE, CHECK) | `list` |
+| `add_foreign_key` | Add a foreign key constraint | `ddl` |
+| `drop_foreign_key` | Drop a foreign key | `ddl` |
+| `add_unique_constraint` | Add a unique constraint | `ddl` |
+| `drop_constraint` | Drop UNIQUE or CHECK constraint | `ddl` |
+| `add_check_constraint` | Add CHECK constraint (MySQL 8.0.16+) | `ddl` |
+
+### Table Maintenance
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `analyze_table` | Update index statistics | `utility` |
+| `optimize_table` | Reclaim space and defragment | `utility` |
+| `check_table` | Check table for errors | `utility` |
+| `repair_table` | Repair corrupted table | `utility` |
+| `truncate_table` | Remove all rows quickly | `ddl` |
+| `get_table_status` | Get table status and statistics | `list` |
+| `flush_table` | Close and reopen table(s) | `utility` |
+| `get_table_size` | Get size information | `list` |
+
+### Process & Server Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `show_process_list` | Show running MySQL processes | `utility` |
+| `kill_process` | Kill a MySQL process/connection | `utility` |
+| `show_status` | Show server status variables | `utility` |
+| `show_variables` | Show server configuration | `utility` |
+| `explain_query` | Show query execution plan | `utility` |
+| `show_engine_status` | Show storage engine status | `utility` |
+| `get_server_info` | Get comprehensive server info | `utility` |
+| `show_binary_logs` | Show binary log files | `utility` |
+| `show_replication_status` | Show replication status | `utility` |
+
+### Cache Management
 
 | Tool | Description |
 |------|-------------|
 | `get_cache_stats` | Get query cache statistics |
 | `get_cache_config` | Get current cache configuration |
-| `configure_cache` | Configure cache settings (TTL, max size) |
-| `clear_cache` | Clear all cached query results |
-| `invalidate_table_cache` | Invalidate cache for a specific table |
+| `configure_cache` | Configure cache settings |
+| `clear_cache` | Clear all cached results |
+| `invalidate_table_cache` | Invalidate cache for specific table |
 
-### Query Optimization (2 tools)
+### Query Optimization
 
 | Tool | Description |
 |------|-------------|
 | `analyze_query` | Analyze query and get optimization suggestions |
-| `get_optimization_hints` | Get optimizer hints for SPEED, MEMORY, or STABILITY goals |
+| `get_optimization_hints` | Get optimizer hints for SPEED, MEMORY, or STABILITY |
 
-### Database Backup & Restore (5 tools) - NEW!
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `backup_table` | Backup single table to SQL dump format | `utility` permission |
-| `backup_database` | Backup entire database to SQL dump | `utility` permission |
-| `restore_from_sql` | Restore database from SQL dump content | `ddl` permission |
-| `get_create_table_statement` | Get CREATE TABLE statement for a table | `list` permission |
-| `get_database_schema` | Get complete database schema (tables, views, procedures, functions, triggers) | `list` permission |
-
-### Data Import/Export (5 tools)
+### Database Backup & Restore
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `export_table_to_json` | Export table data to JSON format | `utility` permission |
-| `export_query_to_json` | Export query results to JSON format | `utility` permission |
-| `export_table_to_sql` | Export table data to SQL INSERT statements | `utility` permission |
-| `import_from_csv` | Import data from CSV string into a table | `create` permission |
-| `import_from_json` | Import data from JSON array into a table | `create` permission |
+| `backup_table` | Backup single table to SQL dump | `utility` |
+| `backup_database` | Backup entire database to SQL dump | `utility` |
+| `restore_from_sql` | Restore from SQL dump content | `ddl` |
+| `get_create_table_statement` | Get CREATE TABLE statement | `list` |
+| `get_database_schema` | Get complete database schema | `list` |
 
-### Data Migration (5 tools)
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `copy_table_data` | Copy data from one table to another with optional column mapping | `create` permission |
-| `move_table_data` | Move data (copy + delete from source) | `create`, `delete` permission |
-| `clone_table` | Clone table structure with optional data | `ddl` permission |
-| `compare_table_structure` | Compare structure of two tables and identify differences | `list` permission |
-| `sync_table_data` | Synchronize data between tables (insert_only, update_only, upsert) | `update` permission |
-
-### Schema Versioning & Migrations (9 tools) - NEW!
+### Data Import/Export
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `init_migrations_table` | Initialize the migrations tracking table | `ddl` permission |
-| `create_migration` | Create a new migration with up/down SQL | `ddl` permission |
-| `apply_migrations` | Apply pending migrations (with dry-run support) | `ddl` permission |
-| `rollback_migration` | Rollback applied migrations by steps or version | `ddl` permission |
-| `get_migration_status` | Get migration history and status | `list` permission |
-| `get_schema_version` | Get current schema version | `list` permission |
-| `validate_migrations` | Validate migrations for issues | `list` permission |
-| `reset_failed_migration` | Reset failed migration to pending | `ddl` permission |
-| `generate_migration_from_diff` | Generate migration from table comparison | `ddl` permission |
+| `export_table_to_json` | Export table to JSON format | `utility` |
+| `export_query_to_json` | Export query results to JSON | `utility` |
+| `export_table_to_sql` | Export to SQL INSERT statements | `utility` |
+| `import_from_csv` | Import from CSV string | `create` |
+| `import_from_json` | Import from JSON array | `create` |
+
+### Data Migration
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `copy_table_data` | Copy data with optional column mapping | `create` |
+| `move_table_data` | Move data (copy + delete source) | `create`, `delete` |
+| `clone_table` | Clone table structure with optional data | `ddl` |
+| `compare_table_structure` | Compare two table structures | `list` |
+| `sync_table_data` | Sync data between tables | `update` |
+
+### Schema Versioning & Migrations
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `init_migrations_table` | Initialize migrations tracking table | `ddl` |
+| `create_migration` | Create migration with up/down SQL | `ddl` |
+| `apply_migrations` | Apply pending migrations (dry-run support) | `ddl` |
+| `rollback_migration` | Rollback by steps or version | `ddl` |
+| `get_migration_status` | Get migration history and status | `list` |
+| `get_schema_version` | Get current schema version | `list` |
+| `validate_migrations` | Validate migrations for issues | `list` |
+| `reset_failed_migration` | Reset failed migration to pending | `ddl` |
+| `generate_migration_from_diff` | Generate migration from table diff | `ddl` |
 
 ---
 
-## 📚 Detailed Documentation
+## Detailed Documentation
 
-For comprehensive documentation on all features, please see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)** which includes:
+For comprehensive documentation, see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)**:
 
-- 🗃️ **DDL Operations** - Create, alter, and drop tables
-- 📤 **Data Export Tools** - Export data to CSV, JSON, and SQL formats
-- 📥 **Data Import Tools** - Import data from CSV and JSON sources
-- 💾 **Database Backup & Restore** - Full backup/restore with SQL dumps
-- 🔄 **Data Migration Tools** - Copy, move, clone, compare, and sync table data
-- 🔄 **Schema Versioning & Migrations** - Version control for database schema changes
-- 💎 **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
-- 🔧 **Stored Procedures** - Create and execute stored procedures with IN/OUT/INOUT parameters
-- 📋 **Usage Examples** - Real-world examples for all tools
-- 🔍 **Query Logging & Automatic SQL Display** - See all SQL queries executed automatically
-- 🔐 **Security Features** - Built-in security and best practices
-- 🚀 **Bulk Operations** - High-performance batch processing
-- 🛠️ **Troubleshooting** - Common issues and solutions
-- 📄 **License** - MIT License details
-- 🗺️ **Roadmap** - Upcoming features and improvements
+- **DDL Operations** - Create, alter, and drop tables
+- **Data Export Tools** - Export to CSV, JSON, and SQL formats
+- **Data Import Tools** - Import from CSV and JSON sources
+- **Database Backup & Restore** - Full backup/restore with SQL dumps
+- **Data Migration Tools** - Copy, move, clone, compare, and sync data
+- **Schema Versioning** - Version control for database schema changes
+- **Transaction Management** - ACID transactions
+- **Stored Procedures** - Create and execute with IN/OUT/INOUT parameters
+- **Query Logging** - See all SQL queries executed automatically
+- **Security Features** - Built-in security and best practices
+- **Bulk Operations** - High-performance batch processing
+- **Troubleshooting** - Common issues and solutions
 
 ---
 
-## 📄 License
+## MySQL MCP vs Manual Database Access
+
+This MySQL MCP is a **powerful intermediary layer** between AI assistants and MySQL databases.
+
+| Comparison Topic | Documentation |
+|------------------|---------------|
+| Data Access & Querying | [docs/comparison/data-access-querying.md](docs/comparison/data-access-querying.md) |
+| Data Analysis | [docs/comparison/data-analysis.md](docs/comparison/data-analysis.md) |
+| Data Validation | [docs/comparison/data-validation.md](docs/comparison/data-validation.md) |
+| Schema Inspection | [docs/comparison/schema-inspection.md](docs/comparison/schema-inspection.md) |
+| Debugging & Diagnostics | [docs/comparison/debugging-diagnostics.md](docs/comparison/debugging-diagnostics.md) |
+| Advanced Operations | [docs/comparison/advanced-operations.md](docs/comparison/advanced-operations.md) |
+| Key Benefits | [docs/comparison/key-benefits.md](docs/comparison/key-benefits.md) |
+| Example Workflows | [docs/comparison/example-workflows.md](docs/comparison/example-workflows.md) |
+| When to Use | [docs/comparison/when-to-use.md](docs/comparison/when-to-use.md) |
+
+---
+
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ for the AI community**
+<div align="center">
 
-*Help AI agents interact with MySQL databases safely and efficiently!*
+**Made with care for the AI development community**
+
+*Enabling AI agents to interact with MySQL databases safely and efficiently*
+
+[Report Bug](https://github.com/berthojoris/mcp-mysql-server/issues) · [Request Feature](https://github.com/berthojoris/mcp-mysql-server/issues) · [Documentation](DOCUMENTATIONS.md)
+
+</div>
