@@ -15,6 +15,7 @@ import { MaintenanceTools } from "./tools/maintenanceTools";
 import { ProcessTools } from "./tools/processTools";
 import { BackupRestoreTools } from "./tools/backupRestoreTools";
 import { MigrationTools } from "./tools/migrationTools";
+import { SchemaVersioningTools } from "./tools/schemaVersioningTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -41,6 +42,7 @@ export class MySQLMCP {
   private processTools: ProcessTools;
   private backupRestoreTools: BackupRestoreTools;
   private migrationTools: MigrationTools;
+  private schemaVersioningTools: SchemaVersioningTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -64,6 +66,7 @@ export class MySQLMCP {
     this.processTools = new ProcessTools(this.security);
     this.backupRestoreTools = new BackupRestoreTools(this.security);
     this.migrationTools = new MigrationTools(this.security);
+    this.schemaVersioningTools = new SchemaVersioningTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -600,6 +603,135 @@ export class MySQLMCP {
       return { status: "error", error: check.error };
     }
     return await this.migrationTools.syncTableData(params);
+  }
+
+  // ==========================================
+  // Schema Versioning and Migrations Tools
+  // ==========================================
+
+  /**
+   * Initialize the migrations tracking table
+   */
+  async initMigrationsTable(params: { database?: string }) {
+    const check = this.checkToolEnabled("initMigrationsTable");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.initMigrationsTable(params);
+  }
+
+  /**
+   * Create a new migration
+   */
+  async createMigration(params: {
+    name: string;
+    up_sql: string;
+    down_sql?: string;
+    description?: string;
+    version?: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("createMigration");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.createMigration(params);
+  }
+
+  /**
+   * Apply pending migrations
+   */
+  async applyMigrations(params: {
+    target_version?: string;
+    dry_run?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("applyMigrations");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.applyMigrations(params);
+  }
+
+  /**
+   * Rollback migrations
+   */
+  async rollbackMigration(params: {
+    target_version?: string;
+    steps?: number;
+    dry_run?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("rollbackMigration");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.rollbackMigration(params);
+  }
+
+  /**
+   * Get migration status and history
+   */
+  async getMigrationStatus(params: {
+    version?: string;
+    status?: "pending" | "applied" | "failed" | "rolled_back";
+    limit?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("getMigrationStatus");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.getMigrationStatus(params);
+  }
+
+  /**
+   * Get current schema version
+   */
+  async getSchemaVersion(params: { database?: string }) {
+    const check = this.checkToolEnabled("getSchemaVersion");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.getSchemaVersion(params);
+  }
+
+  /**
+   * Validate migrations for issues
+   */
+  async validateMigrations(params: { database?: string }) {
+    const check = this.checkToolEnabled("validateMigrations");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.validateMigrations(params);
+  }
+
+  /**
+   * Reset a failed migration to pending status
+   */
+  async resetFailedMigration(params: { version: string; database?: string }) {
+    const check = this.checkToolEnabled("resetFailedMigration");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.resetFailedMigration(params);
+  }
+
+  /**
+   * Generate a migration from table structure differences
+   */
+  async generateMigrationFromDiff(params: {
+    table1: string;
+    table2: string;
+    migration_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("generateMigrationFromDiff");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.schemaVersioningTools.generateMigrationFromDiff(params);
   }
 
   // Get feature configuration status

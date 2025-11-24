@@ -162,6 +162,17 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   cloneTable: ToolCategory.DDL,
   compareTableStructure: ToolCategory.LIST,
   syncTableData: ToolCategory.UPDATE,
+
+  // Schema versioning and migrations tools
+  initMigrationsTable: ToolCategory.DDL,
+  createMigration: ToolCategory.DDL,
+  applyMigrations: ToolCategory.DDL,
+  rollbackMigration: ToolCategory.DDL,
+  getMigrationStatus: ToolCategory.LIST,
+  getSchemaVersion: ToolCategory.LIST,
+  validateMigrations: ToolCategory.LIST,
+  resetFailedMigration: ToolCategory.DDL,
+  generateMigrationFromDiff: ToolCategory.DDL,
 };
 
 /**

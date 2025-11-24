@@ -1,6 +1,6 @@
 ﻿# MySQL MCP Server
 
-A fully-featured **Model Context Protocol (MCP)** server for MySQL database integration with AI agents like Claude Desktop, Cline, Windsurf, and other MCP-compatible tools.
+A fully-featured **Model Context Protocol (MCP)** server for MySQL database integration with AI agents like Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, and other MCP-compatible tools.
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -9,7 +9,7 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 ## 🌟 Features
 
-- ✅ **Full MCP Protocol Support** - Works with Claude Desktop, Cline, Windsurf, and any MCP-compatible AI agent
+- ✅ **Full MCP Protocol Support** - Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, and any MCP-compatible AI agent
 - 🔐 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
 - 🛠️ **100 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations, backup/restore, import/export, data migration)
 - 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
@@ -18,6 +18,120 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 - 🌐 **Dual Mode** - Run as MCP server OR as REST API
 - 📊 **Rich Metadata** - Table schemas, relationships, connection info
 - ⚡ **TypeScript** - Fully typed with TypeScript definitions
+
+---
+
+## 🔄 MySQL MCP vs Manual Database Access: A Comprehensive Comparison
+
+This MySQL MCP is a **powerful intermediary layer** between AI assistants and MySQL databases. Here's how it compares to manual database access:
+
+### Data Access & Querying
+
+| Feature | MySQL MCP | Manual Database Access |
+|---------|-----------|------------------------|
+| **Query Execution** | AI can run SELECT/INSERT/UPDATE/DELETE via natural language | Requires manual SQL writing in terminal/client |
+| **Parameterized Queries** | Automatic protection against SQL injection | Must manually parameterize |
+| **Bulk Operations** | Up to 10,000 records per batch with auto-batching | Manual scripting required |
+| **Query Caching** | Built-in LRU cache with TTL | Must implement yourself |
+
+### Data Analysis
+
+| Feature | MySQL MCP | Manual Database Access |
+|---------|-----------|------------------------|
+| **Query Analysis** | Auto-detects complexity, joins, bottlenecks | Run EXPLAIN manually, interpret yourself |
+| **Optimization Hints** | Auto-generates MySQL 8.0+ optimizer hints | Must know hint syntax |
+| **Execution Plans** | Get EXPLAIN in JSON/TREE/TRADITIONAL formats | Run EXPLAIN manually |
+| **Server Diagnostics** | 9 tools for status, processes, replication | Multiple manual commands |
+
+### Data Validation
+
+| Feature | MySQL MCP | Manual Database Access |
+|---------|-----------|------------------------|
+| **Input Validation** | Automatic type/length/format validation | Manual validation code |
+| **SQL Injection Prevention** | Multi-layer protection (identifiers, keywords, params) | Depends on your code |
+| **Permission Enforcement** | 10 granular permission categories | Configure in MySQL grants |
+| **Dangerous Query Blocking** | Blocks GRANT, DROP USER, system schema access | No automatic protection |
+
+### Schema Inspection
+
+| Feature | MySQL MCP | Manual Database Access |
+|---------|-----------|------------------------|
+| **Table Structure** | One command shows columns, keys, indexes | Multiple SHOW/DESCRIBE commands |
+| **Foreign Key Discovery** | Auto-discovers relationships | Manual INFORMATION_SCHEMA queries |
+| **Full Schema Export** | Get entire DB schema (tables, views, procs, triggers) | Multiple manual exports |
+| **Object Comparison** | Compare table structures automatically | Manual diff work |
+
+### Debugging & Diagnostics
+
+| Feature | MySQL MCP | Manual Database Access |
+|---------|-----------|------------------------|
+| **Query Logging** | Automatic logging with timing, params, status | Enable general_log manually |
+| **Formatted Output** | SQL formatted with highlighted keywords | Raw output |
+| **Process Management** | View/kill processes via simple commands | SHOW PROCESSLIST + KILL manually |
+| **Cache Monitoring** | Hit rate, memory usage, statistics | No built-in tracking |
+
+### Advanced Operations
+
+| Feature | MySQL MCP | Manual Database Access |
+|---------|-----------|------------------------|
+| **Transactions** | Begin/Commit/Rollback via commands | Manual SQL |
+| **Stored Procedures** | Create, execute, manage with parameter handling | Write DDL manually |
+| **Data Migration** | Copy, move, clone, sync tables with one command | Complex scripts required |
+| **Backup/Restore** | Full DB or table backup/restore | mysqldump + manual restore |
+| **Import/Export** | CSV, JSON, SQL formats supported | Manual scripting |
+
+### Key Benefits of Using This MCP
+
+1. **Natural Language Interface** - Ask Claude "show me all users with orders > $100" instead of writing SQL
+
+2. **Built-in Security** - 5+ validation layers protect against:
+   - SQL injection
+   - Privilege escalation
+   - Cross-database access
+   - Dangerous operations
+
+3. **Audit Trail** - Every query automatically logged with timing and parameters
+
+4. **100 Tools in 16 Categories** - Covers virtually every database task
+
+5. **Permission Granularity** - Give AI read-only access in production, full access in dev
+
+6. **Error Handling** - Detailed, human-readable error messages
+
+### Example Workflows
+
+**Without MCP (Manual):**
+```sql
+-- Connect to MySQL client
+mysql -u user -p database
+-- Write schema query
+DESCRIBE users;
+SHOW INDEX FROM users;
+-- Write analysis query  
+EXPLAIN SELECT * FROM users WHERE email LIKE '%@gmail.com';
+-- Check if safe, then run
+SELECT * FROM users WHERE email LIKE '%@gmail.com';
+```
+
+**With MCP (AI-Assisted):**
+> "Show me the users table structure and find all Gmail users"
+- AI calls `read_table_schema`, `explain_query`, `read_records`
+- Returns formatted results with execution time
+- All queries logged, validated, parameterized automatically
+
+### When to Use This MCP
+
+| Use Case | Recommendation |
+|----------|----------------|
+| Quick data lookups | MCP - faster, safer |
+| Complex analysis | MCP - AI can iterate and refine |
+| Schema exploration | MCP - comprehensive tools |
+| Production debugging | MCP with read-only permissions |
+| Bulk data operations | MCP - auto-batching |
+| Data migrations | MCP - 5 migration tools |
+| Learning SQL | Both - MCP shows what it executes |
+
+This MCP transforms database work from "write SQL, hope it's safe, interpret results" to "describe what you need, get validated results with full audit trail."
 
 ---
 
@@ -65,13 +179,13 @@ npm run build
 
 ### 3. Configure AI Agent
 
-#### Claude Desktop
+This MCP server works with multiple AI coding assistants. Below are configuration examples for each platform.
 
-**Location:**
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+#### Claude Code (CLI)
 
-**Configuration (using npx - recommended):**
+Claude Code uses a `.mcp.json` file in your project root or home directory.
+
+**Project-level config (`.mcp.json` in project root):**
 
 ```json
 {
@@ -89,15 +203,38 @@ npm run build
 }
 ```
 
-**Configuration (using local path - for development):**
+**Global config (`~/.mcp.json`):**
 
 ```json
 {
   "mcpServers": {
     "mysql": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js",
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,create,update,delete,ddl"
+      ]
+    }
+  }
+}
+```
+
+#### Cursor
+
+Cursor uses `.cursor/mcp.json` in your project root.
+
+**Configuration (`.cursor/mcp.json`):**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
         "mysql://user:password@localhost:3306/database",
         "list,read,utility"
       ]
@@ -106,24 +243,23 @@ npm run build
 }
 ```
 
-**Configuration (using environment variables - alternative local approach):**
+#### Windsurf
+
+Windsurf uses `~/.codeium/windsurf/mcp_config.json`.
+
+**Configuration:**
 
 ```json
 {
   "mcpServers": {
     "mysql": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "C:\\DEKSTOP\\MCP\\mcp_mysql\\dist\\mcp-server.js"
-      ],
-      "env": {
-        "DB_HOST": "localhost",
-        "DB_PORT": "3306",
-        "DB_USER": "root",
-        "DB_PASSWORD": "",
-        "DB_NAME": "your_database",
-        "MCP_PERMISSIONS": "list,read,utility"
-      }
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
     }
   }
 }
@@ -131,11 +267,225 @@ npm run build
 
 #### Cline (VS Code Extension)
 
-Add to Cline MCP settings (same JSON format as Claude Desktop).
+Add to Cline MCP settings in VS Code settings or cline config file.
 
-#### Windsurf
+**Configuration:**
 
-Add to Windsurf MCP settings (same JSON format as Claude Desktop).
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Gemini CLI
+
+Gemini CLI uses `~/.gemini/settings.json`.
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Trae AI
+
+Trae AI uses MCP configuration in its settings.
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Qwen Code
+
+Qwen Code supports MCP servers with standard configuration.
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Droid CLI
+
+Droid CLI uses MCP configuration in its settings file.
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Zed IDE
+
+Zed IDE uses `~/.config/zed/settings.json` for MCP configuration.
+
+**Configuration:**
+
+```json
+{
+  "context_servers": {
+    "mysql": {
+      "command": {
+        "path": "npx",
+        "args": [
+          "-y",
+          "@berthojoris/mcp-mysql-server",
+          "mysql://user:password@localhost:3306/database",
+          "list,read,utility"
+        ]
+      }
+    }
+  }
+}
+```
+
+#### Kilo Code (VS Code Extension)
+
+Kilo Code is a VS Code extension that supports MCP servers.
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Roo Code (VS Code Extension)
+
+Roo Code is a VS Code extension with MCP support.
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mcp-mysql-server",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Local Path Configuration (for development)
+
+If you've cloned the repository locally:
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "/path/to/mcp_mysql/bin/mcp-mysql.js",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+#### Environment Variables Configuration
+
+Alternative approach using environment variables:
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "/path/to/mcp_mysql/dist/mcp-server.js"
+      ],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "your_password",
+        "DB_NAME": "your_database",
+        "MCP_PERMISSIONS": "list,read,utility"
+      }
+    }
+  }
+}
+```
 
 ### 4. Restart AI Agent
 
@@ -227,7 +577,7 @@ Use the local path approach when you:
 
 ---
 
-##  Permission System
+## 🔐 Permission System
 
 ### Permission Categories
 
@@ -541,7 +891,7 @@ The MCP server provides **100 powerful tools**:
 | `import_from_csv` | Import data from CSV string into a table | `create` permission |
 | `import_from_json` | Import data from JSON array into a table | `create` permission |
 
-### Data Migration (5 tools) - NEW!
+### Data Migration (5 tools)
 
 | Tool | Description | Requires |
 |------|-------------|----------|
@@ -550,6 +900,20 @@ The MCP server provides **100 powerful tools**:
 | `clone_table` | Clone table structure with optional data | `ddl` permission |
 | `compare_table_structure` | Compare structure of two tables and identify differences | `list` permission |
 | `sync_table_data` | Synchronize data between tables (insert_only, update_only, upsert) | `update` permission |
+
+### Schema Versioning & Migrations (9 tools) - NEW!
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `init_migrations_table` | Initialize the migrations tracking table | `ddl` permission |
+| `create_migration` | Create a new migration with up/down SQL | `ddl` permission |
+| `apply_migrations` | Apply pending migrations (with dry-run support) | `ddl` permission |
+| `rollback_migration` | Rollback applied migrations by steps or version | `ddl` permission |
+| `get_migration_status` | Get migration history and status | `list` permission |
+| `get_schema_version` | Get current schema version | `list` permission |
+| `validate_migrations` | Validate migrations for issues | `list` permission |
+| `reset_failed_migration` | Reset failed migration to pending | `ddl` permission |
+| `generate_migration_from_diff` | Generate migration from table comparison | `ddl` permission |
 
 ---
 
@@ -562,6 +926,7 @@ For comprehensive documentation on all features, please see **[DOCUMENTATIONS.md
 - 📥 **Data Import Tools** - Import data from CSV and JSON sources
 - 💾 **Database Backup & Restore** - Full backup/restore with SQL dumps
 - 🔄 **Data Migration Tools** - Copy, move, clone, compare, and sync table data
+- 🔄 **Schema Versioning & Migrations** - Version control for database schema changes
 - 💎 **Transaction Management** - ACID transactions with BEGIN, COMMIT, ROLLBACK
 - 🔧 **Stored Procedures** - Create and execute stored procedures with IN/OUT/INOUT parameters
 - 📋 **Usage Examples** - Real-world examples for all tools

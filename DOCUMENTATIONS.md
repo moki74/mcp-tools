@@ -770,6 +770,481 @@ Synchronize data between two tables based on a key column. Supports three modes:
 
 ---
 
+## 🔄 Schema Versioning and Migrations
+
+The MySQL MCP Server provides comprehensive schema versioning and migration tools for managing database schema changes in a controlled, trackable manner. This feature enables version control for your database schema with support for applying and rolling back migrations.
+
+### Schema Versioning Tools Overview
+
+| Tool | Description | Permission |
+|------|-------------|------------|
+| `init_migrations_table` | Initialize the migrations tracking table | ddl |
+| `create_migration` | Create a new migration entry | ddl |
+| `apply_migrations` | Apply pending migrations | ddl |
+| `rollback_migration` | Rollback applied migrations | ddl |
+| `get_migration_status` | Get migration history and status | list |
+| `get_schema_version` | Get current schema version | list |
+| `validate_migrations` | Validate migrations for issues | list |
+| `reset_failed_migration` | Reset a failed migration to pending | ddl |
+| `generate_migration_from_diff` | Generate migration from table comparison | ddl |
+
+### ⚠️ Enable Schema Versioning
+
+Schema versioning operations require `ddl` permission:
+
+```json
+"args": [
+  "--mysql-host", "localhost",
+  "--mysql-user", "root",
+  "--mysql-password", "password",
+  "--mysql-database", "mydb",
+  "--permissions", "list,read,create,update,delete,ddl"
+]
+```
+
+### Initialize Migrations Table
+
+Before using migrations, initialize the tracking table:
+
+```json
+{
+  "tool": "init_migrations_table",
+  "arguments": {}
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Migrations table '_schema_migrations' initialized successfully",
+    "table_name": "_schema_migrations"
+  }
+}
+```
+
+### Creating Migrations
+
+Create a migration with up and down SQL:
+
+```json
+{
+  "tool": "create_migration",
+  "arguments": {
+    "name": "add_users_table",
+    "description": "Create the users table with basic fields",
+    "up_sql": "CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255) NOT NULL UNIQUE, name VARCHAR(100), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);",
+    "down_sql": "DROP TABLE IF EXISTS users;"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Migration 'add_users_table' created successfully",
+    "version": "20240115120000",
+    "name": "add_users_table",
+    "checksum": "a1b2c3d4",
+    "status": "pending"
+  }
+}
+```
+
+#### Multi-Statement Migrations
+
+Migrations can contain multiple SQL statements separated by semicolons:
+
+```json
+{
+  "tool": "create_migration",
+  "arguments": {
+    "name": "add_orders_and_items",
+    "up_sql": "CREATE TABLE orders (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, total DECIMAL(10,2), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP); CREATE TABLE order_items (id INT AUTO_INCREMENT PRIMARY KEY, order_id INT, product_id INT, quantity INT, price DECIMAL(10,2)); ALTER TABLE order_items ADD CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES orders(id);",
+    "down_sql": "DROP TABLE IF EXISTS order_items; DROP TABLE IF EXISTS orders;"
+  }
+}
+```
+
+### Applying Migrations
+
+Apply all pending migrations:
+
+```json
+{
+  "tool": "apply_migrations",
+  "arguments": {}
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Successfully applied 3 migration(s)",
+    "applied_count": 3,
+    "failed_count": 0,
+    "applied_migrations": [
+      {"version": "20240115120000", "name": "add_users_table", "execution_time_ms": 45},
+      {"version": "20240115130000", "name": "add_orders_table", "execution_time_ms": 32},
+      {"version": "20240115140000", "name": "add_products_table", "execution_time_ms": 28}
+    ]
+  }
+}
+```
+
+#### Apply to Specific Version
+
+```json
+{
+  "tool": "apply_migrations",
+  "arguments": {
+    "target_version": "20240115130000"
+  }
+}
+```
+
+#### Dry Run Mode
+
+Preview migrations without executing:
+
+```json
+{
+  "tool": "apply_migrations",
+  "arguments": {
+    "dry_run": true
+  }
+}
+```
+
+### Rolling Back Migrations
+
+Rollback the last migration:
+
+```json
+{
+  "tool": "rollback_migration",
+  "arguments": {
+    "steps": 1
+  }
+}
+```
+
+Rollback multiple migrations:
+
+```json
+{
+  "tool": "rollback_migration",
+  "arguments": {
+    "steps": 3
+  }
+}
+```
+
+Rollback to a specific version (exclusive):
+
+```json
+{
+  "tool": "rollback_migration",
+  "arguments": {
+    "target_version": "20240115120000"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Successfully rolled back 2 migration(s)",
+    "rolled_back_count": 2,
+    "failed_count": 0,
+    "rolled_back_migrations": [
+      {"version": "20240115140000", "name": "add_products_table", "execution_time_ms": 15},
+      {"version": "20240115130000", "name": "add_orders_table", "execution_time_ms": 12}
+    ]
+  }
+}
+```
+
+### Getting Schema Version
+
+Check the current schema version:
+
+```json
+{
+  "tool": "get_schema_version",
+  "arguments": {}
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "current_version": "20240115140000",
+    "current_migration_name": "add_products_table",
+    "applied_at": "2024-01-15T14:30:00.000Z",
+    "pending_migrations": 2,
+    "migrations_table_exists": true
+  }
+}
+```
+
+### Getting Migration Status
+
+View migration history with status:
+
+```json
+{
+  "tool": "get_migration_status",
+  "arguments": {
+    "limit": 10
+  }
+}
+```
+
+Filter by status:
+
+```json
+{
+  "tool": "get_migration_status",
+  "arguments": {
+    "status": "failed"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "current_version": "20240115140000",
+    "summary": {
+      "total": 5,
+      "pending": 1,
+      "applied": 3,
+      "failed": 1,
+      "rolled_back": 0
+    },
+    "migrations": [
+      {
+        "id": 5,
+        "version": "20240115150000",
+        "name": "add_analytics_table",
+        "status": "pending",
+        "applied_at": null,
+        "execution_time_ms": null
+      },
+      {
+        "id": 4,
+        "version": "20240115140000",
+        "name": "add_products_table",
+        "status": "applied",
+        "applied_at": "2024-01-15T14:30:00.000Z",
+        "execution_time_ms": 28
+      }
+    ]
+  }
+}
+```
+
+### Validating Migrations
+
+Check migrations for potential issues:
+
+```json
+{
+  "tool": "validate_migrations",
+  "arguments": {}
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "valid": false,
+    "total_migrations": 5,
+    "issues_count": 1,
+    "warnings_count": 2,
+    "issues": [
+      {
+        "type": "checksum_mismatch",
+        "version": "20240115120000",
+        "name": "add_users_table",
+        "message": "Migration 'add_users_table' checksum mismatch - migration may have been modified after being applied"
+      }
+    ],
+    "warnings": [
+      {
+        "type": "missing_down_sql",
+        "version": "20240115150000",
+        "name": "add_analytics_table",
+        "message": "Migration 'add_analytics_table' has no down_sql - rollback will not be possible"
+      },
+      {
+        "type": "blocked_migrations",
+        "message": "1 pending migration(s) are blocked by failed migration 'add_audit_table'"
+      }
+    ]
+  }
+}
+```
+
+### Resetting Failed Migrations
+
+Reset a failed migration to try again:
+
+```json
+{
+  "tool": "reset_failed_migration",
+  "arguments": {
+    "version": "20240115145000"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Migration 'add_audit_table' (20240115145000) has been reset to pending status",
+    "version": "20240115145000",
+    "name": "add_audit_table",
+    "previous_status": "failed",
+    "new_status": "pending"
+  }
+}
+```
+
+### Generating Migrations from Table Differences
+
+Automatically generate a migration by comparing two table structures:
+
+```json
+{
+  "tool": "generate_migration_from_diff",
+  "arguments": {
+    "table1": "users_v2",
+    "table2": "users",
+    "migration_name": "update_users_to_v2"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Migration 'update_users_to_v2' generated with 3 change(s)",
+    "version": "20240115160000",
+    "changes_count": 3,
+    "up_sql": "ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(20) NULL;\nALTER TABLE `users` ADD COLUMN `avatar_url` VARCHAR(500) NULL;\nALTER TABLE `users` MODIFY COLUMN `name` VARCHAR(200) NOT NULL;",
+    "down_sql": "ALTER TABLE `users` DROP COLUMN `phone`;\nALTER TABLE `users` DROP COLUMN `avatar_url`;\nALTER TABLE `users` MODIFY COLUMN `name` VARCHAR(100) NULL;",
+    "source_table": "users_v2",
+    "target_table": "users"
+  }
+}
+```
+
+### Migration Best Practices
+
+1. **Always include down_sql**: Enable rollback capability for all migrations
+2. **Test migrations first**: Use `dry_run: true` to preview changes
+3. **Validate before applying**: Run `validate_migrations` to check for issues
+4. **Use descriptive names**: Make migration names clear and meaningful
+5. **Keep migrations small**: One logical change per migration
+6. **Version control migrations**: Store migration SQL in your VCS
+7. **Never modify applied migrations**: Create new migrations for changes
+8. **Backup before migrating**: Always backup production databases first
+
+### Common Migration Patterns
+
+#### Adding a Column
+
+```json
+{
+  "tool": "create_migration",
+  "arguments": {
+    "name": "add_user_phone",
+    "up_sql": "ALTER TABLE users ADD COLUMN phone VARCHAR(20) NULL AFTER email;",
+    "down_sql": "ALTER TABLE users DROP COLUMN phone;"
+  }
+}
+```
+
+#### Adding an Index
+
+```json
+{
+  "tool": "create_migration",
+  "arguments": {
+    "name": "add_email_index",
+    "up_sql": "CREATE INDEX idx_users_email ON users(email);",
+    "down_sql": "DROP INDEX idx_users_email ON users;"
+  }
+}
+```
+
+#### Renaming a Column
+
+```json
+{
+  "tool": "create_migration",
+  "arguments": {
+    "name": "rename_user_name_to_full_name",
+    "up_sql": "ALTER TABLE users CHANGE COLUMN name full_name VARCHAR(100);",
+    "down_sql": "ALTER TABLE users CHANGE COLUMN full_name name VARCHAR(100);"
+  }
+}
+```
+
+#### Adding Foreign Key
+
+```json
+{
+  "tool": "create_migration",
+  "arguments": {
+    "name": "add_orders_user_fk",
+    "up_sql": "ALTER TABLE orders ADD CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;",
+    "down_sql": "ALTER TABLE orders DROP FOREIGN KEY fk_orders_user;"
+  }
+}
+```
+
+### Migration Table Schema
+
+The `_schema_migrations` table stores all migration information:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT | Auto-increment primary key |
+| version | VARCHAR(14) | Migration version (timestamp-based) |
+| name | VARCHAR(255) | Migration name |
+| description | TEXT | Optional description |
+| up_sql | LONGTEXT | SQL to apply migration |
+| down_sql | LONGTEXT | SQL to rollback migration |
+| checksum | VARCHAR(64) | Checksum of up_sql for integrity |
+| applied_at | TIMESTAMP | When migration was applied |
+| applied_by | VARCHAR(255) | User who applied migration |
+| execution_time_ms | INT | Execution time in milliseconds |
+| status | ENUM | pending, applied, failed, rolled_back |
+| error_message | TEXT | Error message if failed |
+| created_at | TIMESTAMP | When migration was created |
+
+---
+
 ## 💰 Transaction Management
 
 The MySQL MCP Server provides full ACID transaction support, allowing you to group multiple database operations into atomic units.
@@ -2385,10 +2860,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **Database backup and restore tools** - **COMPLETED!**
 - ✅ **Data export/import utilities** (CSV, JSON, SQL dumps) - **COMPLETED!**
 - ✅ **Data migration utilities** - **COMPLETED!**
+- ✅ **Schema versioning and migrations** - **COMPLETED!**
 - [ ] **Performance monitoring and metrics**
 - [ ] **Connection pool monitoring**
 - [ ] **Audit logging and compliance**
-- [ ] **Schema versioning and migrations**
 
 ### Database Adapters
 - [ ] PostgreSQL adapter
@@ -2413,7 +2888,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 #### **Phase 3: Enterprise Features** 🏢
 - [ ] **Audit logging and compliance** - Track all database operations for security
-- [ ] **Schema versioning and migrations** - Version control for database schema changes
+- ✅ **Schema versioning and migrations** - Version control for database schema changes - **COMPLETED!**
 - ✅ **Query optimization** - Automatic query analysis and optimization suggestions - **COMPLETED!**
 - [ ] **Advanced security features** - Enhanced access control and monitoring
 
@@ -2439,10 +2914,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Database Backup/Restore | High | High | 10 | ✅ COMPLETED |
 | Data Export/Import (JSON, SQL) | High | Medium | 11 | ✅ COMPLETED |
 | Data Migration | High | High | 12 | ✅ COMPLETED |
-| Performance Monitoring | High | Medium | 13 | Pending |
-| PostgreSQL Adapter | High | High | 14 | Pending |
-| Audit Logging | Medium | Low | 14 | Pending |
-| Schema Versioning | Medium | Medium | 15 | Pending |
+| Schema Versioning | Medium | Medium | 13 | ✅ COMPLETED |
+| Performance Monitoring | High | Medium | 14 | Pending |
+| PostgreSQL Adapter | High | High | 15 | Pending |
+| Audit Logging | Medium | Low | 16 | Pending |
 
 ---
 
