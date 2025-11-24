@@ -26,9 +26,10 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 18. [Query Result Caching](#💾-query-result-caching)
 19. [Query Optimization Hints](#🎯-query-optimization-hints)
 20. [Bulk Operations](#🚀-bulk-operations)
-21. [Troubleshooting](#🛠️-troubleshooting)
-22. [License](#📄-license)
-23. [Roadmap](#🗺️-roadmap)
+21. [OpenAI Codex Integration](#🤖-openai-codex-integration) - NEW!
+22. [Troubleshooting](#🛠️-troubleshooting)
+23. [License](#📄-license)
+24. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -2738,6 +2739,224 @@ Each bulk operation returns performance metrics:
   "records_per_second": 4000
 }
 ```
+
+---
+
+## 🤖 OpenAI Codex Integration
+
+OpenAI Codex CLI and VS Code Extension support MCP servers through a shared TOML configuration file. This section provides detailed setup instructions for integrating the MySQL MCP Server with Codex.
+
+### Configuration Overview
+
+| Feature | Details |
+|---------|---------|
+| **Config File** | `~/.codex/config.toml` |
+| **Shared Config** | CLI and VS Code extension use the same file |
+| **Transport** | STDIO (standard input/output) |
+| **Format** | TOML |
+
+### Quick Setup via CLI
+
+The fastest way to add MySQL MCP to Codex:
+
+```bash
+# Basic setup with connection string
+codex mcp add mysql -- npx -y @berthojoris/mcp-mysql-server mysql://user:password@localhost:3306/database list,read,utility
+
+# With environment variables
+codex mcp add mysql --env DB_HOST=localhost --env DB_PORT=3306 --env DB_USER=root --env DB_PASSWORD=secret --env DB_NAME=mydb --env MCP_PERMISSIONS=list,read,utility -- npx -y @berthojoris/mcp-mysql-server
+```
+
+### Manual TOML Configuration
+
+Edit `~/.codex/config.toml` directly for more control:
+
+#### Basic Configuration
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:password@localhost:3306/database", "list,read,utility"]
+```
+
+#### With Environment Variables
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server"]
+
+[mcp_servers.mysql.env]
+DB_HOST = "localhost"
+DB_PORT = "3306"
+DB_USER = "root"
+DB_PASSWORD = "your_password"
+DB_NAME = "your_database"
+MCP_PERMISSIONS = "list,read,utility"
+```
+
+#### Local Path Configuration (Development)
+
+```toml
+[mcp_servers.mysql]
+command = "node"
+args = ["C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js", "mysql://user:pass@localhost:3306/database", "list,read,utility"]
+cwd = "C:\\DEKSTOP\\MCP\\mcp_mysql"
+```
+
+### Configuration Options Reference
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `command` | String | Required | The executable to launch the server |
+| `args` | Array | `[]` | Command-line arguments passed to the server |
+| `env` | Table | `{}` | Environment variables for the server process |
+| `env_vars` | Array | `[]` | Additional env vars to whitelist/forward |
+| `cwd` | String | - | Working directory to launch the server from |
+| `startup_timeout_sec` | Number | `10` | Server startup timeout in seconds |
+| `tool_timeout_sec` | Number | `60` | Per-tool execution timeout in seconds |
+| `enabled` | Boolean | `true` | Set to `false` to disable without deleting |
+| `enabled_tools` | Array | - | Allow-list of tools to expose from server |
+| `disabled_tools` | Array | - | Deny-list of tools to hide |
+
+### Advanced Configurations
+
+#### Production (Read-Only) + Development (Full Access)
+
+```toml
+# Production database - Read Only
+[mcp_servers.mysql-prod]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://reader:pass@prod-server:3306/prod_db", "list,read,utility"]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+# Development database - Full Access
+[mcp_servers.mysql-dev]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://root:pass@localhost:3306/dev_db", "list,read,create,update,delete,execute,ddl,transaction,utility"]
+```
+
+#### With Tool Filtering (Limit Exposed Tools)
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
+
+# Only expose specific tools
+enabled_tools = [
+  "list_tables",
+  "read_table_schema",
+  "read_records",
+  "run_query",
+  "test_connection"
+]
+
+# Or hide specific dangerous tools
+# disabled_tools = ["drop_table", "delete_record", "execute_sql"]
+```
+
+#### With Custom Timeouts for Large Operations
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,create,update,delete,utility"]
+startup_timeout_sec = 30    # Allow more time for startup
+tool_timeout_sec = 300      # 5 minutes for large bulk operations
+```
+
+### Codex MCP Management Commands
+
+```bash
+# List all configured MCP servers
+codex mcp list
+
+# List with JSON output (for scripting)
+codex mcp list --json
+
+# Get details about a specific server
+codex mcp get mysql
+
+# Remove an MCP server
+codex mcp remove mysql
+
+# Add server with multiple env vars
+codex mcp add mysql --env DB_HOST=localhost --env DB_USER=root -- npx -y @berthojoris/mcp-mysql-server
+```
+
+### VS Code Extension Setup
+
+1. Install the Codex VS Code Extension
+2. Open the extension settings (gear icon in top right)
+3. Click "MCP settings" > "Open config.toml"
+4. Add your MySQL MCP configuration
+5. Save the file - changes apply immediately
+
+### Verifying the Setup
+
+After configuration, test your setup:
+
+```bash
+# In Codex CLI
+codex mcp list
+
+# You should see:
+# mysql: npx -y @berthojoris/mcp-mysql-server ...
+```
+
+Then ask Codex:
+- "What databases are available?"
+- "List all tables in my database"
+- "Show me the structure of the users table"
+
+### Troubleshooting Codex Integration
+
+#### Server Not Starting
+
+1. **Check TOML syntax** - A single syntax error breaks both CLI and VS Code extension
+2. **Verify paths** - Use absolute paths for local installations
+3. **Check startup timeout** - Increase `startup_timeout_sec` if server takes time to initialize
+
+#### Tools Not Appearing
+
+1. Verify server configuration with `codex mcp list --json`
+2. Check that `enabled = true` (or not set, defaults to true)
+3. Ensure `enabled_tools` doesn't accidentally filter out needed tools
+
+#### Connection Errors
+
+1. Test MySQL connection manually: `mysql -u user -p -h host database`
+2. Verify credentials in connection string
+3. Check network connectivity to MySQL server
+
+#### Common TOML Syntax Errors
+
+```toml
+# WRONG - missing quotes around string values
+args = [-y, @berthojoris/mcp-mysql-server]
+
+# CORRECT
+args = ["-y", "@berthojoris/mcp-mysql-server"]
+
+# WRONG - using JSON syntax
+"mcp_servers": { "mysql": { ... } }
+
+# CORRECT - TOML table syntax
+[mcp_servers.mysql]
+command = "npx"
+```
+
+### Permission Sets for Common Use Cases
+
+| Use Case | Permissions |
+|----------|-------------|
+| Read-Only Analysis | `list,read,utility` |
+| Data Entry | `list,read,create,utility` |
+| Full Data Access | `list,read,create,update,delete,utility` |
+| With Transactions | `list,read,create,update,delete,transaction,utility` |
+| Development (Full) | `list,read,create,update,delete,execute,ddl,transaction,procedure,utility` |
 
 ---
 

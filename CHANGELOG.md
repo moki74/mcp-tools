@@ -5,6 +5,37 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2025-11-24
+
+### Added
+- **OpenAI Codex Integration** - Full support for OpenAI Codex CLI and VS Code Extension
+  - Added Codex configuration examples to README.md
+  - Added comprehensive Codex Integration section to DOCUMENTATIONS.md
+  - TOML configuration format (`~/.codex/config.toml`)
+  - CLI setup via `codex mcp add` command
+  - Environment variables configuration
+  - Multiple database configurations (prod/dev)
+  - Advanced options (timeouts, tool filtering)
+  - Codex MCP management commands reference
+  - Troubleshooting section for Codex-specific issues
+
+### Changed
+- Updated package.json keywords to include "codex" and "openai-codex"
+- Updated feature list to include OpenAI Codex as supported AI agent
+
+### Documentation
+- README.md: Added OpenAI Codex CLI & VS Code Extension configuration section
+- DOCUMENTATIONS.md: Added new section "OpenAI Codex Integration" with:
+  - Configuration overview table
+  - Quick setup via CLI
+  - Manual TOML configuration examples
+  - Configuration options reference table
+  - Advanced configurations (prod+dev, tool filtering, custom timeouts)
+  - VS Code Extension setup steps
+  - Verification instructions
+  - Common TOML syntax errors
+  - Permission sets for common use cases
+
 ## [1.9.0] - 2025-11-24
 
 ### Added

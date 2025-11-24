@@ -1,6 +1,6 @@
 ﻿# MySQL MCP Server
 
-A fully-featured **Model Context Protocol (MCP)** server for MySQL database integration with AI agents like Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, and other MCP-compatible tools.
+A fully-featured **Model Context Protocol (MCP)** server for MySQL database integration with AI agents like Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and other MCP-compatible tools.
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -9,7 +9,7 @@ A fully-featured **Model Context Protocol (MCP)** server for MySQL database inte
 
 ## 🌟 Features
 
-- ✅ **Full MCP Protocol Support** - Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, and any MCP-compatible AI agent
+- ✅ **Full MCP Protocol Support** - Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent
 - 🔐 **Secure by Default** - Parameterized queries, SQL injection protection, permission-based access control
 - 🛠️ **100 Powerful Tools** - Complete database operations (CRUD, DDL, queries, schema inspection, transactions, stored procedures, bulk operations, backup/restore, import/export, data migration)
 - 🎛️ **Dynamic Per-Project Permissions** - Each AI agent can have different access levels
@@ -397,6 +397,85 @@ Zed IDE uses `~/.config/zed/settings.json` for MCP configuration.
     }
   }
 }
+```
+
+#### OpenAI Codex CLI & VS Code Extension
+
+OpenAI Codex uses `~/.codex/config.toml` for MCP configuration. This configuration is **shared between the CLI and VS Code extension**.
+
+**Option 1: Using the Codex CLI command:**
+
+```bash
+codex mcp add mysql -- npx -y @berthojoris/mcp-mysql-server mysql://user:password@localhost:3306/database list,read,utility
+```
+
+**Option 2: Manual TOML configuration (`~/.codex/config.toml`):**
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:password@localhost:3306/database", "list,read,utility"]
+startup_timeout_sec = 20
+```
+
+**With environment variables:**
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server"]
+
+[mcp_servers.mysql.env]
+DB_HOST = "localhost"
+DB_PORT = "3306"
+DB_USER = "root"
+DB_PASSWORD = "your_password"
+DB_NAME = "your_database"
+MCP_PERMISSIONS = "list,read,utility"
+```
+
+**Multiple database configurations:**
+
+```toml
+# Production - Read Only
+[mcp_servers.mysql-prod]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://reader:pass@prod-server:3306/prod_db", "list,read,utility"]
+startup_timeout_sec = 30
+
+# Development - Full Access
+[mcp_servers.mysql-dev]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://root:pass@localhost:3306/dev_db", "list,read,create,update,delete,execute,ddl,utility"]
+```
+
+**Advanced options:**
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/database", "list,read,utility"]
+startup_timeout_sec = 20        # Server startup timeout (default: 10)
+tool_timeout_sec = 120          # Per-tool execution timeout (default: 60)
+enabled = true                  # Set false to disable without deleting
+# enabled_tools = ["list_tables", "read_records"]  # Optional: limit exposed tools
+# disabled_tools = ["drop_table", "delete_record"] # Optional: hide specific tools
+```
+
+**Codex MCP management commands:**
+
+```bash
+# List all configured MCP servers
+codex mcp list
+
+# List with JSON output
+codex mcp list --json
+
+# Remove an MCP server
+codex mcp remove mysql
+
+# Get details about a specific server
+codex mcp get mysql
 ```
 
 #### Kilo Code (VS Code Extension)
