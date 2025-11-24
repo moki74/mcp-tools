@@ -753,7 +753,10 @@ export class MySQLMCP {
     data: Record<string, any>[];
     batch_size?: number;
   }): Promise<{ status: string; data?: any; error?: string }> {
-    this.checkToolEnabled("bulk_insert");
+    const check = this.checkToolEnabled("bulkInsert");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
     return this.crudTools.bulkInsert(params);
   }
 
@@ -768,7 +771,10 @@ export class MySQLMCP {
     }>;
     batch_size?: number;
   }): Promise<{ status: string; data?: any; error?: string }> {
-    this.checkToolEnabled("bulk_update");
+    const check = this.checkToolEnabled("bulkUpdate");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
     return this.crudTools.bulkUpdate(params);
   }
 
@@ -780,7 +786,10 @@ export class MySQLMCP {
     condition_sets: any[][];
     batch_size?: number;
   }): Promise<{ status: string; data?: any; error?: string }> {
-    this.checkToolEnabled("bulk_delete");
+    const check = this.checkToolEnabled("bulkDelete");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
     return this.crudTools.bulkDelete(params);
   }
 
