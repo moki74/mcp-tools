@@ -5,6 +5,53 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2025-11-25
+
+### Added
+- **Performance Monitoring** - Complete performance analysis toolkit with 10 new tools:
+  - `get_performance_metrics` - Comprehensive metrics (query performance, connections, buffer pool, InnoDB stats)
+  - `get_top_queries_by_time` - Identify slowest queries by execution time
+  - `get_top_queries_by_count` - Find most frequently executed queries
+  - `get_slow_queries` - Queries exceeding custom time thresholds
+  - `get_table_io_stats` - Monitor table I/O operations and identify hot tables
+  - `get_index_usage_stats` - Track index usage patterns
+  - `get_unused_indexes` - Identify unused indexes for optimization
+  - `get_connection_pool_stats` - Monitor connection pool health
+  - `get_database_health_check` - Comprehensive health assessment with status levels
+  - `reset_performance_stats` - Reset performance schema statistics
+- Added comprehensive Performance Monitoring section to DOCUMENTATIONS.md
+- Updated README.md tool count from 109 to 119 tools
+- All performance tools require only `utility` permission (no special setup needed)
+
+### Fixed
+- **test_connection Enhanced Diagnostics** - Significantly improved error reporting:
+  - Added error-specific troubleshooting steps for common issues
+  - Platform-specific guidance (Windows/Linux/Mac) for MySQL server management
+  - Shows current configuration (host, port, user, database) for verification
+  - Detects and diagnoses: ECONNREFUSED, ER_ACCESS_DENIED_ERROR, ER_BAD_DB_ERROR, ETIMEDOUT, ENOTFOUND
+  - Clear success messages with connection latency
+- **run_query SHOW Support** - Fixed rejection of read-only information queries:
+  - Now supports: SHOW TABLES, SHOW DATABASES, SHOW COLUMNS, SHOW CREATE TABLE, etc.
+  - Added support for: DESCRIBE, DESC, EXPLAIN, HELP commands
+  - These queries work with `read` permission (no `execute` permission needed)
+- **Performance Tools Registration** - Added all 10 performance monitoring tools to `featureConfig.ts`
+  - Ensures AI agents can discover and use performance tools correctly
+  - All mapped to `ToolCategory.UTILITY` permission
+
+### Changed
+- Enhanced error handling in `test_connection` to return detailed diagnostic information
+- Updated security layer to recognize SHOW, DESCRIBE, EXPLAIN as valid read-only queries
+- Improved error messages throughout with clearer guidance
+
+### Documentation
+- Added "Performance Monitoring" section to DOCUMENTATIONS.md with:
+  - Complete tool reference with examples
+  - Best practices for regular monitoring
+  - Query optimization workflows
+  - Common performance patterns and troubleshooting
+- Updated README.md with Performance Monitoring category
+- Updated roadmap to mark Performance Monitoring as completed
+
 ## [1.9.1] - 2025-11-24
 
 ### Added

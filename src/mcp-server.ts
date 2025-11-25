@@ -2663,6 +2663,144 @@ const TOOLS: Tool[] = [
       required: ["table1", "table2", "migration_name"],
     },
   },
+  // Performance Monitoring Tools
+  {
+    name: "get_performance_metrics",
+    description:
+      "Get comprehensive performance metrics including query performance, connection stats, buffer pool metrics, and InnoDB statistics.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "get_top_queries_by_time",
+    description:
+      "Get the top queries ordered by total execution time. Useful for identifying slow queries.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "number",
+          description:
+            "Maximum number of queries to return (default: 10, max: 100)",
+        },
+      },
+    },
+  },
+  {
+    name: "get_top_queries_by_count",
+    description:
+      "Get the top queries ordered by execution count. Useful for identifying frequently executed queries.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "number",
+          description:
+            "Maximum number of queries to return (default: 10, max: 100)",
+        },
+      },
+    },
+  },
+  {
+    name: "get_slow_queries",
+    description:
+      "Get queries that exceed a specified execution time threshold.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "number",
+          description:
+            "Maximum number of queries to return (default: 10, max: 100)",
+        },
+        threshold_seconds: {
+          type: "number",
+          description: "Execution time threshold in seconds (default: 1)",
+        },
+      },
+    },
+  },
+  {
+    name: "get_table_io_stats",
+    description:
+      "Get I/O statistics for tables including read/write operations and timings.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "number",
+          description:
+            "Maximum number of tables to return (default: 20, max: 100)",
+        },
+        table_schema: {
+          type: "string",
+          description: "Filter by specific database schema",
+        },
+      },
+    },
+  },
+  {
+    name: "get_index_usage_stats",
+    description:
+      "Get index usage statistics showing how often each index is used.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "number",
+          description:
+            "Maximum number of indexes to return (default: 20, max: 100)",
+        },
+        table_schema: {
+          type: "string",
+          description: "Filter by specific database schema",
+        },
+      },
+    },
+  },
+  {
+    name: "get_unused_indexes",
+    description:
+      "Identify indexes that are not being used by queries. These may be candidates for removal to improve write performance.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_schema: {
+          type: "string",
+          description: "Filter by specific database schema",
+        },
+      },
+    },
+  },
+  {
+    name: "get_connection_pool_stats",
+    description:
+      "Get connection pool statistics including current connections, max usage, configuration, and health indicators.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "get_database_health_check",
+    description:
+      "Perform a comprehensive health check of the database including connection usage, buffer pool efficiency, aborted connections, and slow queries.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "reset_performance_stats",
+    description:
+      "Reset performance schema statistics. This clears query digest statistics, table I/O stats, and index usage stats. Requires 'utility' permission.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
 ];
 
 // Create the MCP server
@@ -3145,6 +3283,38 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
       case "generate_migration_from_diff":
         result = await mysqlMCP.generateMigrationFromDiff((args || {}) as any);
+        break;
+
+      // Performance Monitoring Tools
+      case "get_performance_metrics":
+        result = await mysqlMCP.getPerformanceMetrics();
+        break;
+      case "get_top_queries_by_time":
+        result = await mysqlMCP.getTopQueriesByTime((args || {}) as any);
+        break;
+      case "get_top_queries_by_count":
+        result = await mysqlMCP.getTopQueriesByCount((args || {}) as any);
+        break;
+      case "get_slow_queries":
+        result = await mysqlMCP.getSlowQueries((args || {}) as any);
+        break;
+      case "get_table_io_stats":
+        result = await mysqlMCP.getTableIOStats((args || {}) as any);
+        break;
+      case "get_index_usage_stats":
+        result = await mysqlMCP.getIndexUsageStats((args || {}) as any);
+        break;
+      case "get_unused_indexes":
+        result = await mysqlMCP.getUnusedIndexes((args || {}) as any);
+        break;
+      case "get_connection_pool_stats":
+        result = await mysqlMCP.getConnectionPoolStats();
+        break;
+      case "get_database_health_check":
+        result = await mysqlMCP.getDatabaseHealthCheck();
+        break;
+      case "reset_performance_stats":
+        result = await mysqlMCP.resetPerformanceStats();
         break;
 
       default:

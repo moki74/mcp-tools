@@ -20,7 +20,8 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 12. [Constraint Management](#🔗-constraint-management)
 13. [Table Maintenance](#🔧-table-maintenance)
 14. [Process & Server Management](#📊-process--server-management)
-15. [Usage Examples](#📋-usage-examples)
+15. [Performance Monitoring](#📈-performance-monitoring) - NEW!
+16. [Usage Examples](#📋-usage-examples)
 16. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
 17. [Security Features](#🔒-security-features)
 18. [Query Result Caching](#💾-query-result-caching)
@@ -1985,6 +1986,477 @@ Monitor and manage MySQL server processes and configuration.
 
 ---
 
+## 📈 Performance Monitoring
+
+Monitor database performance, identify bottlenecks, and optimize query execution.
+
+### Performance Monitoring Tools Overview
+
+- **`get_performance_metrics`** - Get comprehensive performance metrics
+- **`get_top_queries_by_time`** - Find slowest queries by execution time
+- **`get_top_queries_by_count`** - Find most frequently executed queries
+- **`get_slow_queries`** - Identify queries exceeding time threshold
+- **`get_table_io_stats`** - Monitor table I/O operations
+- **`get_index_usage_stats`** - Track index usage statistics
+- **`get_unused_indexes`** - Identify unused indexes
+- **`get_connection_pool_stats`** - Monitor connection pool health
+- **`get_database_health_check`** - Comprehensive health assessment
+- **`reset_performance_stats`** - Reset performance schema statistics
+
+**Requirements:**
+- MySQL Performance Schema must be enabled
+- Tools use standard `utility` permission
+- No special permissions required
+
+### Get Performance Metrics
+
+Get comprehensive performance metrics including query performance, connections, buffer pool, and InnoDB statistics.
+
+**User:** *"Show me the database performance metrics"*
+
+```json
+{
+  "tool": "get_performance_metrics",
+  "arguments": {}
+}
+```
+
+**Returns:**
+```json
+{
+  "status": "success",
+  "data": {
+    "query_performance": {
+      "total_execution_time_sec": 123.45,
+      "total_lock_time_sec": 2.34,
+      "total_rows_examined": 1000000,
+      "total_rows_sent": 50000,
+      "full_table_scans": 10,
+      "queries_without_indexes": 5
+    },
+    "connections": {
+      "threads_connected": 10,
+      "threads_running": 2,
+      "max_used_connections": 50,
+      "connections": 1000,
+      "aborted_connects": 5
+    },
+    "innodb": {
+      "buffer_pool_hit_ratio": "99.95%",
+      "innodb_rows_read": 500000,
+      "innodb_rows_inserted": 10000
+    },
+    "slow_queries": {
+      "slow_queries": 100,
+      "questions": 100000,
+      "slow_query_percentage": "0.1000%"
+    }
+  }
+}
+```
+
+### Get Top Queries by Execution Time
+
+Identify the slowest queries consuming the most time.
+
+**User:** *"Show me the top 5 slowest queries"*
+
+```json
+{
+  "tool": "get_top_queries_by_time",
+  "arguments": {
+    "limit": 5
+  }
+}
+```
+
+**Returns:**
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "query_pattern": "SELECT * FROM orders WHERE user_id = ?",
+      "execution_count": 1000,
+      "avg_execution_time_sec": 2.5,
+      "max_execution_time_sec": 10.2,
+      "total_execution_time_sec": 2500.0,
+      "rows_examined": 50000,
+      "rows_sent": 1000
+    }
+  ]
+}
+```
+
+### Get Top Queries by Execution Count
+
+Find the most frequently executed queries.
+
+**User:** *"What queries are executed most often?"*
+
+```json
+{
+  "tool": "get_top_queries_by_count",
+  "arguments": {
+    "limit": 10
+  }
+}
+```
+
+### Get Slow Queries
+
+Find queries exceeding a specific execution time threshold.
+
+**User:** *"Show me queries taking longer than 2 seconds"*
+
+```json
+{
+  "tool": "get_slow_queries",
+  "arguments": {
+    "limit": 20,
+    "threshold_seconds": 2
+  }
+}
+```
+
+**Response includes:**
+- Query pattern (with `?` for parameters)
+- Execution count and timing statistics
+- Lock time and rows examined
+- Number of times executed without indexes
+
+### Get Table I/O Statistics
+
+Monitor read/write operations on tables to identify hot tables.
+
+**User:** *"Show me table I/O statistics"*
+
+```json
+{
+  "tool": "get_table_io_stats",
+  "arguments": {
+    "limit": 20,
+    "table_schema": "myapp"
+  }
+}
+```
+
+**Returns:**
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "table_schema": "myapp",
+      "table_name": "orders",
+      "read_operations": 10000,
+      "write_operations": 5000,
+      "fetch_operations": 8000,
+      "insert_operations": 2000,
+      "update_operations": 2500,
+      "delete_operations": 500,
+      "total_read_time_sec": 45.2,
+      "total_write_time_sec": 23.1
+    }
+  ]
+}
+```
+
+### Get Index Usage Statistics
+
+Track how often indexes are being used.
+
+**User:** *"Show me index usage statistics"*
+
+```json
+{
+  "tool": "get_index_usage_stats",
+  "arguments": {
+    "limit": 20,
+    "table_schema": "myapp"
+  }
+}
+```
+
+**Use cases:**
+- Identify most-used indexes
+- Verify new indexes are being utilized
+- Monitor index efficiency
+
+### Get Unused Indexes
+
+Identify indexes that are never used - candidates for removal.
+
+**User:** *"Find indexes that are not being used"*
+
+```json
+{
+  "tool": "get_unused_indexes",
+  "arguments": {
+    "table_schema": "myapp"
+  }
+}
+```
+
+**Returns:**
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "table_schema": "myapp",
+      "table_name": "users",
+      "index_name": "idx_old_field",
+      "column_name": "old_field",
+      "is_non_unique": 1
+    }
+  ]
+}
+```
+
+**Benefits:**
+- Unused indexes slow down INSERT/UPDATE/DELETE operations
+- Removing unused indexes saves storage space
+- Improves write performance
+
+### Get Connection Pool Statistics
+
+Monitor connection pool health and usage.
+
+**User:** *"Check connection pool statistics"*
+
+```json
+{
+  "tool": "get_connection_pool_stats",
+  "arguments": {}
+}
+```
+
+**Returns:**
+```json
+{
+  "status": "success",
+  "data": {
+    "current_status": {
+      "threads_connected": 25,
+      "threads_running": 5,
+      "max_used_connections": 100,
+      "connections": 50000,
+      "aborted_connects": 10
+    },
+    "configuration": {
+      "max_connections": 200,
+      "thread_cache_size": 8,
+      "wait_timeout": 28800
+    },
+    "health_indicators": {
+      "connection_usage_percentage": "12.50%",
+      "max_usage_percentage": "50.00%",
+      "available_connections": 175,
+      "aborted_connection_percentage": "0.0200%",
+      "thread_cache_hit_rate": "95.50%"
+    }
+  }
+}
+```
+
+### Get Database Health Check
+
+Perform a comprehensive health assessment.
+
+**User:** *"Perform a database health check"*
+
+```json
+{
+  "tool": "get_database_health_check",
+  "arguments": {}
+}
+```
+
+**Returns:**
+```json
+{
+  "status": "success",
+  "data": {
+    "overall_status": "healthy",
+    "checks": [
+      {
+        "name": "Connection Usage",
+        "status": "healthy",
+        "current": 25,
+        "max": 200,
+        "usage_percentage": "12.50%"
+      },
+      {
+        "name": "Buffer Pool Hit Ratio",
+        "status": "healthy",
+        "hit_ratio": "99.85%"
+      },
+      {
+        "name": "Aborted Connections",
+        "status": "healthy",
+        "aborted": 10,
+        "total": 50000,
+        "abort_rate": "0.0200%"
+      },
+      {
+        "name": "Slow Queries",
+        "status": "healthy",
+        "slow_queries": 50,
+        "total_queries": 100000,
+        "slow_query_rate": "0.0500%"
+      }
+    ],
+    "warnings": [],
+    "errors": []
+  }
+}
+```
+
+**Status Levels:**
+- `healthy` - All metrics within acceptable ranges
+- `warning` - Some metrics need attention
+- `critical` - Immediate action required
+
+**Health Checks Include:**
+- Connection usage (warning >80%, critical >90%)
+- Buffer pool hit ratio (warning <95%, critical <85%)
+- Aborted connection rate (warning >1%, critical >5%)
+- Slow query percentage (warning >1%, critical >5%)
+
+### Reset Performance Statistics
+
+Reset Performance Schema statistics to start fresh monitoring.
+
+**User:** *"Reset performance statistics"*
+
+```json
+{
+  "tool": "reset_performance_stats",
+  "arguments": {}
+}
+```
+
+**What gets reset:**
+- Query digest statistics
+- Table I/O wait statistics
+- Index usage statistics
+- All performance_schema summary tables
+
+**Use cases:**
+- Start monitoring from a clean slate
+- After major application changes
+- For specific performance testing periods
+
+### Performance Monitoring Best Practices
+
+**Regular Monitoring:**
+```json
+// Daily health check
+{ "tool": "get_database_health_check" }
+
+// Weekly deep dive
+{ "tool": "get_performance_metrics" }
+{ "tool": "get_top_queries_by_time", "arguments": { "limit": 20 } }
+{ "tool": "get_unused_indexes" }
+```
+
+**Query Optimization Workflow:**
+1. Identify slow queries with `get_slow_queries`
+2. Analyze execution plan with `explain_query`
+3. Check index usage with `get_index_usage_stats`
+4. Find unused indexes with `get_unused_indexes`
+5. Monitor improvements with `get_performance_metrics`
+
+**Connection Pool Monitoring:**
+```json
+// Check connection health
+{ "tool": "get_connection_pool_stats" }
+
+// If issues found, check active processes
+{ "tool": "show_process_list", "arguments": { "full": true } }
+```
+
+**Table I/O Analysis:**
+```json
+// Find hot tables
+{ "tool": "get_table_io_stats", "arguments": { "limit": 10 } }
+
+// Check specific table indexes
+{ "tool": "get_index_usage_stats", "arguments": { "table_schema": "myapp" } }
+```
+
+### Common Performance Patterns
+
+#### Finding Query Bottlenecks
+```json
+// Step 1: Get top slow queries
+{
+  "tool": "get_top_queries_by_time",
+  "arguments": { "limit": 10 }
+}
+
+// Step 2: Check if indexes are being used
+{
+  "tool": "get_slow_queries",
+  "arguments": {
+    "threshold_seconds": 1,
+    "limit": 20
+  }
+}
+
+// Step 3: Review query execution plans
+{
+  "tool": "explain_query",
+  "arguments": {
+    "query": "SELECT * FROM orders WHERE user_id = 5",
+    "format": "JSON"
+  }
+}
+```
+
+#### Optimizing Indexes
+```json
+// Step 1: Find unused indexes
+{
+  "tool": "get_unused_indexes",
+  "arguments": { "table_schema": "myapp" }
+}
+
+// Step 2: Check current index usage
+{
+  "tool": "get_index_usage_stats",
+  "arguments": { "table_schema": "myapp", "limit": 50 }
+}
+
+// Step 3: Drop unused indexes (requires DDL permission)
+{
+  "tool": "drop_index",
+  "arguments": {
+    "table_name": "users",
+    "index_name": "idx_unused"
+  }
+}
+```
+
+#### Monitoring After Changes
+```json
+// Reset stats before deployment
+{ "tool": "reset_performance_stats" }
+
+// After deployment, check metrics
+{ "tool": "get_performance_metrics" }
+{ "tool": "get_database_health_check" }
+
+// Monitor specific queries
+{
+  "tool": "get_top_queries_by_count",
+  "arguments": { "limit": 10 }
+}
+```
+
+---
+
 ## 📋 Usage Examples
 
 ### Example 1: Read Data
@@ -3095,9 +3567,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 #### **Phase 1: Performance & Monitoring** 🚀
 - ✅ **Query result caching** - Dramatically improve response times for repeated queries - **COMPLETED!**
-- [ ] **Performance metrics** - Track query execution times and database performance
-- [ ] **Connection pool monitoring** - Monitor database connection health and usage
-- [ ] **Database health checks** - Comprehensive system health monitoring
+- ✅ **Performance metrics** - Track query execution times and database performance - **COMPLETED!**
+- ✅ **Connection pool monitoring** - Monitor database connection health and usage - **COMPLETED!**
+- ✅ **Database health checks** - Comprehensive system health monitoring - **COMPLETED!**
 
 #### **Phase 2: Data Management** 📊
 - ✅ **Database backup and restore tools** - Essential for production data safety - **COMPLETED!**
@@ -3134,7 +3606,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Data Export/Import (JSON, SQL) | High | Medium | 11 | ✅ COMPLETED |
 | Data Migration | High | High | 12 | ✅ COMPLETED |
 | Schema Versioning | Medium | Medium | 13 | ✅ COMPLETED |
-| Performance Monitoring | High | Medium | 14 | Pending |
+| Performance Monitoring | High | Medium | 14 | ✅ COMPLETED |
 | PostgreSQL Adapter | High | High | 15 | Pending |
 | Audit Logging | Medium | Low | 16 | Pending |
 

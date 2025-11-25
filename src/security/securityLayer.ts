@@ -40,6 +40,16 @@ export class SecurityLayer {
   }
 
   /**
+   * Check if a query is a read-only information query (SHOW, DESCRIBE, EXPLAIN, etc.)
+   */
+  private isInformationQuery(query: string): boolean {
+    const trimmedQuery = query.trim().toUpperCase();
+    const readOnlyCommands = ["SHOW", "DESCRIBE", "DESC", "EXPLAIN", "HELP"];
+
+    return readOnlyCommands.some((cmd) => trimmedQuery.startsWith(cmd));
+  }
+
+  /**
    * Validate input against a JSON schema
    */
   validateInput(schema: object, data: any): { valid: boolean; errors?: any } {
@@ -157,6 +167,11 @@ export class SecurityLayer {
 
     // Remove trailing semicolon for analysis
     const cleanQuery = trimmedQuery.replace(/;$/, "");
+
+    // Check if it's an information query (SHOW, DESCRIBE, EXPLAIN, etc.) - these are always allowed
+    if (this.isInformationQuery(trimmedQuery)) {
+      return { valid: true, queryType: "INFORMATION" };
+    }
 
     // Determine query type - check basic operations first
     let queryType = "";
@@ -301,9 +316,15 @@ export class SecurityLayer {
   }
 
   /**
-   * Check if a query is a read-only SELECT query
+   * Check if a query is a read-only SELECT query or information query (SHOW, DESCRIBE, etc.)
    */
   isReadOnlyQuery(query: string): boolean {
+    // Check if it's an information query first (SHOW, DESCRIBE, EXPLAIN, etc.)
+    if (this.isInformationQuery(query)) {
+      return true;
+    }
+
+    // Check if it's a SELECT query
     const validation = this.validateQuery(query);
     return validation.valid && validation.queryType === "SELECT";
   }

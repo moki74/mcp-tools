@@ -16,6 +16,7 @@ import { ProcessTools } from "./tools/processTools";
 import { BackupRestoreTools } from "./tools/backupRestoreTools";
 import { MigrationTools } from "./tools/migrationTools";
 import { SchemaVersioningTools } from "./tools/schemaVersioningTools";
+import { PerformanceTools } from "./tools/performanceTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -43,6 +44,7 @@ export class MySQLMCP {
   private backupRestoreTools: BackupRestoreTools;
   private migrationTools: MigrationTools;
   private schemaVersioningTools: SchemaVersioningTools;
+  private performanceTools: PerformanceTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -67,6 +69,7 @@ export class MySQLMCP {
     this.backupRestoreTools = new BackupRestoreTools(this.security);
     this.migrationTools = new MigrationTools(this.security);
     this.schemaVersioningTools = new SchemaVersioningTools(this.security);
+    this.performanceTools = new PerformanceTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -1265,6 +1268,73 @@ export class MySQLMCP {
     const check = this.checkToolEnabled("showReplicationStatus");
     if (!check.enabled) return { status: "error", error: check.error };
     return await this.processTools.showReplicationStatus(params);
+  }
+
+  // ==========================================
+  // Performance Monitoring Tools
+  // ==========================================
+
+  async getPerformanceMetrics() {
+    const check = this.checkToolEnabled("getPerformanceMetrics");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getPerformanceMetrics();
+  }
+
+  async getTopQueriesByTime(params?: { limit?: number }) {
+    const check = this.checkToolEnabled("getTopQueriesByTime");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getTopQueriesByTime(params);
+  }
+
+  async getTopQueriesByCount(params?: { limit?: number }) {
+    const check = this.checkToolEnabled("getTopQueriesByCount");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getTopQueriesByCount(params);
+  }
+
+  async getSlowQueries(params?: {
+    limit?: number;
+    threshold_seconds?: number;
+  }) {
+    const check = this.checkToolEnabled("getSlowQueries");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getSlowQueries(params);
+  }
+
+  async getTableIOStats(params?: { limit?: number; table_schema?: string }) {
+    const check = this.checkToolEnabled("getTableIOStats");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getTableIOStats(params);
+  }
+
+  async getIndexUsageStats(params?: { limit?: number; table_schema?: string }) {
+    const check = this.checkToolEnabled("getIndexUsageStats");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getIndexUsageStats(params);
+  }
+
+  async getUnusedIndexes(params?: { table_schema?: string }) {
+    const check = this.checkToolEnabled("getUnusedIndexes");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getUnusedIndexes(params);
+  }
+
+  async getConnectionPoolStats() {
+    const check = this.checkToolEnabled("getConnectionPoolStats");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getConnectionPoolStats();
+  }
+
+  async getDatabaseHealthCheck() {
+    const check = this.checkToolEnabled("getDatabaseHealthCheck");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.getDatabaseHealthCheck();
+  }
+
+  async resetPerformanceStats() {
+    const check = this.checkToolEnabled("resetPerformanceStats");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.performanceTools.resetPerformanceStats();
   }
 }
 

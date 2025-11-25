@@ -106,6 +106,8 @@ class DatabaseConnection {
   public async testConnection(): Promise<{
     connected: boolean;
     latency: number;
+    error?: string;
+    errorCode?: string;
   }> {
     const startTime = Date.now();
     try {
@@ -113,8 +115,14 @@ class DatabaseConnection {
       connection.release();
       const endTime = Date.now();
       return { connected: true, latency: endTime - startTime };
-    } catch (error) {
-      return { connected: false, latency: -1 };
+    } catch (error: any) {
+      // Return detailed error information for diagnostics
+      return {
+        connected: false,
+        latency: -1,
+        error: error?.message || "Unknown connection error",
+        errorCode: error?.code || error?.errno || "UNKNOWN",
+      };
     }
   }
 

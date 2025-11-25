@@ -439,7 +439,7 @@ Each project can have different permissions - specify as the second argument aft
 
 ## Available Tools
 
-The MCP server provides **98 powerful tools** organized into categories:
+The MCP server provides **119 powerful tools** organized into categories:
 
 ### Quick Reference
 
@@ -459,6 +459,7 @@ The MCP server provides **98 powerful tools** organized into categories:
 | [Constraints](#constraint-management) | 7 | `add_foreign_key`, `add_unique_constraint` |
 | [Table Maintenance](#table-maintenance) | 8 | `analyze_table`, `optimize_table`, `repair_table` |
 | [Server Management](#process--server-management) | 9 | `show_process_list`, `explain_query` |
+| [Performance Monitoring](#performance-monitoring) | 10 | `get_performance_metrics`, `get_database_health_check` |
 | [Cache](#cache-management) | 5 | `get_cache_stats`, `clear_cache` |
 | [Query Optimization](#query-optimization) | 2 | `analyze_query`, `get_optimization_hints` |
 | [Backup & Restore](#database-backup--restore) | 5 | `backup_database`, `restore_from_sql` |
@@ -621,6 +622,21 @@ The MCP server provides **98 powerful tools** organized into categories:
 | `get_server_info` | Get comprehensive server info | `utility` |
 | `show_binary_logs` | Show binary log files | `utility` |
 | `show_replication_status` | Show replication status | `utility` |
+
+### Performance Monitoring
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `get_performance_metrics` | Get comprehensive performance metrics | `utility` |
+| `get_top_queries_by_time` | Find slowest queries by execution time | `utility` |
+| `get_top_queries_by_count` | Find most frequently executed queries | `utility` |
+| `get_slow_queries` | Identify queries exceeding time threshold | `utility` |
+| `get_table_io_stats` | Monitor table I/O operations | `utility` |
+| `get_index_usage_stats` | Track index usage statistics | `utility` |
+| `get_unused_indexes` | Identify unused indexes | `utility` |
+| `get_connection_pool_stats` | Monitor connection pool health | `utility` |
+| `get_database_health_check` | Comprehensive health assessment | `utility` |
+| `reset_performance_stats` | Reset performance schema statistics | `utility` |
 
 ### Cache Management
 

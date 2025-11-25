@@ -173,6 +173,18 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   validateMigrations: ToolCategory.LIST,
   resetFailedMigration: ToolCategory.DDL,
   generateMigrationFromDiff: ToolCategory.DDL,
+
+  // Performance monitoring tools
+  getPerformanceMetrics: ToolCategory.UTILITY,
+  getTopQueriesByTime: ToolCategory.UTILITY,
+  getTopQueriesByCount: ToolCategory.UTILITY,
+  getSlowQueries: ToolCategory.UTILITY,
+  getTableIOStats: ToolCategory.UTILITY,
+  getIndexUsageStats: ToolCategory.UTILITY,
+  getUnusedIndexes: ToolCategory.UTILITY,
+  getConnectionPoolStats: ToolCategory.UTILITY,
+  getDatabaseHealthCheck: ToolCategory.UTILITY,
+  resetPerformanceStats: ToolCategory.UTILITY,
 };
 
 /**
