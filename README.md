@@ -50,7 +50,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
   - [Environment Variables](#environment-variables-configuration)
   - [Local Development](#local-path-configuration)
 - [Permission System](#-permission-system)
-- [Available Tools (98 total)](#-available-tools)
+- [Available Tools (119 total)](#-available-tools)
 - [Documentation](#-detailed-documentation)
 - [Comparison: MCP vs Manual Access](#-mysql-mcp-vs-manual-database-access)
 - [License](#-license)
