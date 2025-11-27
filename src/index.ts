@@ -48,8 +48,8 @@ export class MySQLMCP {
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
-  constructor(permissionsConfig?: string) {
-    this.featureConfig = new FeatureConfig(permissionsConfig);
+  constructor(permissionsConfig?: string, categoriesConfig?: string) {
+    this.featureConfig = new FeatureConfig(permissionsConfig, categoriesConfig);
     this.security = new SecurityLayer(this.featureConfig);
     this.dbTools = new DatabaseTools();
     this.crudTools = new CrudTools(this.security);
@@ -746,6 +746,15 @@ export class MySQLMCP {
         categoryStatus: this.featureConfig.getCategoryStatus(),
       },
     };
+  }
+
+  /**
+   * Check if a specific tool is enabled based on current permissions and categories
+   * @param toolName - The tool name in camelCase (e.g., 'listDatabases')
+   * @returns boolean indicating if the tool is enabled
+   */
+  isToolEnabled(toolName: string): boolean {
+    return this.featureConfig.isToolEnabled(toolName);
   }
 
   /**

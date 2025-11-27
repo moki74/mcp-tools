@@ -63,8 +63,8 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 |----------|-------------|
 | **Full MCP Support** | Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent |
 | **Security First** | Parameterized queries, SQL injection protection, permission-based access control |
-| **98 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
-| **Granular Permissions** | 10 permission categories for fine-grained access control per project |
+| **119 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
+| **🆕 Category Filtering** | 22 documentation categories for intuitive, fine-grained access control (backward compatible with 10 legacy categories) |
 | **Transaction Support** | Full ACID transaction management (BEGIN, COMMIT, ROLLBACK) |
 | **Schema Migrations** | Version control for database schema with up/down migrations |
 | **Dual Mode** | Run as MCP server OR as REST API |
@@ -394,9 +394,43 @@ npm run build
 
 ## Permission System
 
-Control database access with granular permission categories:
+Control database access with a **dual-layer filtering system** that provides both broad and fine-grained control:
 
-### Permission Categories
+- **Layer 1 (Permissions)**: Broad operation-level control using legacy categories
+- **Layer 2 (Categories)**: Optional fine-grained tool-level filtering using documentation categories
+
+**Filtering Logic**: `Tool enabled = (Has Permission) AND (Has Category OR No categories specified)`
+
+### 🆕 Documentation Categories (Recommended)
+
+Use these categories for fine-grained control that matches the tool organization:
+
+| Category | Tools Count | Description |
+|----------|-------------|-------------|
+| `database_discovery` | 4 | List databases, tables, schemas, relationships |
+| `crud_operations` | 4 | Basic Create, Read, Update, Delete operations |
+| `bulk_operations` | 3 | Bulk insert, update, delete with batching |
+| `custom_queries` | 2 | Run custom SELECT or execute SQL |
+| `schema_management` | 4 | CREATE/ALTER/DROP tables (DDL) |
+| `utilities` | 4 | Connection testing, diagnostics, CSV export |
+| `transaction_management` | 5 | BEGIN, COMMIT, ROLLBACK transactions |
+| `stored_procedures` | 6 | Create, execute, manage stored procedures |
+| `views_management` | 6 | Create, alter, drop views |
+| `triggers_management` | 5 | Create, drop triggers |
+| `functions_management` | 6 | Create, execute functions |
+| `index_management` | 5 | Create, drop, analyze indexes |
+| `constraint_management` | 7 | Foreign keys, unique, check constraints |
+| `table_maintenance` | 8 | Analyze, optimize, repair tables |
+| `server_management` | 9 | Process list, explain queries, server info |
+| `performance_monitoring` | 10 | Metrics, slow queries, health checks |
+| `cache_management` | 5 | Query cache stats and configuration |
+| `query_optimization` | 2 | Analyze queries, get optimization hints |
+| `backup_restore` | 5 | Backup/restore database and tables |
+| `import_export` | 5 | Import/export JSON, CSV, SQL |
+| `data_migration` | 5 | Copy, move, clone, sync table data |
+| `schema_migrations` | 9 | Version control for database schema |
+
+### Legacy Categories (Backward Compatible)
 
 | Permission | Operations | Use Case |
 |------------|------------|----------|
@@ -411,7 +445,22 @@ Control database access with granular permission categories:
 | `transaction` | BEGIN, COMMIT, ROLLBACK | ACID operations |
 | `utility` | Connection testing, diagnostics | Troubleshooting |
 
-### Common Permission Sets
+### Common Category Sets
+
+#### Using Documentation Categories (Recommended)
+
+| Environment | Categories | Description |
+|-------------|------------|-------------|
+| **Production Read-Only** | `database_discovery,utilities` | Safe exploration only |
+| **Analytics & Reporting** | `database_discovery,crud_operations,custom_queries,performance_monitoring` | Read and analyze |
+| **Data Entry** | `database_discovery,crud_operations,utilities` | Basic CRUD operations |
+| **Data Management** | `database_discovery,crud_operations,bulk_operations,utilities` | CRUD + bulk operations |
+| **Application Backend** | `database_discovery,crud_operations,bulk_operations,custom_queries,transaction_management` | Full app support |
+| **Development & Testing** | `database_discovery,crud_operations,bulk_operations,custom_queries,schema_management,utilities,transaction_management` | Development access |
+| **DBA & DevOps** | `database_discovery,schema_management,table_maintenance,backup_restore,schema_migrations,performance_monitoring` | Admin tasks |
+| **Full Access** | *(leave empty)* | All 119 tools enabled |
+
+#### Using Legacy Categories (Backward Compatible)
 
 | Environment | Permissions | Description |
 |-------------|-------------|-------------|
@@ -424,14 +473,87 @@ Control database access with granular permission categories:
 
 ### Per-Project Configuration
 
-Each project can have different permissions - specify as the second argument after the connection string:
+#### Single-Layer: Permissions Only (Backward Compatible)
+
+Use only the 2nd argument for broad permission-based filtering:
 
 ```json
 {
-  "args": [
-    "mysql://user:pass@localhost:3306/db",
-    "list,read,utility"
-  ]
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://user:password@localhost:3306/db",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+**Result**: All tools within `list`, `read`, and `utility` permissions are enabled.
+
+#### Dual-Layer: Permissions + Categories (Recommended for Fine Control)
+
+Use both 2nd argument (permissions) and 3rd argument (categories):
+
+```json
+{
+  "mcpServers": {
+    "mysql-prod": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://readonly:pass@prod:3306/app_db",
+        "list,read,utility",
+        "database_discovery,performance_monitoring"
+      ]
+    }
+  }
+}
+```
+
+**Result**: Only tools that have BOTH:
+- Permission: `list`, `read`, OR `utility` AND
+- Category: `database_discovery` OR `performance_monitoring`
+
+**Enabled**: `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`, `get_performance_metrics`, `get_slow_queries`, etc.
+
+**Disabled**: `test_connection` (has `utility` permission but not in allowed categories), `read_records` (has `read` permission but category is `crud_operations`), etc.
+
+#### Multiple Environments Example
+
+```json
+{
+  "mcpServers": {
+    "mysql-prod-readonly": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://readonly:pass@prod:3306/app_db",
+        "list,read,utility",
+        "database_discovery,performance_monitoring"
+      ]
+    },
+    "mysql-dev-full": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://dev:pass@localhost:3306/dev_db",
+        "list,read,create,update,delete,ddl,transaction,utility"
+      ]
+    },
+    "mysql-dba": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://dba:pass@server:3306/app_db",
+        "list,ddl,utility",
+        "database_discovery,schema_management,table_maintenance,backup_restore,index_management"
+      ]
+    }
+  }
 }
 ```
 

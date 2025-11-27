@@ -6,31 +6,261 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 ## Table of Contents
 
-1. [DDL Operations](#🏗️-ddl-operations)
-2. [Data Export Tools](#📤-data-export-tools)
-3. [Data Import Tools](#📥-data-import-tools)
-4. [Database Backup & Restore](#💾-database-backup--restore)
-5. [Data Migration Tools](#🔄-data-migration-tools) - NEW!
-6. [Transaction Management](#💰-transaction-management)
-7. [Stored Procedures](#🔧-stored-procedures)
-8. [Views Management](#👁️-views-management)
-9. [Triggers Management](#⚡-triggers-management)
-10. [Functions Management](#🔢-functions-management)
-11. [Index Management](#📇-index-management)
-12. [Constraint Management](#🔗-constraint-management)
-13. [Table Maintenance](#🔧-table-maintenance)
-14. [Process & Server Management](#📊-process--server-management)
-15. [Performance Monitoring](#📈-performance-monitoring) - NEW!
-16. [Usage Examples](#📋-usage-examples)
-16. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
-17. [Security Features](#🔒-security-features)
-18. [Query Result Caching](#💾-query-result-caching)
-19. [Query Optimization Hints](#🎯-query-optimization-hints)
-20. [Bulk Operations](#🚀-bulk-operations)
-21. [OpenAI Codex Integration](#🤖-openai-codex-integration) - NEW!
-22. [Troubleshooting](#🛠️-troubleshooting)
-23. [License](#📄-license)
-24. [Roadmap](#🗺️-roadmap)
+1. [🆕 Category Filtering System](#🆕-category-filtering-system) - NEW!
+2. [DDL Operations](#🏗️-ddl-operations)
+3. [Data Export Tools](#📤-data-export-tools)
+4. [Data Import Tools](#📥-data-import-tools)
+5. [Database Backup & Restore](#💾-database-backup--restore)
+6. [Data Migration Tools](#🔄-data-migration-tools)
+7. [Schema Versioning & Migrations](#🔄-schema-versioning-and-migrations)
+8. [Transaction Management](#💰-transaction-management)
+9. [Stored Procedures](#🔧-stored-procedures)
+10. [Views Management](#👁️-views-management)
+11. [Triggers Management](#⚡-triggers-management)
+12. [Functions Management](#🔢-functions-management)
+13. [Index Management](#📇-index-management)
+14. [Constraint Management](#🔗-constraint-management)
+15. [Table Maintenance](#🔧-table-maintenance)
+16. [Process & Server Management](#📊-process--server-management)
+17. [Performance Monitoring](#📈-performance-monitoring)
+18. [Usage Examples](#📋-usage-examples)
+19. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+20. [Security Features](#🔒-security-features)
+21. [Query Result Caching](#💾-query-result-caching)
+22. [Query Optimization Hints](#🎯-query-optimization-hints)
+23. [Bulk Operations](#🚀-bulk-operations)
+24. [OpenAI Codex Integration](#🤖-openai-codex-integration)
+25. [Troubleshooting](#🛠️-troubleshooting)
+26. [License](#📄-license)
+27. [Roadmap](#🗺️-roadmap)
+
+---
+
+## 🆕 Dual-Layer Filtering System
+
+Control which database operations are available to AI using a **dual-layer filtering system**:
+
+- **Layer 1 (Permissions)**: Broad operation-level control using legacy categories (required)
+- **Layer 2 (Categories)**: Fine-grained tool-level filtering using documentation categories (optional)
+
+**Filtering Logic**: `Tool enabled = (Has Permission) AND (Has Category OR No categories specified)`
+
+### Why Use Dual-Layer Filtering?
+
+- **Security**: Multiple layers of protection - broad permissions + specific tool access
+- **Flexibility**: Simple permission-only mode OR advanced dual-layer mode
+- **Backward Compatible**: Existing single-layer configurations continue to work
+- **Granular Control**: 10 permissions × 22 categories = precise access control
+- **Clear Intent**: Separate "what operations are allowed" from "which specific tools"
+
+### Filtering Modes
+
+| Mode | Configuration | Use Case |
+|------|--------------|----------|
+| **No Filtering** | No args specified | Development, full trust |
+| **Single-Layer** | Permissions only (2nd arg) | Simple, broad control |
+| **Dual-Layer** | Permissions + Categories (2nd + 3rd args) | Production, precise control |
+
+### Documentation Categories Reference
+
+```bash
+# All 22 available categories (comma-separated):
+database_discovery,crud_operations,bulk_operations,custom_queries,
+schema_management,utilities,transaction_management,stored_procedures,
+views_management,triggers_management,functions_management,index_management,
+constraint_management,table_maintenance,server_management,
+performance_monitoring,cache_management,query_optimization,
+backup_restore,import_export,data_migration,schema_migrations
+```
+
+### Configuration Examples
+
+#### Example 1: Single-Layer (Permissions Only) - Backward Compatible
+
+Use only the 2nd argument for broad control:
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://user:pass@localhost:3306/db",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+**Result**: All tools within `list`, `read`, and `utility` permissions are enabled.
+
+**Enabled tools**: `list_databases`, `list_tables`, `read_records`, `run_query`, `test_connection`, `export_table_to_csv`, etc.
+
+#### Example 2: Dual-Layer (Permissions + Categories) - Production Read-Only
+
+Use both 2nd argument (permissions) and 3rd argument (categories):
+
+```json
+{
+  "mcpServers": {
+    "mysql-prod": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://readonly:pass@prod:3306/app_db",
+        "list,read,utility",
+        "database_discovery,performance_monitoring"
+      ]
+    }
+  }
+}
+```
+
+**Layer 1 (Permissions)**: Allows `list`, `read`, `utility` operations
+**Layer 2 (Categories)**: Further restricts to `database_discovery` and `performance_monitoring` tools
+
+**Enabled tools**: `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`, `get_performance_metrics`, `get_slow_queries`, etc.
+
+**Disabled tools**:
+- `read_records` - Has `read` permission but category is `crud_operations` (not allowed)
+- `test_connection` - Has `utility` permission but category is `utilities` (not in category list)
+- `create_record` - No `create` permission (blocked by Layer 1)
+
+#### Example 3: Development Environment - Single-Layer
+
+Full access using permissions only:
+
+```json
+{
+  "mcpServers": {
+    "mysql-dev": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://dev:pass@localhost:3306/dev_db",
+        "list,read,create,update,delete,ddl,transaction,utility"
+      ]
+    }
+  }
+}
+```
+
+**Result**: All tools within specified permissions are enabled (no category filtering).
+
+#### Example 4: DBA Tasks - Dual-Layer
+
+Schema management and maintenance only:
+
+```json
+{
+  "mcpServers": {
+    "mysql-dba": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://dba:pass@server:3306/app_db",
+        "list,ddl,utility",
+        "database_discovery,schema_management,table_maintenance,backup_restore,index_management"
+      ]
+    }
+  }
+}
+```
+
+**Enabled**: Schema changes, backups, maintenance - NO data modification.
+
+#### Example 5: Application Backend - Dual-Layer
+
+Data operations without schema changes:
+
+```json
+{
+  "mcpServers": {
+    "mysql-app": {
+      "command": "node",
+      "args": [
+        "/path/to/bin/mcp-mysql.js",
+        "mysql://app:pass@localhost:3306/app_db",
+        "list,read,create,update,delete,transaction,utility",
+        "crud_operations,bulk_operations,transaction_management,cache_management"
+      ]
+    }
+  }
+}
+```
+
+**Enabled**: Full data CRUD + bulk ops + transactions - NO schema changes (no `ddl` permission).
+
+### Permissions Reference (Layer 1)
+
+| Permission | Operations Allowed | Example Tools |
+|------------|-------------------|---------------|
+| `list` | List/discover database objects | `list_databases`, `list_tables`, `list_views` |
+| `read` | Read data from tables | `read_records`, `run_query` |
+| `create` | Insert new records | `create_record`, `bulk_insert` |
+| `update` | Update existing records | `update_record`, `bulk_update` |
+| `delete` | Delete records | `delete_record`, `bulk_delete` |
+| `execute` | Execute custom SQL | `execute_sql`, `run_query` |
+| `ddl` | Schema changes | `create_table`, `alter_table`, `drop_table` |
+| `utility` | Utility operations | `test_connection`, `analyze_table` |
+| `transaction` | Transaction management | `begin_transaction`, `commit_transaction` |
+| `procedure` | Stored procedures/functions | `create_stored_procedure`, `execute_function` |
+
+### Categories Reference (Layer 2)
+
+See the full list of 22 documentation categories in the [README.md](README.md#-documentation-categories-recommended).
+
+### How Filtering Works
+
+The system uses both arguments to determine access:
+
+**Argument positions**:
+- **2nd argument**: Permissions (Layer 1) - comma-separated legacy categories
+- **3rd argument**: Categories (Layer 2, optional) - comma-separated documentation categories
+
+**Decision logic**:
+1. If no arguments: All 119 tools enabled
+2. If only 2nd argument (permissions): Tools enabled if they match permission
+3. If both arguments: Tools enabled if they match BOTH permission AND category
+
+**Example**:
+```bash
+# Tool: bulk_insert
+# Permission required: create
+# Category required: bulk_operations
+
+# Single-layer (permissions only)
+args: ["mysql://...", "list,create,read"]
+Result: ✅ Enabled (has 'create' permission)
+
+# Dual-layer (permissions + categories)
+args: ["mysql://...", "list,create,read", "database_discovery,crud_operations"]
+Result: ✗ Disabled (has 'create' but category is 'bulk_operations', not in list)
+
+# Dual-layer with correct category
+args: ["mysql://...", "list,create,read", "bulk_operations,crud_operations"]
+Result: ✅ Enabled (has both 'create' permission AND 'bulk_operations' category)
+```
+
+### Troubleshooting Filters
+
+If a tool is not available, check the error message which tells you which layer blocked it:
+
+**Layer 1 (Permission) error**:
+```
+Permission denied: This tool requires 'create' permission (Layer 1).
+Your current permissions: list,read,utility.
+Add 'create' to the permissions argument.
+```
+
+**Layer 2 (Category) error**:
+```
+Permission denied: This tool requires 'bulk_operations' category (Layer 2).
+Your current categories: database_discovery,crud_operations.
+Add 'bulk_operations' to the categories argument.
+```
 
 ---
 

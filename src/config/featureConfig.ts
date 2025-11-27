@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 /**
- * Available MCP tool categories
+ * Available MCP tool categories (Legacy - for backward compatibility)
  */
 export enum ToolCategory {
   LIST = "list", // List databases, tables, etc.
@@ -20,7 +20,36 @@ export enum ToolCategory {
 }
 
 /**
- * Map of tool names to their categories
+ * Documentation categories from README (21 categories)
+ * More intuitive and matches user mental model
+ */
+export enum DocCategory {
+  DATABASE_DISCOVERY = "database_discovery",
+  CRUD_OPERATIONS = "crud_operations",
+  BULK_OPERATIONS = "bulk_operations",
+  CUSTOM_QUERIES = "custom_queries",
+  SCHEMA_MANAGEMENT = "schema_management",
+  UTILITIES = "utilities",
+  TRANSACTION_MANAGEMENT = "transaction_management",
+  STORED_PROCEDURES = "stored_procedures",
+  VIEWS_MANAGEMENT = "views_management",
+  TRIGGERS_MANAGEMENT = "triggers_management",
+  FUNCTIONS_MANAGEMENT = "functions_management",
+  INDEX_MANAGEMENT = "index_management",
+  CONSTRAINT_MANAGEMENT = "constraint_management",
+  TABLE_MAINTENANCE = "table_maintenance",
+  SERVER_MANAGEMENT = "server_management",
+  PERFORMANCE_MONITORING = "performance_monitoring",
+  CACHE_MANAGEMENT = "cache_management",
+  QUERY_OPTIMIZATION = "query_optimization",
+  BACKUP_RESTORE = "backup_restore",
+  IMPORT_EXPORT = "import_export",
+  DATA_MIGRATION = "data_migration",
+  SCHEMA_MIGRATIONS = "schema_migrations",
+}
+
+/**
+ * Map of tool names to their legacy categories
  */
 export const toolCategoryMap: Record<string, ToolCategory> = {
   // Database tools
@@ -188,148 +217,451 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
 };
 
 /**
+ * Map of tool names to their documentation categories (New Enhanced System)
+ */
+export const toolDocCategoryMap: Record<string, DocCategory> = {
+  // Database Discovery
+  listDatabases: DocCategory.DATABASE_DISCOVERY,
+  listTables: DocCategory.DATABASE_DISCOVERY,
+  readTableSchema: DocCategory.DATABASE_DISCOVERY,
+  getTableRelationships: DocCategory.DATABASE_DISCOVERY,
+
+  // CRUD Operations
+  createRecord: DocCategory.CRUD_OPERATIONS,
+  readRecords: DocCategory.CRUD_OPERATIONS,
+  updateRecord: DocCategory.CRUD_OPERATIONS,
+  deleteRecord: DocCategory.CRUD_OPERATIONS,
+
+  // Bulk Operations
+  bulkInsert: DocCategory.BULK_OPERATIONS,
+  bulkUpdate: DocCategory.BULK_OPERATIONS,
+  bulkDelete: DocCategory.BULK_OPERATIONS,
+
+  // Custom Queries
+  runQuery: DocCategory.CUSTOM_QUERIES,
+  executeSql: DocCategory.CUSTOM_QUERIES,
+
+  // Schema Management (DDL)
+  createTable: DocCategory.SCHEMA_MANAGEMENT,
+  alterTable: DocCategory.SCHEMA_MANAGEMENT,
+  dropTable: DocCategory.SCHEMA_MANAGEMENT,
+  executeDdl: DocCategory.SCHEMA_MANAGEMENT,
+
+  // Utilities
+  testConnection: DocCategory.UTILITIES,
+  describeConnection: DocCategory.UTILITIES,
+  exportTableToCSV: DocCategory.UTILITIES,
+  exportQueryToCSV: DocCategory.UTILITIES,
+
+  // Transaction Management
+  beginTransaction: DocCategory.TRANSACTION_MANAGEMENT,
+  commitTransaction: DocCategory.TRANSACTION_MANAGEMENT,
+  rollbackTransaction: DocCategory.TRANSACTION_MANAGEMENT,
+  getTransactionStatus: DocCategory.TRANSACTION_MANAGEMENT,
+  executeInTransaction: DocCategory.TRANSACTION_MANAGEMENT,
+
+  // Stored Procedures
+  listStoredProcedures: DocCategory.STORED_PROCEDURES,
+  getStoredProcedureInfo: DocCategory.STORED_PROCEDURES,
+  executeStoredProcedure: DocCategory.STORED_PROCEDURES,
+  createStoredProcedure: DocCategory.STORED_PROCEDURES,
+  dropStoredProcedure: DocCategory.STORED_PROCEDURES,
+  showCreateProcedure: DocCategory.STORED_PROCEDURES,
+
+  // Views Management
+  listViews: DocCategory.VIEWS_MANAGEMENT,
+  getViewInfo: DocCategory.VIEWS_MANAGEMENT,
+  createView: DocCategory.VIEWS_MANAGEMENT,
+  alterView: DocCategory.VIEWS_MANAGEMENT,
+  dropView: DocCategory.VIEWS_MANAGEMENT,
+  showCreateView: DocCategory.VIEWS_MANAGEMENT,
+
+  // Triggers Management
+  listTriggers: DocCategory.TRIGGERS_MANAGEMENT,
+  getTriggerInfo: DocCategory.TRIGGERS_MANAGEMENT,
+  createTrigger: DocCategory.TRIGGERS_MANAGEMENT,
+  dropTrigger: DocCategory.TRIGGERS_MANAGEMENT,
+  showCreateTrigger: DocCategory.TRIGGERS_MANAGEMENT,
+
+  // Functions Management
+  listFunctions: DocCategory.FUNCTIONS_MANAGEMENT,
+  getFunctionInfo: DocCategory.FUNCTIONS_MANAGEMENT,
+  createFunction: DocCategory.FUNCTIONS_MANAGEMENT,
+  dropFunction: DocCategory.FUNCTIONS_MANAGEMENT,
+  showCreateFunction: DocCategory.FUNCTIONS_MANAGEMENT,
+  executeFunction: DocCategory.FUNCTIONS_MANAGEMENT,
+
+  // Index Management
+  listIndexes: DocCategory.INDEX_MANAGEMENT,
+  getIndexInfo: DocCategory.INDEX_MANAGEMENT,
+  createIndex: DocCategory.INDEX_MANAGEMENT,
+  dropIndex: DocCategory.INDEX_MANAGEMENT,
+  analyzeIndex: DocCategory.INDEX_MANAGEMENT,
+
+  // Constraint Management
+  listForeignKeys: DocCategory.CONSTRAINT_MANAGEMENT,
+  listConstraints: DocCategory.CONSTRAINT_MANAGEMENT,
+  addForeignKey: DocCategory.CONSTRAINT_MANAGEMENT,
+  dropForeignKey: DocCategory.CONSTRAINT_MANAGEMENT,
+  addUniqueConstraint: DocCategory.CONSTRAINT_MANAGEMENT,
+  dropConstraint: DocCategory.CONSTRAINT_MANAGEMENT,
+  addCheckConstraint: DocCategory.CONSTRAINT_MANAGEMENT,
+
+  // Table Maintenance
+  analyzeTable: DocCategory.TABLE_MAINTENANCE,
+  optimizeTable: DocCategory.TABLE_MAINTENANCE,
+  checkTable: DocCategory.TABLE_MAINTENANCE,
+  repairTable: DocCategory.TABLE_MAINTENANCE,
+  truncateTable: DocCategory.TABLE_MAINTENANCE,
+  getTableStatus: DocCategory.TABLE_MAINTENANCE,
+  flushTable: DocCategory.TABLE_MAINTENANCE,
+  getTableSize: DocCategory.TABLE_MAINTENANCE,
+
+  // Server Management
+  showProcessList: DocCategory.SERVER_MANAGEMENT,
+  killProcess: DocCategory.SERVER_MANAGEMENT,
+  showStatus: DocCategory.SERVER_MANAGEMENT,
+  showVariables: DocCategory.SERVER_MANAGEMENT,
+  explainQuery: DocCategory.SERVER_MANAGEMENT,
+  showEngineStatus: DocCategory.SERVER_MANAGEMENT,
+  getServerInfo: DocCategory.SERVER_MANAGEMENT,
+  showBinaryLogs: DocCategory.SERVER_MANAGEMENT,
+  showReplicationStatus: DocCategory.SERVER_MANAGEMENT,
+
+  // Performance Monitoring
+  getPerformanceMetrics: DocCategory.PERFORMANCE_MONITORING,
+  getTopQueriesByTime: DocCategory.PERFORMANCE_MONITORING,
+  getTopQueriesByCount: DocCategory.PERFORMANCE_MONITORING,
+  getSlowQueries: DocCategory.PERFORMANCE_MONITORING,
+  getTableIOStats: DocCategory.PERFORMANCE_MONITORING,
+  getIndexUsageStats: DocCategory.PERFORMANCE_MONITORING,
+  getUnusedIndexes: DocCategory.PERFORMANCE_MONITORING,
+  getConnectionPoolStats: DocCategory.PERFORMANCE_MONITORING,
+  getDatabaseHealthCheck: DocCategory.PERFORMANCE_MONITORING,
+  resetPerformanceStats: DocCategory.PERFORMANCE_MONITORING,
+
+  // Cache Management
+  getCacheStats: DocCategory.CACHE_MANAGEMENT,
+  getCacheConfig: DocCategory.CACHE_MANAGEMENT,
+  configureCacheSettings: DocCategory.CACHE_MANAGEMENT,
+  clearCache: DocCategory.CACHE_MANAGEMENT,
+  invalidateCacheForTable: DocCategory.CACHE_MANAGEMENT,
+
+  // Query Optimization
+  analyzeQuery: DocCategory.QUERY_OPTIMIZATION,
+  getOptimizationHints: DocCategory.QUERY_OPTIMIZATION,
+
+  // Backup & Restore
+  backupTable: DocCategory.BACKUP_RESTORE,
+  backupDatabase: DocCategory.BACKUP_RESTORE,
+  restoreFromSql: DocCategory.BACKUP_RESTORE,
+  getCreateTableStatement: DocCategory.BACKUP_RESTORE,
+  getDatabaseSchema: DocCategory.BACKUP_RESTORE,
+
+  // Import/Export
+  exportTableToJSON: DocCategory.IMPORT_EXPORT,
+  exportQueryToJSON: DocCategory.IMPORT_EXPORT,
+  exportTableToSql: DocCategory.IMPORT_EXPORT,
+  importFromCSV: DocCategory.IMPORT_EXPORT,
+  importFromJSON: DocCategory.IMPORT_EXPORT,
+
+  // Data Migration
+  copyTableData: DocCategory.DATA_MIGRATION,
+  moveTableData: DocCategory.DATA_MIGRATION,
+  cloneTable: DocCategory.DATA_MIGRATION,
+  compareTableStructure: DocCategory.DATA_MIGRATION,
+  syncTableData: DocCategory.DATA_MIGRATION,
+
+  // Schema Migrations
+  initMigrationsTable: DocCategory.SCHEMA_MIGRATIONS,
+  createMigration: DocCategory.SCHEMA_MIGRATIONS,
+  applyMigrations: DocCategory.SCHEMA_MIGRATIONS,
+  rollbackMigration: DocCategory.SCHEMA_MIGRATIONS,
+  getMigrationStatus: DocCategory.SCHEMA_MIGRATIONS,
+  getSchemaVersion: DocCategory.SCHEMA_MIGRATIONS,
+  validateMigrations: DocCategory.SCHEMA_MIGRATIONS,
+  resetFailedMigration: DocCategory.SCHEMA_MIGRATIONS,
+  generateMigrationFromDiff: DocCategory.SCHEMA_MIGRATIONS,
+};
+
+/**
+ * Mapping between legacy categories and documentation categories
+ * This allows backward compatibility
+ */
+const legacyToDocCategoryMap: Record<string, DocCategory[]> = {
+  list: [
+    DocCategory.DATABASE_DISCOVERY,
+    DocCategory.STORED_PROCEDURES,
+    DocCategory.VIEWS_MANAGEMENT,
+    DocCategory.TRIGGERS_MANAGEMENT,
+    DocCategory.FUNCTIONS_MANAGEMENT,
+    DocCategory.INDEX_MANAGEMENT,
+    DocCategory.CONSTRAINT_MANAGEMENT,
+    DocCategory.TABLE_MAINTENANCE,
+    DocCategory.SERVER_MANAGEMENT,
+    DocCategory.SCHEMA_MIGRATIONS,
+  ],
+  read: [DocCategory.CRUD_OPERATIONS, DocCategory.CUSTOM_QUERIES],
+  create: [
+    DocCategory.CRUD_OPERATIONS,
+    DocCategory.BULK_OPERATIONS,
+    DocCategory.IMPORT_EXPORT,
+    DocCategory.DATA_MIGRATION,
+  ],
+  update: [
+    DocCategory.CRUD_OPERATIONS,
+    DocCategory.BULK_OPERATIONS,
+    DocCategory.DATA_MIGRATION,
+  ],
+  delete: [
+    DocCategory.CRUD_OPERATIONS,
+    DocCategory.BULK_OPERATIONS,
+    DocCategory.DATA_MIGRATION,
+  ],
+  execute: [DocCategory.CUSTOM_QUERIES, DocCategory.SERVER_MANAGEMENT],
+  ddl: [
+    DocCategory.SCHEMA_MANAGEMENT,
+    DocCategory.VIEWS_MANAGEMENT,
+    DocCategory.TRIGGERS_MANAGEMENT,
+    DocCategory.INDEX_MANAGEMENT,
+    DocCategory.CONSTRAINT_MANAGEMENT,
+    DocCategory.TABLE_MAINTENANCE,
+    DocCategory.BACKUP_RESTORE,
+    DocCategory.DATA_MIGRATION,
+    DocCategory.SCHEMA_MIGRATIONS,
+  ],
+  utility: [
+    DocCategory.UTILITIES,
+    DocCategory.TABLE_MAINTENANCE,
+    DocCategory.PERFORMANCE_MONITORING,
+    DocCategory.CACHE_MANAGEMENT,
+    DocCategory.QUERY_OPTIMIZATION,
+    DocCategory.BACKUP_RESTORE,
+    DocCategory.IMPORT_EXPORT,
+  ],
+  transaction: [DocCategory.TRANSACTION_MANAGEMENT],
+  procedure: [DocCategory.STORED_PROCEDURES, DocCategory.FUNCTIONS_MANAGEMENT],
+};
+
+/**
  * Class to manage feature configuration based on runtime or environment variables
+ * Supports dual-layer filtering:
+ * - Layer 1 (Permissions): Legacy categories (broad control)
+ * - Layer 2 (Categories): Documentation categories (fine-grained control, optional)
  */
 export class FeatureConfig {
-  private enabledCategories: Set<ToolCategory>;
-  private originalConfigString: string;
+  private enabledLegacyCategories: Set<ToolCategory>;
+  private enabledDocCategories: Set<DocCategory>;
+  private originalPermissionsString: string;
+  private originalCategoriesString: string;
+  private useDualLayer: boolean; // Flag to determine if using dual-layer filtering
 
-  constructor(configStr?: string) {
-    this.originalConfigString = configStr || process.env.MCP_CONFIG || "";
-    this.enabledCategories = this.parseConfig(configStr);
+  constructor(permissionsStr?: string, categoriesStr?: string) {
+    // Support both old single-parameter and new dual-parameter signatures
+    const permissions =
+      permissionsStr ||
+      process.env.MCP_PERMISSIONS ||
+      process.env.MCP_CONFIG ||
+      "";
+    const categories = categoriesStr || process.env.MCP_CATEGORIES || "";
+
+    this.originalPermissionsString = permissions;
+    this.originalCategoriesString = categories;
+    this.useDualLayer = !!categories.trim();
+
+    const parsed = this.parseConfig(permissions, categories);
+    this.enabledLegacyCategories = parsed.legacy;
+    this.enabledDocCategories = parsed.doc;
   }
 
   /**
-   * Parse MCP_CONFIG from provided string or environment variables
+   * Parse permissions and categories for dual-layer filtering
+   * Layer 1 (permissions): Broad control using legacy categories
+   * Layer 2 (categories): Fine-grained control using documentation categories (optional)
    */
-  private parseConfig(configStr?: string): Set<ToolCategory> {
-    // Priority: 1. Provided config, 2. Environment variable, 3. Enable all
-    const config = configStr || process.env.MCP_CONFIG || "";
-
-    // If config is empty, enable all features
-    if (!config.trim()) {
-      return new Set(Object.values(ToolCategory));
+  private parseConfig(
+    permissionsStr: string,
+    categoriesStr: string,
+  ): {
+    legacy: Set<ToolCategory>;
+    doc: Set<DocCategory>;
+  } {
+    // If both are empty, enable all features
+    if (!permissionsStr.trim() && !categoriesStr.trim()) {
+      return {
+        legacy: new Set(Object.values(ToolCategory)),
+        doc: new Set(Object.values(DocCategory)),
+      };
     }
 
-    // Parse comma-separated list
-    const categories = config.split(",").map((c) => c.trim().toLowerCase());
-    const validCategories = categories.filter((c) =>
-      Object.values(ToolCategory).includes(c as ToolCategory),
-    ) as ToolCategory[];
+    // Parse Layer 1: Permissions (legacy categories)
+    let legacySet = new Set<ToolCategory>();
+    if (permissionsStr.trim()) {
+      const items = permissionsStr
+        .split(",")
+        .map((c) => c.trim().toLowerCase());
+      const validLegacyCategories = items.filter((c) =>
+        Object.values(ToolCategory).includes(c as ToolCategory),
+      ) as ToolCategory[];
+      legacySet = new Set(validLegacyCategories);
+    } else {
+      // If no permissions specified but categories are, allow all permissions
+      legacySet = new Set(Object.values(ToolCategory));
+    }
 
-    return new Set(validCategories);
+    // Parse Layer 2: Categories (documentation categories)
+    let docSet = new Set<DocCategory>();
+    if (categoriesStr.trim()) {
+      // Categories specified - use them for fine-grained filtering
+      const items = categoriesStr.split(",").map((c) => c.trim().toLowerCase());
+      const validDocCategories = items.filter((c) =>
+        Object.values(DocCategory).includes(c as DocCategory),
+      ) as DocCategory[];
+      docSet = new Set(validDocCategories);
+    } else {
+      // No categories specified - derive from permissions
+      legacySet.forEach((legacyCat) => {
+        const docCats = legacyToDocCategoryMap[legacyCat] || [];
+        docCats.forEach((dc) => docSet.add(dc));
+      });
+    }
+
+    return {
+      legacy: legacySet,
+      doc: docSet,
+    };
   }
 
   /**
    * Update configuration at runtime
    */
-  setConfig(configStr: string): void {
-    this.originalConfigString = configStr;
-    this.enabledCategories = this.parseConfig(configStr);
+  setConfig(permissionsStr: string, categoriesStr?: string): void {
+    this.originalPermissionsString = permissionsStr;
+    this.originalCategoriesString = categoriesStr || "";
+    this.useDualLayer = !!(categoriesStr && categoriesStr.trim());
+    const parsed = this.parseConfig(permissionsStr, categoriesStr || "");
+    this.enabledLegacyCategories = parsed.legacy;
+    this.enabledDocCategories = parsed.doc;
   }
 
   /**
    * Check if a specific tool is enabled
+   * Dual-layer logic:
+   * - Layer 1 (Permission): Tool must be allowed by its legacy category
+   * - Layer 2 (Category): If categories specified, tool must also be in allowed doc category
    */
   isToolEnabled(toolName: string): boolean {
-    const category = toolCategoryMap[toolName];
+    const docCategory = toolDocCategoryMap[toolName];
+    const legacyCategory = toolCategoryMap[toolName];
 
-    // If tool is not in the map, default to disabled
-    if (!category) {
+    // If tool is not in either map, default to disabled
+    if (!docCategory && !legacyCategory) {
       console.warn(`Unknown tool: ${toolName}`);
       return false;
     }
 
-    return this.enabledCategories.has(category);
+    // Layer 1: Check permission (legacy category)
+    const hasPermission = legacyCategory
+      ? this.enabledLegacyCategories.has(legacyCategory)
+      : false;
+
+    if (!hasPermission) {
+      return false;
+    }
+
+    // Layer 2: Check category (documentation category) if dual-layer mode
+    if (this.useDualLayer) {
+      const hasCategory = docCategory
+        ? this.enabledDocCategories.has(docCategory)
+        : false;
+      return hasCategory;
+    }
+
+    // Single-layer mode: permission is sufficient
+    return true;
   }
 
   /**
    * Get detailed permission error message for a specific tool
    */
   getPermissionError(toolName: string): string {
-    const category = toolCategoryMap[toolName];
+    const docCategory = toolDocCategoryMap[toolName];
+    const legacyCategory = toolCategoryMap[toolName];
 
-    if (!category) {
+    if (!docCategory && !legacyCategory) {
       return `Unknown tool '${toolName}'. This tool is not recognized by the MCP server.`;
     }
 
-    const isAllPermissions = !this.originalConfigString.trim();
-    const currentPermissions = isAllPermissions
-      ? "all"
-      : this.originalConfigString;
+    const isAllEnabled =
+      !this.originalPermissionsString.trim() &&
+      !this.originalCategoriesString.trim();
 
-    const actionDescriptions: Record<ToolCategory, string> = {
-      [ToolCategory.LIST]: "list databases and tables",
-      [ToolCategory.READ]: "read data from tables",
-      [ToolCategory.CREATE]: "create new records",
-      [ToolCategory.UPDATE]: "update existing records",
-      [ToolCategory.DELETE]: "delete records",
-      [ToolCategory.EXECUTE]: "execute custom SQL queries",
-      [ToolCategory.DDL]: "create, alter, or drop tables (schema changes)",
-      [ToolCategory.UTILITY]: "use utility functions",
-      [ToolCategory.TRANSACTION]: "manage database transactions",
-      [ToolCategory.PROCEDURE]: "manage stored procedures",
-    };
+    if (isAllEnabled) {
+      return `Unknown error: All tools should be enabled but '${toolName}' was blocked.`;
+    }
 
-    const toolDescriptions: Record<string, string> = {
-      createTable: "create new tables",
-      alterTable: "modify table structure",
-      dropTable: "delete tables",
-      executeDdl: "execute DDL statements",
-      createRecord: "insert new records",
-      updateRecord: "update existing records",
-      deleteRecord: "delete records",
-      bulkInsert: "insert multiple records in batches",
-      bulkUpdate: "update multiple records in batches",
-      bulkDelete: "delete multiple records in batches",
-      executeSql: "execute custom SQL statements",
-      runQuery: "run SELECT queries",
-      beginTransaction: "start database transactions",
-      commitTransaction: "commit database transactions",
-      rollbackTransaction: "rollback database transactions",
-      executeInTransaction: "execute queries within transactions",
-      createStoredProcedure: "create stored procedures",
-      dropStoredProcedure: "delete stored procedures",
-      executeStoredProcedure: "execute stored procedures",
-      exportTableToCSV: "export table data to CSV",
-      exportQueryToCSV: "export query results to CSV",
-      // Backup and restore
-      backupTable: "backup table to SQL dump",
-      backupDatabase: "backup database to SQL dump",
-      restoreFromSql: "restore database from SQL dump",
-      getCreateTableStatement: "get CREATE TABLE statement",
-      getDatabaseSchema: "get database schema overview",
-      // Extended export/import
-      exportTableToJSON: "export table data to JSON",
-      exportQueryToJSON: "export query results to JSON",
-      exportTableToSql: "export table data to SQL INSERT statements",
-      importFromCSV: "import data from CSV",
-      importFromJSON: "import data from JSON",
-    };
+    // Build error message based on dual-layer or single-layer mode
+    if (this.useDualLayer) {
+      const hasPermission = legacyCategory
+        ? this.enabledLegacyCategories.has(legacyCategory)
+        : false;
+      const hasCategory = docCategory
+        ? this.enabledDocCategories.has(docCategory)
+        : false;
 
-    const toolDescription =
-      toolDescriptions[toolName] || actionDescriptions[category];
-    const requiredPermission = category;
+      if (!hasPermission) {
+        return (
+          `Permission denied: This tool requires '${legacyCategory}' permission (Layer 1). ` +
+          `Your current permissions: ${this.originalPermissionsString || "none"}. ` +
+          `Add '${legacyCategory}' to the permissions argument.`
+        );
+      }
 
-    return (
-      `Permission denied: Cannot ${toolDescription}. ` +
-      `This action requires '${requiredPermission}' permission, but your current MCP configuration only allows: ${currentPermissions}. ` +
-      `To enable this feature, update your MCP server configuration to include '${requiredPermission}' in the permissions list.`
-    );
+      if (!hasCategory) {
+        return (
+          `Permission denied: This tool requires '${docCategory}' category (Layer 2). ` +
+          `Your current categories: ${this.originalCategoriesString || "none"}. ` +
+          `Add '${docCategory}' to the categories argument.`
+        );
+      }
+    } else {
+      // Single-layer mode
+      return (
+        `Permission denied: This tool requires '${legacyCategory}' permission. ` +
+        `Your current configuration allows: ${this.originalPermissionsString || "all"}. ` +
+        `Add '${legacyCategory}' to enable this tool.`
+      );
+    }
+
+    return `Permission denied for tool '${toolName}'.`;
   }
 
   /**
-   * Check if a category is enabled
+   * Check if a legacy category is enabled
    */
   isCategoryEnabled(category: ToolCategory): boolean {
-    return this.enabledCategories.has(category);
+    return this.enabledLegacyCategories.has(category);
   }
 
   /**
-   * Get all enabled categories
+   * Check if a documentation category is enabled
+   */
+  isDocCategoryEnabled(category: DocCategory): boolean {
+    return this.enabledDocCategories.has(category);
+  }
+
+  /**
+   * Get all enabled legacy categories
    */
   getEnabledCategories(): ToolCategory[] {
-    return Array.from(this.enabledCategories);
+    return Array.from(this.enabledLegacyCategories);
+  }
+
+  /**
+   * Get all enabled documentation categories
+   */
+  getEnabledDocCategories(): DocCategory[] {
+    return Array.from(this.enabledDocCategories);
   }
 
   /**
@@ -339,10 +671,46 @@ export class FeatureConfig {
     const result = {} as Record<ToolCategory, boolean>;
 
     for (const category of Object.values(ToolCategory)) {
-      result[category] = this.enabledCategories.has(category);
+      result[category] = this.enabledLegacyCategories.has(category);
     }
 
     return result;
+  }
+
+  /**
+   * Get all available documentation categories with their status
+   */
+  getDocCategoryStatus(): Record<DocCategory, boolean> {
+    const result = {} as Record<DocCategory, boolean>;
+
+    for (const category of Object.values(DocCategory)) {
+      result[category] = this.enabledDocCategories.has(category);
+    }
+
+    return result;
+  }
+
+  /**
+   * Check if using dual-layer filtering mode
+   */
+  isUsingDualLayer(): boolean {
+    return this.useDualLayer;
+  }
+
+  /**
+   * Get filtering mode description
+   */
+  getFilteringMode(): string {
+    if (
+      !this.originalPermissionsString.trim() &&
+      !this.originalCategoriesString.trim()
+    ) {
+      return "No filtering (all tools enabled)";
+    }
+    if (this.useDualLayer) {
+      return "Dual-layer (Permissions + Categories)";
+    }
+    return "Single-layer (Permissions only)";
   }
 }
 

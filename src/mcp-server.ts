@@ -9,9 +9,11 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { MySQLMCP } from "./index.js";
 
-// Get permissions from environment variable (set by bin/mcp-mysql.js)
-// Priority: MCP_PERMISSIONS (from command line) > MCP_CONFIG (from .env) > all permissions
+// Get permissions and categories from environment variables (set by bin/mcp-mysql.js)
+// Layer 1 (Permissions): MCP_PERMISSIONS or MCP_CONFIG (backward compatible)
+// Layer 2 (Categories): MCP_CATEGORIES (optional, for fine-grained control)
 const permissions = process.env.MCP_PERMISSIONS || process.env.MCP_CONFIG || "";
+const categories = process.env.MCP_CATEGORIES || "";
 
 // Declare the MySQL MCP instance (will be initialized in main())
 let mysqlMCP: MySQLMCP;
@@ -2816,10 +2818,27 @@ const server = new Server(
   },
 );
 
-// Handle list tools request
+// Handle list tools request - filter tools based on permissions and categories
 server.setRequestHandler(ListToolsRequestSchema, async () => {
+  // Filter tools to only return those that are enabled based on current config
+  const enabledTools = TOOLS.filter((tool) => {
+    // Convert tool name from snake_case to camelCase for checking
+    // e.g., "list_databases" -> "listDatabases"
+    const toolNameCamelCase = tool.name.replace(/_([a-z])/g, (_, letter) =>
+      letter.toUpperCase(),
+    );
+
+    // Check if tool is enabled based on permissions and categories
+    return mysqlMCP.isToolEnabled(toolNameCamelCase);
+  });
+
+  // Log the filtering results
+  console.error(
+    `Tools available: ${enabledTools.length} of ${TOOLS.length} total tools`,
+  );
+
   return {
-    tools: TOOLS,
+    tools: enabledTools,
   };
 });
 
@@ -3429,11 +3448,16 @@ async function main() {
 
   // Initialize the MySQL MCP instance AFTER transport is connected
   // This ensures the database connection pool is created when the server is ready
-  mysqlMCP = new MySQLMCP(permissions);
+  mysqlMCP = new MySQLMCP(permissions, categories);
 
-  // Log the effective permissions to stderr
-  if (permissions) {
+  // Log the effective filtering configuration to stderr
+  if (permissions && categories) {
+    console.error(`Active permissions (Layer 1): ${permissions}`);
+    console.error(`Active categories (Layer 2): ${categories}`);
+    console.error("Filtering mode: Dual-layer");
+  } else if (permissions) {
     console.error(`Active permissions: ${permissions}`);
+    console.error("Filtering mode: Single-layer");
   } else {
     console.error("Active permissions: all (default)");
   }
