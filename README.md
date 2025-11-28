@@ -4,8 +4,8 @@
 
 **A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
-[![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
-[![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
+[![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
+[![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mysql-mcp)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
@@ -20,7 +20,7 @@
 
 ```bash
 # Run directly with npx (no installation needed)
-npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/mydb "list,read,utility"
+npx @berthojoris/mysql-mcp mysql://user:pass@localhost:3306/mydb "list,read,utility"
 ```
 
 Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
@@ -30,7 +30,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
   "mcpServers": {
     "mysql": {
       "command": "npx",
-      "args": ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/mydb", "list,read,utility"]
+      "args": ["-y", "@berthojoris/mysql-mcp", "mysql://user:pass@localhost:3306/mydb", "list,read,utility"]
     }
   }
 }
@@ -79,13 +79,13 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 No installation required - run directly:
 
 ```bash
-npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db "list,read,utility"
+npx @berthojoris/mysql-mcp mysql://user:pass@localhost:3306/db "list,read,utility"
 ```
 
 ### Option 2: Global Installation
 
 ```bash
-npm install -g @berthojoris/mcp-mysql-server
+npm install -g @berthojoris/mysql-mcp
 mcp-mysql mysql://user:pass@localhost:3306/db "list,read,utility"
 ```
 
@@ -153,6 +153,7 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
 
 **Universal Configuration Template:**
 
+**Option 1: Single-Layer (Permissions Only) - Simple Setup**
 ```json
 {
   "mcpServers": {
@@ -160,7 +161,7 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
       "command": "npx",
       "args": [
         "-y",
-        "@berthojoris/mcp-mysql-server",
+        "@berthojoris/mysql-mcp",
         "mysql://user:password@localhost:3306/database",
         "list,read,utility"
       ]
@@ -168,6 +169,26 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
   }
 }
 ```
+
+**Option 2: Dual-Layer (Permissions + Categories) - Recommended for Fine Control**
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mysql-mcp",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility",
+        "database-discovery,data-read,schema-inspection"
+      ]
+    }
+  }
+}
+```
+
+> **💡 Tip:** The dual-layer approach provides granular control. The 4th argument (permissions) controls broad access levels, while the 5th argument (categories) fine-tunes which specific tools are available.
 
 <details>
 <summary><strong>Multiple Database Configuration</strong></summary>
@@ -179,7 +200,7 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
       "command": "npx",
       "args": [
         "-y",
-        "@berthojoris/mcp-mysql-server",
+        "@berthojoris/mysql-mcp",
         "mysql://reader:pass@prod-server:3306/prod_db",
         "list,read,utility"
       ]
@@ -188,7 +209,7 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
       "command": "npx",
       "args": [
         "-y",
-        "@berthojoris/mcp-mysql-server",
+        "@berthojoris/mysql-mcp",
         "mysql://root:pass@localhost:3306/dev_db",
         "list,read,create,update,delete,execute,ddl,utility"
       ]
@@ -208,7 +229,7 @@ OpenAI Codex uses TOML format in `~/.codex/config.toml`.
 **Quick setup via CLI:**
 
 ```bash
-codex mcp add mysql -- npx -y @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db list,read,utility
+codex mcp add mysql -- npx -y @berthojoris/mysql-mcp mysql://user:pass@localhost:3306/db list,read,utility
 ```
 
 **Manual TOML configuration:**
@@ -216,7 +237,7 @@ codex mcp add mysql -- npx -y @berthojoris/mcp-mysql-server mysql://user:pass@lo
 ```toml
 [mcp_servers.mysql]
 command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
+args = ["-y", "@berthojoris/mysql-mcp", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
 startup_timeout_sec = 20
 ```
 
@@ -228,7 +249,7 @@ startup_timeout_sec = 20
 ```toml
 [mcp_servers.mysql]
 command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server"]
+args = ["-y", "@berthojoris/mysql-mcp"]
 
 [mcp_servers.mysql.env]
 DB_HOST = "localhost"
@@ -245,13 +266,13 @@ MCP_PERMISSIONS = "list,read,utility"
 # Production - Read Only
 [mcp_servers.mysql-prod]
 command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://reader:pass@prod:3306/prod_db", "list,read,utility"]
+args = ["-y", "@berthojoris/mysql-mcp", "mysql://reader:pass@prod:3306/prod_db", "list,read,utility"]
 startup_timeout_sec = 30
 
 # Development - Full Access
 [mcp_servers.mysql-dev]
 command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://root:pass@localhost:3306/dev_db", "list,read,create,update,delete,execute,ddl,utility"]
+args = ["-y", "@berthojoris/mysql-mcp", "mysql://root:pass@localhost:3306/dev_db", "list,read,create,update,delete,execute,ddl,utility"]
 ```
 
 **Advanced options:**
@@ -259,7 +280,7 @@ args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://root:pass@localhost:3306
 ```toml
 [mcp_servers.mysql]
 command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
+args = ["-y", "@berthojoris/mysql-mcp", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
 startup_timeout_sec = 20        # Server startup timeout (default: 10)
 tool_timeout_sec = 120          # Per-tool execution timeout (default: 60)
 enabled = true                  # Set false to disable without deleting
@@ -292,7 +313,7 @@ Zed IDE uses a different structure in `~/.config/zed/settings.json`:
         "path": "npx",
         "args": [
           "-y",
-          "@berthojoris/mcp-mysql-server",
+          "@berthojoris/mysql-mcp",
           "mysql://user:password@localhost:3306/database",
           "list,read,utility"
         ]
@@ -313,7 +334,7 @@ Alternative approach using environment variables instead of connection string:
   "mcpServers": {
     "mysql": {
       "command": "npx",
-      "args": ["-y", "@berthojoris/mcp-mysql-server"],
+      "args": ["-y", "@berthojoris/mysql-mcp"],
       "env": {
         "DB_HOST": "localhost",
         "DB_PORT": "3306",
@@ -565,261 +586,34 @@ The MCP server provides **119 powerful tools** organized into categories:
 
 ### Quick Reference
 
+**119 Tools Available** - Organized into 22 categories
+
 | Category | Count | Key Tools |
 |----------|-------|-----------|
-| [Database Discovery](#database-discovery) | 4 | `list_databases`, `list_tables`, `read_table_schema` |
-| [CRUD Operations](#data-operations---crud) | 4 | `create_record`, `read_records`, `update_record`, `delete_record` |
-| [Bulk Operations](#bulk-operations) | 3 | `bulk_insert`, `bulk_update`, `bulk_delete` |
-| [Custom Queries](#custom-queries) | 2 | `run_query`, `execute_sql` |
-| [Schema Management](#schema-management---ddl) | 4 | `create_table`, `alter_table`, `drop_table`, `execute_ddl` |
-| [Transactions](#transaction-management) | 5 | `begin_transaction`, `commit_transaction`, `rollback_transaction` |
-| [Stored Procedures](#stored-procedures) | 6 | `create_stored_procedure`, `execute_stored_procedure` |
-| [Views](#views-management) | 6 | `create_view`, `alter_view`, `drop_view` |
-| [Triggers](#triggers-management) | 5 | `create_trigger`, `drop_trigger` |
-| [Functions](#functions-management) | 6 | `create_function`, `execute_function` |
-| [Indexes](#index-management) | 5 | `create_index`, `drop_index`, `analyze_index` |
-| [Constraints](#constraint-management) | 7 | `add_foreign_key`, `add_unique_constraint` |
-| [Table Maintenance](#table-maintenance) | 8 | `analyze_table`, `optimize_table`, `repair_table` |
-| [Server Management](#process--server-management) | 9 | `show_process_list`, `explain_query` |
-| [Performance Monitoring](#performance-monitoring) | 10 | `get_performance_metrics`, `get_database_health_check` |
-| [Cache](#cache-management) | 5 | `get_cache_stats`, `clear_cache` |
-| [Query Optimization](#query-optimization) | 2 | `analyze_query`, `get_optimization_hints` |
-| [Backup & Restore](#database-backup--restore) | 5 | `backup_database`, `restore_from_sql` |
-| [Import/Export](#data-importexport) | 5 | `export_table_to_json`, `import_from_csv` |
-| [Data Migration](#data-migration) | 5 | `copy_table_data`, `sync_table_data` |
-| [Schema Migrations](#schema-versioning--migrations) | 9 | `create_migration`, `apply_migrations` |
-| [Utilities](#utilities) | 4 | `test_connection`, `export_table_to_csv` |
+| Database Discovery | 4 | `list_databases`, `list_tables`, `read_table_schema` |
+| CRUD Operations | 4 | `create_record`, `read_records`, `update_record`, `delete_record` |
+| Bulk Operations | 3 | `bulk_insert`, `bulk_update`, `bulk_delete` |
+| Custom Queries | 2 | `run_query`, `execute_sql` |
+| Schema Management | 4 | `create_table`, `alter_table`, `drop_table` |
+| Transactions | 5 | `begin_transaction`, `commit_transaction`, `rollback_transaction` |
+| Stored Procedures | 6 | `create_stored_procedure`, `execute_stored_procedure` |
+| Views | 6 | `create_view`, `alter_view`, `drop_view` |
+| Triggers | 5 | `create_trigger`, `drop_trigger` |
+| Functions | 6 | `create_function`, `execute_function` |
+| Indexes | 5 | `create_index`, `drop_index`, `analyze_index` |
+| Constraints | 7 | `add_foreign_key`, `add_unique_constraint` |
+| Table Maintenance | 8 | `analyze_table`, `optimize_table`, `repair_table` |
+| Server Management | 9 | `show_process_list`, `explain_query` |
+| Performance Monitoring | 10 | `get_performance_metrics`, `get_database_health_check` |
+| Cache | 5 | `get_cache_stats`, `clear_cache` |
+| Query Optimization | 2 | `analyze_query`, `get_optimization_hints` |
+| Backup & Restore | 5 | `backup_database`, `restore_from_sql` |
+| Import/Export | 5 | `export_table_to_json`, `import_from_csv` |
+| Data Migration | 5 | `copy_table_data`, `sync_table_data` |
+| Schema Migrations | 9 | `create_migration`, `apply_migrations` |
+| Utilities | 4 | `test_connection`, `export_table_to_csv` |
 
----
-
-### Database Discovery
-
-| Tool | Description |
-|------|-------------|
-| `list_databases` | Lists all databases on the MySQL server |
-| `list_tables` | Lists all tables in the current/specified database |
-| `read_table_schema` | Gets detailed schema (columns, types, keys, indexes) |
-| `get_table_relationships` | Discovers foreign key relationships |
-
-### Data Operations - CRUD
-
-| Tool | Description |
-|------|-------------|
-| `create_record` | Insert new records with automatic SQL generation |
-| `read_records` | Query records with filtering, pagination, and sorting |
-| `update_record` | Update records based on conditions |
-| `delete_record` | Delete records with safety checks |
-
-### Bulk Operations
-
-| Tool | Description | Performance |
-|------|-------------|-------------|
-| `bulk_insert` | Insert multiple records in batches | Up to 10,000 records/batch |
-| `bulk_update` | Update multiple records with different conditions | Up to 1,000 ops/batch |
-| `bulk_delete` | Delete multiple record sets | Up to 1,000 ops/batch |
-
-### Custom Queries
-
-| Tool | Description |
-|------|-------------|
-| `run_query` | Execute read-only SELECT queries |
-| `execute_sql` | Execute write operations (INSERT, UPDATE, DELETE, or DDL) |
-
-### Schema Management - DDL
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `create_table` | Create new tables with columns and indexes | `ddl` |
-| `alter_table` | Modify table structure | `ddl` |
-| `drop_table` | Delete tables | `ddl` |
-| `execute_ddl` | Execute raw DDL SQL | `ddl` |
-
-### Utilities
-
-| Tool | Description |
-|------|-------------|
-| `test_connection` | Test database connectivity and measure latency |
-| `describe_connection` | Get current connection information |
-| `export_table_to_csv` | Export table data to CSV format |
-| `export_query_to_csv` | Export query results to CSV format |
-
-### Transaction Management
-
-| Tool | Description |
-|------|-------------|
-| `begin_transaction` | Start a new database transaction |
-| `commit_transaction` | Commit the current transaction |
-| `rollback_transaction` | Rollback the current transaction |
-| `get_transaction_status` | Check if a transaction is active |
-| `execute_in_transaction` | Execute SQL within a transaction context |
-
-### Stored Procedures
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_stored_procedures` | List all stored procedures | `procedure` |
-| `create_stored_procedure` | Create new stored procedures | `procedure` |
-| `get_stored_procedure_info` | Get procedure details | `procedure` |
-| `execute_stored_procedure` | Execute with IN/OUT/INOUT params | `procedure` |
-| `drop_stored_procedure` | Delete stored procedures | `procedure` |
-| `show_create_procedure` | Show CREATE statement | `procedure` |
-
-### Views Management
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_views` | List all views in the database | `list` |
-| `get_view_info` | Get detailed view information | `list` |
-| `create_view` | Create a new view | `ddl` |
-| `alter_view` | Alter an existing view | `ddl` |
-| `drop_view` | Drop a view | `ddl` |
-| `show_create_view` | Show CREATE statement | `list` |
-
-### Triggers Management
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_triggers` | List all triggers | `list` |
-| `get_trigger_info` | Get trigger details | `list` |
-| `create_trigger` | Create a new trigger | `ddl` |
-| `drop_trigger` | Drop a trigger | `ddl` |
-| `show_create_trigger` | Show CREATE statement | `list` |
-
-### Functions Management
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_functions` | List all user-defined functions | `list` |
-| `get_function_info` | Get function details | `list` |
-| `create_function` | Create a new function | `ddl` |
-| `drop_function` | Drop a function | `ddl` |
-| `show_create_function` | Show CREATE statement | `list` |
-| `execute_function` | Execute and return result | `read` |
-
-### Index Management
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_indexes` | List all indexes for a table | `list` |
-| `get_index_info` | Get index details | `list` |
-| `create_index` | Create index (BTREE, HASH, FULLTEXT, SPATIAL) | `ddl` |
-| `drop_index` | Drop an index | `ddl` |
-| `analyze_index` | Analyze index statistics | `utility` |
-
-### Constraint Management
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_foreign_keys` | List all foreign keys | `list` |
-| `list_constraints` | List all constraints (PK, FK, UNIQUE, CHECK) | `list` |
-| `add_foreign_key` | Add a foreign key constraint | `ddl` |
-| `drop_foreign_key` | Drop a foreign key | `ddl` |
-| `add_unique_constraint` | Add a unique constraint | `ddl` |
-| `drop_constraint` | Drop UNIQUE or CHECK constraint | `ddl` |
-| `add_check_constraint` | Add CHECK constraint (MySQL 8.0.16+) | `ddl` |
-
-### Table Maintenance
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `analyze_table` | Update index statistics | `utility` |
-| `optimize_table` | Reclaim space and defragment | `utility` |
-| `check_table` | Check table for errors | `utility` |
-| `repair_table` | Repair corrupted table | `utility` |
-| `truncate_table` | Remove all rows quickly | `ddl` |
-| `get_table_status` | Get table status and statistics | `list` |
-| `flush_table` | Close and reopen table(s) | `utility` |
-| `get_table_size` | Get size information | `list` |
-
-### Process & Server Management
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `show_process_list` | Show running MySQL processes | `utility` |
-| `kill_process` | Kill a MySQL process/connection | `utility` |
-| `show_status` | Show server status variables | `utility` |
-| `show_variables` | Show server configuration | `utility` |
-| `explain_query` | Show query execution plan | `utility` |
-| `show_engine_status` | Show storage engine status | `utility` |
-| `get_server_info` | Get comprehensive server info | `utility` |
-| `show_binary_logs` | Show binary log files | `utility` |
-| `show_replication_status` | Show replication status | `utility` |
-
-### Performance Monitoring
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `get_performance_metrics` | Get comprehensive performance metrics | `utility` |
-| `get_top_queries_by_time` | Find slowest queries by execution time | `utility` |
-| `get_top_queries_by_count` | Find most frequently executed queries | `utility` |
-| `get_slow_queries` | Identify queries exceeding time threshold | `utility` |
-| `get_table_io_stats` | Monitor table I/O operations | `utility` |
-| `get_index_usage_stats` | Track index usage statistics | `utility` |
-| `get_unused_indexes` | Identify unused indexes | `utility` |
-| `get_connection_pool_stats` | Monitor connection pool health | `utility` |
-| `get_database_health_check` | Comprehensive health assessment | `utility` |
-| `reset_performance_stats` | Reset performance schema statistics | `utility` |
-
-### Cache Management
-
-| Tool | Description |
-|------|-------------|
-| `get_cache_stats` | Get query cache statistics |
-| `get_cache_config` | Get current cache configuration |
-| `configure_cache` | Configure cache settings |
-| `clear_cache` | Clear all cached results |
-| `invalidate_table_cache` | Invalidate cache for specific table |
-
-### Query Optimization
-
-| Tool | Description |
-|------|-------------|
-| `analyze_query` | Analyze query and get optimization suggestions |
-| `get_optimization_hints` | Get optimizer hints for SPEED, MEMORY, or STABILITY |
-
-### Database Backup & Restore
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `backup_table` | Backup single table to SQL dump | `utility` |
-| `backup_database` | Backup entire database to SQL dump | `utility` |
-| `restore_from_sql` | Restore from SQL dump content | `ddl` |
-| `get_create_table_statement` | Get CREATE TABLE statement | `list` |
-| `get_database_schema` | Get complete database schema | `list` |
-
-### Data Import/Export
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `export_table_to_json` | Export table to JSON format | `utility` |
-| `export_query_to_json` | Export query results to JSON | `utility` |
-| `export_table_to_sql` | Export to SQL INSERT statements | `utility` |
-| `import_from_csv` | Import from CSV string | `create` |
-| `import_from_json` | Import from JSON array | `create` |
-
-### Data Migration
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `copy_table_data` | Copy data with optional column mapping | `create` |
-| `move_table_data` | Move data (copy + delete source) | `create`, `delete` |
-| `clone_table` | Clone table structure with optional data | `ddl` |
-| `compare_table_structure` | Compare two table structures | `list` |
-| `sync_table_data` | Sync data between tables | `update` |
-
-### Schema Versioning & Migrations
-
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `init_migrations_table` | Initialize migrations tracking table | `ddl` |
-| `create_migration` | Create migration with up/down SQL | `ddl` |
-| `apply_migrations` | Apply pending migrations (dry-run support) | `ddl` |
-| `rollback_migration` | Rollback by steps or version | `ddl` |
-| `get_migration_status` | Get migration history and status | `list` |
-| `get_schema_version` | Get current schema version | `list` |
-| `validate_migrations` | Validate migrations for issues | `list` |
-| `reset_failed_migration` | Reset failed migration to pending | `ddl` |
-| `generate_migration_from_diff` | Generate migration from table diff | `ddl` |
+> **📖 For detailed tool descriptions, parameters, and examples, see [DOCUMENTATIONS.md](DOCUMENTATIONS.md#🔧-complete-tools-reference)**
 
 ---
 
@@ -872,6 +666,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 *Enabling AI agents to interact with MySQL databases safely and efficiently*
 
-[Report Bug](https://github.com/berthojoris/mcp-mysql-server/issues) · [Request Feature](https://github.com/berthojoris/mcp-mysql-server/issues) · [Documentation](DOCUMENTATIONS.md)
+[Report Bug](https://github.com/berthojoris/mysql-mcp/issues) · [Request Feature](https://github.com/berthojoris/mysql-mcp/issues) · [Documentation](DOCUMENTATIONS.md)
 
 </div>

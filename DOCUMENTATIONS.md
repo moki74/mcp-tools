@@ -7,32 +7,33 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [🆕 Category Filtering System](#🆕-category-filtering-system) - NEW!
-2. [DDL Operations](#🏗️-ddl-operations)
-3. [Data Export Tools](#📤-data-export-tools)
-4. [Data Import Tools](#📥-data-import-tools)
-5. [Database Backup & Restore](#💾-database-backup--restore)
-6. [Data Migration Tools](#🔄-data-migration-tools)
-7. [Schema Versioning & Migrations](#🔄-schema-versioning-and-migrations)
-8. [Transaction Management](#💰-transaction-management)
-9. [Stored Procedures](#🔧-stored-procedures)
-10. [Views Management](#👁️-views-management)
-11. [Triggers Management](#⚡-triggers-management)
-12. [Functions Management](#🔢-functions-management)
-13. [Index Management](#📇-index-management)
-14. [Constraint Management](#🔗-constraint-management)
-15. [Table Maintenance](#🔧-table-maintenance)
-16. [Process & Server Management](#📊-process--server-management)
-17. [Performance Monitoring](#📈-performance-monitoring)
-18. [Usage Examples](#📋-usage-examples)
-19. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
-20. [Security Features](#🔒-security-features)
-21. [Query Result Caching](#💾-query-result-caching)
-22. [Query Optimization Hints](#🎯-query-optimization-hints)
-23. [Bulk Operations](#🚀-bulk-operations)
-24. [OpenAI Codex Integration](#🤖-openai-codex-integration)
-25. [Troubleshooting](#🛠️-troubleshooting)
-26. [License](#📄-license)
-27. [Roadmap](#🗺️-roadmap)
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 119 tools organized by category
+3. [DDL Operations](#🏗️-ddl-operations)
+4. [Data Export Tools](#📤-data-export-tools)
+5. [Data Import Tools](#📥-data-import-tools)
+6. [Database Backup & Restore](#💾-database-backup--restore)
+7. [Data Migration Tools](#🔄-data-migration-tools)
+8. [Schema Versioning & Migrations](#🔄-schema-versioning-and-migrations)
+9. [Transaction Management](#💰-transaction-management)
+10. [Stored Procedures](#🔧-stored-procedures)
+11. [Views Management](#👁️-views-management)
+12. [Triggers Management](#⚡-triggers-management)
+13. [Functions Management](#🔢-functions-management)
+14. [Index Management](#📇-index-management)
+15. [Constraint Management](#🔗-constraint-management)
+16. [Table Maintenance](#🔧-table-maintenance)
+17. [Process & Server Management](#📊-process--server-management)
+18. [Performance Monitoring](#📈-performance-monitoring)
+19. [Usage Examples](#📋-usage-examples)
+20. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+21. [Security Features](#🔒-security-features)
+22. [Query Result Caching](#💾-query-result-caching)
+23. [Query Optimization Hints](#🎯-query-optimization-hints)
+24. [Bulk Operations](#🚀-bulk-operations)
+25. [OpenAI Codex Integration](#🤖-openai-codex-integration)
+26. [Troubleshooting](#🛠️-troubleshooting)
+27. [License](#📄-license)
+28. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -261,6 +262,241 @@ Permission denied: This tool requires 'bulk_operations' category (Layer 2).
 Your current categories: database_discovery,crud_operations.
 Add 'bulk_operations' to the categories argument.
 ```
+
+---
+
+## 🔧 Complete Tools Reference
+
+This section provides a comprehensive reference of all 119 available tools organized by category.
+
+### Database Discovery
+
+| Tool | Description |
+|------|-------------|
+| `list_databases` | Lists all databases on the MySQL server |
+| `list_tables` | Lists all tables in the current/specified database |
+| `read_table_schema` | Gets detailed schema (columns, types, keys, indexes) |
+| `get_table_relationships` | Discovers foreign key relationships |
+
+### Data Operations - CRUD
+
+| Tool | Description |
+|------|-------------|
+| `create_record` | Insert new records with automatic SQL generation |
+| `read_records` | Query records with filtering, pagination, and sorting |
+| `update_record` | Update records based on conditions |
+| `delete_record` | Delete records with safety checks |
+
+### Bulk Operations
+
+| Tool | Description | Performance |
+|------|-------------|-------------|
+| `bulk_insert` | Insert multiple records in batches | Up to 10,000 records/batch |
+| `bulk_update` | Update multiple records with different conditions | Up to 1,000 ops/batch |
+| `bulk_delete` | Delete multiple record sets | Up to 1,000 ops/batch |
+
+### Custom Queries
+
+| Tool | Description |
+|------|-------------|
+| `run_query` | Execute read-only SELECT queries |
+| `execute_sql` | Execute write operations (INSERT, UPDATE, DELETE, or DDL) |
+
+### Schema Management - DDL
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `create_table` | Create new tables with columns and indexes | `ddl` |
+| `alter_table` | Modify table structure | `ddl` |
+| `drop_table` | Delete tables | `ddl` |
+| `execute_ddl` | Execute raw DDL SQL | `ddl` |
+
+### Utilities
+
+| Tool | Description |
+|------|-------------|
+| `test_connection` | Test database connectivity and measure latency |
+| `describe_connection` | Get current connection information |
+| `export_table_to_csv` | Export table data to CSV format |
+| `export_query_to_csv` | Export query results to CSV format |
+
+### Transaction Management
+
+| Tool | Description |
+|------|-------------|
+| `begin_transaction` | Start a new database transaction |
+| `commit_transaction` | Commit the current transaction |
+| `rollback_transaction` | Rollback the current transaction |
+| `get_transaction_status` | Check if a transaction is active |
+| `execute_in_transaction` | Execute SQL within a transaction context |
+
+### Stored Procedures
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_stored_procedures` | List all stored procedures | `procedure` |
+| `create_stored_procedure` | Create new stored procedures | `procedure` |
+| `get_stored_procedure_info` | Get procedure details | `procedure` |
+| `execute_stored_procedure` | Execute with IN/OUT/INOUT params | `procedure` |
+| `drop_stored_procedure` | Delete stored procedures | `procedure` |
+| `show_create_procedure` | Show CREATE statement | `procedure` |
+
+### Views Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_views` | List all views in the database | `list` |
+| `get_view_info` | Get detailed view information | `list` |
+| `create_view` | Create a new view | `ddl` |
+| `alter_view` | Alter an existing view | `ddl` |
+| `drop_view` | Drop a view | `ddl` |
+| `show_create_view` | Show CREATE statement | `list` |
+
+### Triggers Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_triggers` | List all triggers | `list` |
+| `get_trigger_info` | Get trigger details | `list` |
+| `create_trigger` | Create a new trigger | `ddl` |
+| `drop_trigger` | Drop a trigger | `ddl` |
+| `show_create_trigger` | Show CREATE statement | `list` |
+
+### Functions Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_functions` | List all user-defined functions | `list` |
+| `get_function_info` | Get function details | `list` |
+| `create_function` | Create a new function | `ddl` |
+| `drop_function` | Drop a function | `ddl` |
+| `show_create_function` | Show CREATE statement | `list` |
+| `execute_function` | Execute and return result | `read` |
+
+### Index Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_indexes` | List all indexes for a table | `list` |
+| `get_index_info` | Get index details | `list` |
+| `create_index` | Create index (BTREE, HASH, FULLTEXT, SPATIAL) | `ddl` |
+| `drop_index` | Drop an index | `ddl` |
+| `analyze_index` | Analyze index statistics | `utility` |
+
+### Constraint Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `list_foreign_keys` | List all foreign keys | `list` |
+| `list_constraints` | List all constraints (PK, FK, UNIQUE, CHECK) | `list` |
+| `add_foreign_key` | Add a foreign key constraint | `ddl` |
+| `drop_foreign_key` | Drop a foreign key | `ddl` |
+| `add_unique_constraint` | Add a unique constraint | `ddl` |
+| `drop_constraint` | Drop UNIQUE or CHECK constraint | `ddl` |
+| `add_check_constraint` | Add CHECK constraint (MySQL 8.0.16+) | `ddl` |
+
+### Table Maintenance
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `analyze_table` | Update index statistics | `utility` |
+| `optimize_table` | Reclaim space and defragment | `utility` |
+| `check_table` | Check table for errors | `utility` |
+| `repair_table` | Repair corrupted table | `utility` |
+| `truncate_table` | Remove all rows quickly | `ddl` |
+| `get_table_status` | Get table status and statistics | `list` |
+| `flush_table` | Close and reopen table(s) | `utility` |
+| `get_table_size` | Get size information | `list` |
+
+### Process & Server Management
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `show_process_list` | Show running MySQL processes | `utility` |
+| `kill_process` | Kill a MySQL process/connection | `utility` |
+| `show_status` | Show server status variables | `utility` |
+| `show_variables` | Show server configuration | `utility` |
+| `explain_query` | Show query execution plan | `utility` |
+| `show_engine_status` | Show storage engine status | `utility` |
+| `get_server_info` | Get comprehensive server info | `utility` |
+| `show_binary_logs` | Show binary log files | `utility` |
+| `show_replication_status` | Show replication status | `utility` |
+
+### Performance Monitoring
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `get_performance_metrics` | Get comprehensive performance metrics | `utility` |
+| `get_top_queries_by_time` | Find slowest queries by execution time | `utility` |
+| `get_top_queries_by_count` | Find most frequently executed queries | `utility` |
+| `get_slow_queries` | Identify queries exceeding time threshold | `utility` |
+| `get_table_io_stats` | Monitor table I/O operations | `utility` |
+| `get_index_usage_stats` | Track index usage statistics | `utility` |
+| `get_unused_indexes` | Identify unused indexes | `utility` |
+| `get_connection_pool_stats` | Monitor connection pool health | `utility` |
+| `get_database_health_check` | Comprehensive health assessment | `utility` |
+| `reset_performance_stats` | Reset performance schema statistics | `utility` |
+
+### Cache Management
+
+| Tool | Description |
+|------|-------------|
+| `get_cache_stats` | Get query cache statistics |
+| `get_cache_config` | Get current cache configuration |
+| `configure_cache` | Configure cache settings |
+| `clear_cache` | Clear all cached results |
+| `invalidate_table_cache` | Invalidate cache for specific table |
+
+### Query Optimization
+
+| Tool | Description |
+|------|-------------|
+| `analyze_query` | Analyze query and get optimization suggestions |
+| `get_optimization_hints` | Get optimizer hints for SPEED, MEMORY, or STABILITY |
+
+### Database Backup & Restore
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `backup_table` | Backup single table to SQL dump | `utility` |
+| `backup_database` | Backup entire database to SQL dump | `utility` |
+| `restore_from_sql` | Restore from SQL dump content | `ddl` |
+| `get_create_table_statement` | Get CREATE TABLE statement | `list` |
+| `get_database_schema` | Get complete database schema | `list` |
+
+### Data Import/Export
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `export_table_to_json` | Export table to JSON format | `utility` |
+| `export_query_to_json` | Export query results to JSON | `utility` |
+| `export_table_to_sql` | Export to SQL INSERT statements | `utility` |
+| `import_from_csv` | Import from CSV string | `create` |
+| `import_from_json` | Import from JSON array | `create` |
+
+### Data Migration
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `copy_table_data` | Copy data with optional column mapping | `create` |
+| `move_table_data` | Move data (copy + delete source) | `create`, `delete` |
+| `clone_table` | Clone table structure with optional data | `ddl` |
+| `compare_table_structure` | Compare two table structures | `list` |
+| `sync_table_data` | Sync data between tables | `update` |
+
+### Schema Versioning & Migrations
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `init_migrations_table` | Initialize migrations tracking table | `ddl` |
+| `create_migration` | Create migration with up/down SQL | `ddl` |
+| `apply_migrations` | Apply pending migrations (dry-run support) | `ddl` |
+| `rollback_migration` | Rollback by steps or version | `ddl` |
+| `get_migration_status` | Get migration history and status | `list` |
+| `get_schema_version` | Get current schema version | `list` |
+| `validate_migrations` | Validate migrations for issues | `list` |
+| `reset_failed_migration` | Reset failed migration to pending | `ddl` |
+| `generate_migration_from_diff` | Generate migration from table diff | `ddl` |
 
 ---
 
