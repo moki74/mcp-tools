@@ -5,6 +5,13 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.3] - 2025-11-26
+
+### Fixed
+- Fixed inconsistency in documentation category names in the Dual-Layer configuration example
+- Changed from 'data_read,schema_inspection' to 'crud_operations,custom_queries' to match the Documentation Categories table
+- Ensures consistency throughout the documentation
+
 ## [1.10.0] - 2025-11-25
 
 ### Added
