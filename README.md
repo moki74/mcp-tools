@@ -181,7 +181,7 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
         "@berthojoris/mysql-mcp",
         "mysql://user:password@localhost:3306/database",
         "list,read,utility",
-        "database-discovery,data-read,schema-inspection"
+        "database_discovery,crud_operations,custom_queries"
       ]
     }
   }
