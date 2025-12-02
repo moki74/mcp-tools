@@ -1,6 +1,6 @@
-import DatabaseConnection from '../db/connection';
-import { SecurityLayer } from '../security/securityLayer';
-import { dbConfig } from '../config/config';
+import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
+import { dbConfig } from "../config/config";
 
 export class FunctionTools {
   private db: DatabaseConnection;
@@ -14,46 +14,55 @@ export class FunctionTools {
   /**
    * Validate database access - ensures only the connected database can be accessed
    */
-  private validateDatabaseAccess(requestedDatabase?: string): { valid: boolean; database: string; error?: string } {
+  private validateDatabaseAccess(requestedDatabase?: string): {
+    valid: boolean;
+    database: string;
+    error?: string;
+  } {
     const connectedDatabase = dbConfig.database;
 
     if (!connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: 'No database specified in connection string. Cannot access any database.'
+        database: "",
+        error:
+          "No database specified in connection string. Cannot access any database.",
       };
     }
 
     if (!requestedDatabase) {
       return {
         valid: true,
-        database: connectedDatabase
+        database: connectedDatabase,
       };
     }
 
     if (requestedDatabase !== connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`
+        database: "",
+        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`,
       };
     }
 
     return {
       valid: true,
-      database: connectedDatabase
+      database: connectedDatabase,
     };
   }
 
   /**
    * List all functions in the current database
    */
-  async listFunctions(params: { database?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async listFunctions(params: { database?: string }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const database = dbValidation.database;
@@ -79,15 +88,13 @@ export class FunctionTools {
       const results = await this.db.query<any[]>(query, [database]);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -95,20 +102,31 @@ export class FunctionTools {
   /**
    * Get detailed information about a specific function
    */
-  async getFunctionInfo(params: { function_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getFunctionInfo(params: {
+    function_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { function_name } = params;
       const database = dbValidation.database;
 
       // Validate function name
-      const identifierValidation = this.security.validateIdentifier(function_name);
+      const identifierValidation =
+        this.security.validateIdentifier(function_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid function name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid function name",
+        };
       }
 
       // Get function information
@@ -150,30 +168,27 @@ export class FunctionTools {
 
       const [functionInfo, parameters] = await Promise.all([
         this.db.query<any[]>(functionQuery, [database, function_name]),
-        this.db.query<any[]>(parametersQuery, [database, function_name])
+        this.db.query<any[]>(parametersQuery, [database, function_name]),
       ]);
 
       if (functionInfo.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `Function '${function_name}' not found in database '${database}'`,
-          queryLog: this.db.getFormattedQueryLogs(2)
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           ...functionInfo[0],
-          parameters: parameters
+          parameters: parameters,
         },
-        queryLog: this.db.getFormattedQueryLogs(2)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(2)
       };
     }
   }
@@ -190,15 +205,23 @@ export class FunctionTools {
     returns: string;
     body: string;
     deterministic?: boolean;
-    data_access?: 'CONTAINS SQL' | 'NO SQL' | 'READS SQL DATA' | 'MODIFIES SQL DATA';
-    security?: 'DEFINER' | 'INVOKER';
+    data_access?:
+      | "CONTAINS SQL"
+      | "NO SQL"
+      | "READS SQL DATA"
+      | "MODIFIES SQL DATA";
+    security?: "DEFINER" | "INVOKER";
     comment?: string;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const {
@@ -209,23 +232,29 @@ export class FunctionTools {
         deterministic = false,
         data_access,
         security,
-        comment
+        comment,
       } = params;
       const database = dbValidation.database;
 
       // Validate function name
-      const identifierValidation = this.security.validateIdentifier(function_name);
+      const identifierValidation =
+        this.security.validateIdentifier(function_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid function name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid function name",
+        };
       }
 
       // Build parameter list
-      const parameterList = parameters.map(param => {
-        if (!this.security.validateIdentifier(param.name).valid) {
-          throw new Error(`Invalid parameter name: ${param.name}`);
-        }
-        return `\`${param.name}\` ${param.data_type}`;
-      }).join(', ');
+      const parameterList = parameters
+        .map((param) => {
+          if (!this.security.validateIdentifier(param.name).valid) {
+            throw new Error(`Invalid parameter name: ${param.name}`);
+          }
+          return `\`${param.name}\` ${param.data_type}`;
+        })
+        .join(", ");
 
       // Build CREATE FUNCTION statement
       let createQuery = `CREATE FUNCTION \`${database}\`.\`${function_name}\`(${parameterList})\n`;
@@ -251,9 +280,12 @@ export class FunctionTools {
 
       // Check if body already contains BEGIN/END
       const trimmedBody = body.trim();
-      if (trimmedBody.toUpperCase().startsWith('BEGIN') && trimmedBody.toUpperCase().endsWith('END')) {
+      if (
+        trimmedBody.toUpperCase().startsWith("BEGIN") &&
+        trimmedBody.toUpperCase().endsWith("END")
+      ) {
         createQuery += body;
-      } else if (trimmedBody.toUpperCase().startsWith('RETURN')) {
+      } else if (trimmedBody.toUpperCase().startsWith("RETURN")) {
         // Simple one-liner function
         createQuery += body;
       } else {
@@ -263,19 +295,17 @@ export class FunctionTools {
       await this.db.query(createQuery);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Function '${function_name}' created successfully`,
           function_name,
-          database
+          database,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -283,36 +313,46 @@ export class FunctionTools {
   /**
    * Drop a function
    */
-  async dropFunction(params: { function_name: string; if_exists?: boolean; database?: string }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async dropFunction(params: {
+    function_name: string;
+    if_exists?: boolean;
+    database?: string;
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { function_name, if_exists = false } = params;
       const database = dbValidation.database;
 
       // Validate function name
-      const identifierValidation = this.security.validateIdentifier(function_name);
+      const identifierValidation =
+        this.security.validateIdentifier(function_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid function name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid function name",
+        };
       }
 
-      const dropQuery = `DROP FUNCTION ${if_exists ? 'IF EXISTS' : ''} \`${database}\`.\`${function_name}\``;
+      const dropQuery = `DROP FUNCTION ${if_exists ? "IF EXISTS" : ""} \`${database}\`.\`${function_name}\``;
 
       await this.db.query(dropQuery);
 
       return {
-        status: 'success',
+        status: "success",
         message: `Function '${function_name}' dropped successfully`,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -320,20 +360,31 @@ export class FunctionTools {
   /**
    * Show the CREATE statement for a function
    */
-  async showCreateFunction(params: { function_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async showCreateFunction(params: {
+    function_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { function_name } = params;
       const database = dbValidation.database;
 
       // Validate function name
-      const identifierValidation = this.security.validateIdentifier(function_name);
+      const identifierValidation =
+        this.security.validateIdentifier(function_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid function name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid function name",
+        };
       }
 
       const query = `SHOW CREATE FUNCTION \`${database}\`.\`${function_name}\``;
@@ -341,22 +392,19 @@ export class FunctionTools {
 
       if (results.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `Function '${function_name}' not found`,
-          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -368,47 +416,59 @@ export class FunctionTools {
     function_name: string;
     parameters?: any[];
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { function_name, parameters = [] } = params;
       const database = dbValidation.database;
 
       // Validate function name
-      const identifierValidation = this.security.validateIdentifier(function_name);
+      const identifierValidation =
+        this.security.validateIdentifier(function_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid function name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid function name",
+        };
       }
 
       // Validate parameters
       const paramValidation = this.security.validateParameters(parameters);
       if (!paramValidation.valid) {
-        return { status: 'error', error: `Parameter validation failed: ${paramValidation.error}` };
+        return {
+          status: "error",
+          error: `Parameter validation failed: ${paramValidation.error}`,
+        };
       }
 
       // Build SELECT query to call the function
-      const placeholders = parameters.map(() => '?').join(', ');
+      const placeholders = parameters.map(() => "?").join(", ");
       const selectQuery = `SELECT \`${database}\`.\`${function_name}\`(${placeholders}) AS result`;
 
-      const results = await this.db.query<any[]>(selectQuery, paramValidation.sanitizedParams);
+      const results = await this.db.query<any[]>(
+        selectQuery,
+        paramValidation.sanitizedParams,
+      );
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           function_name,
-          result: results[0]?.result
+          result: results[0]?.result,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

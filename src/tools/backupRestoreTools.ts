@@ -1,6 +1,6 @@
-import DatabaseConnection from '../db/connection';
-import SecurityLayer from '../security/securityLayer';
-import { dbConfig } from '../config/config';
+import DatabaseConnection from "../db/connection";
+import SecurityLayer from "../security/securityLayer";
+import { dbConfig } from "../config/config";
 
 /**
  * Backup and Restore Tools for MySQL MCP Server
@@ -21,29 +21,30 @@ export class BackupRestoreTools {
   private validateDatabaseAccess(requestedDatabase?: string): {
     valid: boolean;
     database: string;
-    error?: string
+    error?: string;
   } {
     const connectedDatabase = dbConfig.database;
 
     if (!connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: 'No database configured. Please specify a database in your connection settings.'
+        database: "",
+        error:
+          "No database configured. Please specify a database in your connection settings.",
       };
     }
 
     if (requestedDatabase && requestedDatabase !== connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: `Access denied: You are connected to '${connectedDatabase}' but requested '${requestedDatabase}'. Cross-database access is not permitted.`
+        database: "",
+        error: `Access denied: You are connected to '${connectedDatabase}' but requested '${requestedDatabase}'. Cross-database access is not permitted.`,
       };
     }
 
     return {
       valid: true,
-      database: connectedDatabase
+      database: connectedDatabase,
     };
   }
 
@@ -51,24 +52,24 @@ export class BackupRestoreTools {
    * Escape string value for SQL
    */
   private escapeValue(value: any): string {
-    if (value === null) return 'NULL';
-    if (typeof value === 'number') return String(value);
-    if (typeof value === 'boolean') return value ? '1' : '0';
+    if (value === null) return "NULL";
+    if (typeof value === "number") return String(value);
+    if (typeof value === "boolean") return value ? "1" : "0";
     if (value instanceof Date) {
-      return `'${value.toISOString().slice(0, 19).replace('T', ' ')}'`;
+      return `'${value.toISOString().slice(0, 19).replace("T", " ")}'`;
     }
     if (Buffer.isBuffer(value)) {
-      return `X'${value.toString('hex')}'`;
+      return `X'${value.toString("hex")}'`;
     }
     // Escape string
     const escaped = String(value)
-      .replace(/\\/g, '\\\\')
+      .replace(/\\/g, "\\\\")
       .replace(/'/g, "\\'")
       .replace(/"/g, '\\"')
-      .replace(/\n/g, '\\n')
-      .replace(/\r/g, '\\r')
-      .replace(/\t/g, '\\t')
-      .replace(/\0/g, '\\0');
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/\t/g, "\\t")
+      .replace(/\0/g, "\\0");
     return `'${escaped}'`;
   }
 
@@ -77,21 +78,25 @@ export class BackupRestoreTools {
    */
   async getCreateTableStatement(params: {
     table_name: string;
-    database?: string
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { table_name, database } = params;
 
       // Validate database access
       const dbValidation = this.validateDatabaseAccess(database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error };
+        return { status: "error", error: dbValidation.error };
       }
 
       // Validate table name
       const tableValidation = this.security.validateIdentifier(table_name);
       if (!tableValidation.valid) {
-        return { status: 'error', error: tableValidation.error };
+        return { status: "error", error: tableValidation.error };
       }
 
       const escapedTable = this.security.escapeIdentifier(table_name);
@@ -101,25 +106,22 @@ export class BackupRestoreTools {
 
       if (results.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `Table '${table_name}' not found`,
-          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           table_name: table_name,
-          create_statement: results[0]['Create Table']
+          create_statement: results[0]["Create Table"],
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -131,25 +133,34 @@ export class BackupRestoreTools {
     table_name: string;
     include_data?: boolean;
     include_drop?: boolean;
-    database?: string
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      const { table_name, include_data = true, include_drop = true, database } = params;
+      const {
+        table_name,
+        include_data = true,
+        include_drop = true,
+        database,
+      } = params;
 
       // Validate database access
       const dbValidation = this.validateDatabaseAccess(database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error };
+        return { status: "error", error: dbValidation.error };
       }
 
       // Validate table name
       const tableValidation = this.security.validateIdentifier(table_name);
       if (!tableValidation.valid) {
-        return { status: 'error', error: tableValidation.error };
+        return { status: "error", error: tableValidation.error };
       }
 
       const escapedTable = this.security.escapeIdentifier(table_name);
-      let sqlDump = '';
+      let sqlDump = "";
       let queryCount = 0;
 
       // Add header comment
@@ -170,13 +181,12 @@ export class BackupRestoreTools {
 
       if (createResults.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `Table '${table_name}' not found`,
-          queryLog: this.db.getFormattedQueryLogs(queryCount)
         };
       }
 
-      sqlDump += `${createResults[0]['Create Table']};\n\n`;
+      sqlDump += `${createResults[0]["Create Table"]};\n\n`;
 
       // Get table data if requested
       let rowCount = 0;
@@ -188,7 +198,9 @@ export class BackupRestoreTools {
         if (dataResults.length > 0) {
           rowCount = dataResults.length;
           const columns = Object.keys(dataResults[0]);
-          const escapedColumns = columns.map(c => this.security.escapeIdentifier(c)).join(', ');
+          const escapedColumns = columns
+            .map((c) => this.security.escapeIdentifier(c))
+            .join(", ");
 
           sqlDump += `-- Data for table ${table_name}\n`;
           sqlDump += `LOCK TABLES ${escapedTable} WRITE;\n`;
@@ -198,10 +210,14 @@ export class BackupRestoreTools {
           const batchSize = 100;
           for (let i = 0; i < dataResults.length; i += batchSize) {
             const batch = dataResults.slice(i, i + batchSize);
-            const values = batch.map(row => {
-              const rowValues = columns.map(col => this.escapeValue(row[col]));
-              return `(${rowValues.join(', ')})`;
-            }).join(',\n');
+            const values = batch
+              .map((row) => {
+                const rowValues = columns.map((col) =>
+                  this.escapeValue(row[col]),
+                );
+                return `(${rowValues.join(", ")})`;
+              })
+              .join(",\n");
 
             sqlDump += `INSERT INTO ${escapedTable} (${escapedColumns}) VALUES\n${values};\n\n`;
           }
@@ -212,21 +228,19 @@ export class BackupRestoreTools {
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           table_name: table_name,
           sql_dump: sqlDump,
           row_count: rowCount,
           include_data: include_data,
-          include_drop: include_drop
+          include_drop: include_drop,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -238,18 +252,27 @@ export class BackupRestoreTools {
     include_data?: boolean;
     include_drop?: boolean;
     tables?: string[];
-    database?: string
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      const { include_data = true, include_drop = true, tables, database } = params;
+      const {
+        include_data = true,
+        include_drop = true,
+        tables,
+        database,
+      } = params;
 
       // Validate database access
       const dbValidation = this.validateDatabaseAccess(database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error };
+        return { status: "error", error: dbValidation.error };
       }
 
-      let sqlDump = '';
+      let sqlDump = "";
       let queryCount = 0;
       let totalRows = 0;
       const backedUpTables: string[] = [];
@@ -271,7 +294,10 @@ export class BackupRestoreTools {
         for (const tableName of tables) {
           const validation = this.security.validateIdentifier(tableName);
           if (!validation.valid) {
-            return { status: 'error', error: `Invalid table name: ${tableName}` };
+            return {
+              status: "error",
+              error: `Invalid table name: ${tableName}`,
+            };
           }
         }
         tableList = tables;
@@ -279,7 +305,7 @@ export class BackupRestoreTools {
         const tablesQuery = `SHOW TABLES`;
         const tablesResult: any[] = await this.db.query(tablesQuery);
         queryCount++;
-        tableList = tablesResult.map(row => Object.values(row)[0] as string);
+        tableList = tablesResult.map((row) => Object.values(row)[0] as string);
       }
 
       // Backup each table
@@ -301,7 +327,7 @@ export class BackupRestoreTools {
         queryCount++;
 
         if (createResults.length > 0) {
-          sqlDump += `${createResults[0]['Create Table']};\n\n`;
+          sqlDump += `${createResults[0]["Create Table"]};\n\n`;
           backedUpTables.push(tableName);
         }
 
@@ -314,7 +340,9 @@ export class BackupRestoreTools {
           if (dataResults.length > 0) {
             totalRows += dataResults.length;
             const columns = Object.keys(dataResults[0]);
-            const escapedColumns = columns.map(c => this.security.escapeIdentifier(c)).join(', ');
+            const escapedColumns = columns
+              .map((c) => this.security.escapeIdentifier(c))
+              .join(", ");
 
             sqlDump += `-- Data for table ${tableName}\n`;
             sqlDump += `LOCK TABLES ${escapedTable} WRITE;\n`;
@@ -324,10 +352,14 @@ export class BackupRestoreTools {
             const batchSize = 100;
             for (let i = 0; i < dataResults.length; i += batchSize) {
               const batch = dataResults.slice(i, i + batchSize);
-              const values = batch.map(row => {
-                const rowValues = columns.map(col => this.escapeValue(row[col]));
-                return `(${rowValues.join(', ')})`;
-              }).join(',\n');
+              const values = batch
+                .map((row) => {
+                  const rowValues = columns.map((col) =>
+                    this.escapeValue(row[col]),
+                  );
+                  return `(${rowValues.join(", ")})`;
+                })
+                .join(",\n");
 
               sqlDump += `INSERT INTO ${escapedTable} (${escapedColumns}) VALUES\n${values};\n\n`;
             }
@@ -344,7 +376,7 @@ export class BackupRestoreTools {
       sqlDump += `\n-- Dump completed successfully\n`;
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           database: dbValidation.database,
           sql_dump: sqlDump,
@@ -352,15 +384,13 @@ export class BackupRestoreTools {
           table_count: backedUpTables.length,
           total_rows: totalRows,
           include_data: include_data,
-          include_drop: include_drop
+          include_drop: include_drop,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -372,19 +402,23 @@ export class BackupRestoreTools {
   async restoreFromSql(params: {
     sql_dump: string;
     stop_on_error?: boolean;
-    database?: string
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { sql_dump, stop_on_error = true, database } = params;
 
       // Validate database access
       const dbValidation = this.validateDatabaseAccess(database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error };
+        return { status: "error", error: dbValidation.error };
       }
 
       if (!sql_dump || sql_dump.trim().length === 0) {
-        return { status: 'error', error: 'SQL dump content is empty' };
+        return { status: "error", error: "SQL dump content is empty" };
       }
 
       // Parse SQL statements (split by semicolon, handling edge cases)
@@ -397,7 +431,7 @@ export class BackupRestoreTools {
 
       for (const statement of statements) {
         const trimmed = statement.trim();
-        if (!trimmed || trimmed.startsWith('--') || trimmed.startsWith('/*')) {
+        if (!trimmed || trimmed.startsWith("--") || trimmed.startsWith("/*")) {
           continue; // Skip comments and empty statements
         }
 
@@ -408,42 +442,41 @@ export class BackupRestoreTools {
         } catch (error: any) {
           errorCount++;
           errors.push({
-            statement: trimmed.substring(0, 200) + (trimmed.length > 200 ? '...' : ''),
-            error: error.message
+            statement:
+              trimmed.substring(0, 200) + (trimmed.length > 200 ? "..." : ""),
+            error: error.message,
           });
 
           if (stop_on_error) {
             return {
-              status: 'error',
+              status: "error",
               error: `Restore stopped at error: ${error.message}`,
               data: {
                 statements_executed: successCount,
                 statements_failed: errorCount,
-                errors: errors
+                errors: errors,
               },
-              queryLog: this.db.getFormattedQueryLogs(queryCount)
             };
           }
         }
       }
 
       return {
-        status: errorCount > 0 ? 'partial' : 'success',
+        status: errorCount > 0 ? "partial" : "success",
         data: {
-          message: errorCount > 0
-            ? `Restore completed with ${errorCount} errors`
-            : 'Restore completed successfully',
+          message:
+            errorCount > 0
+              ? `Restore completed with ${errorCount} errors`
+              : "Restore completed successfully",
           statements_executed: successCount,
           statements_failed: errorCount,
-          errors: errors.length > 0 ? errors : undefined
+          errors: errors.length > 0 ? errors : undefined,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -453,9 +486,9 @@ export class BackupRestoreTools {
    */
   private parseSqlStatements(sqlDump: string): string[] {
     const statements: string[] = [];
-    let currentStatement = '';
+    let currentStatement = "";
     let inString = false;
-    let stringChar = '';
+    let stringChar = "";
     let inComment = false;
     let inBlockComment = false;
 
@@ -465,24 +498,24 @@ export class BackupRestoreTools {
       const prevChar = sqlDump[i - 1];
 
       // Handle block comments /* */
-      if (!inString && !inComment && char === '/' && nextChar === '*') {
+      if (!inString && !inComment && char === "/" && nextChar === "*") {
         inBlockComment = true;
         currentStatement += char;
         continue;
       }
-      if (inBlockComment && char === '*' && nextChar === '/') {
+      if (inBlockComment && char === "*" && nextChar === "/") {
         inBlockComment = false;
         currentStatement += char;
         continue;
       }
 
       // Handle line comments --
-      if (!inString && !inBlockComment && char === '-' && nextChar === '-') {
+      if (!inString && !inBlockComment && char === "-" && nextChar === "-") {
         inComment = true;
         currentStatement += char;
         continue;
       }
-      if (inComment && char === '\n') {
+      if (inComment && char === "\n") {
         inComment = false;
         currentStatement += char;
         continue;
@@ -493,19 +526,19 @@ export class BackupRestoreTools {
         if (!inString) {
           inString = true;
           stringChar = char;
-        } else if (char === stringChar && prevChar !== '\\') {
+        } else if (char === stringChar && prevChar !== "\\") {
           inString = false;
         }
       }
 
       // Handle statement terminator
-      if (!inString && !inComment && !inBlockComment && char === ';') {
+      if (!inString && !inComment && !inBlockComment && char === ";") {
         currentStatement += char;
         const trimmed = currentStatement.trim();
-        if (trimmed && !trimmed.startsWith('--')) {
+        if (trimmed && !trimmed.startsWith("--")) {
           statements.push(trimmed);
         }
-        currentStatement = '';
+        currentStatement = "";
         continue;
       }
 
@@ -514,7 +547,7 @@ export class BackupRestoreTools {
 
     // Add any remaining statement
     const trimmed = currentStatement.trim();
-    if (trimmed && !trimmed.startsWith('--') && trimmed !== '') {
+    if (trimmed && !trimmed.startsWith("--") && trimmed !== "") {
       statements.push(trimmed);
     }
 
@@ -530,20 +563,24 @@ export class BackupRestoreTools {
     include_procedures?: boolean;
     include_functions?: boolean;
     include_triggers?: boolean;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const {
         database,
         include_views = true,
         include_procedures = true,
         include_functions = true,
-        include_triggers = true
+        include_triggers = true,
       } = params;
 
       // Validate database access
       const dbValidation = this.validateDatabaseAccess(database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error };
+        return { status: "error", error: dbValidation.error };
       }
 
       const schema: any = {
@@ -552,7 +589,7 @@ export class BackupRestoreTools {
         views: [],
         procedures: [],
         functions: [],
-        triggers: []
+        triggers: [],
       };
       let queryCount = 0;
 
@@ -570,7 +607,7 @@ export class BackupRestoreTools {
         if (createResult.length > 0) {
           schema.tables.push({
             name: tableName,
-            create_statement: createResult[0]['Create Table']
+            create_statement: createResult[0]["Create Table"],
           });
         }
       }
@@ -590,7 +627,7 @@ export class BackupRestoreTools {
           if (createResult.length > 0) {
             schema.views.push({
               name: viewName,
-              create_statement: createResult[0]['Create View']
+              create_statement: createResult[0]["Create View"],
             });
           }
         }
@@ -599,7 +636,9 @@ export class BackupRestoreTools {
       // Get procedures
       if (include_procedures) {
         const procsQuery = `SHOW PROCEDURE STATUS WHERE Db = ?`;
-        const procsResult: any[] = await this.db.query(procsQuery, [dbValidation.database]);
+        const procsResult: any[] = await this.db.query(procsQuery, [
+          dbValidation.database,
+        ]);
         queryCount++;
 
         for (const proc of procsResult) {
@@ -611,7 +650,7 @@ export class BackupRestoreTools {
             if (createResult.length > 0) {
               schema.procedures.push({
                 name: proc.Name,
-                create_statement: createResult[0]['Create Procedure']
+                create_statement: createResult[0]["Create Procedure"],
               });
             }
           } catch (e) {
@@ -623,7 +662,9 @@ export class BackupRestoreTools {
       // Get functions
       if (include_functions) {
         const funcsQuery = `SHOW FUNCTION STATUS WHERE Db = ?`;
-        const funcsResult: any[] = await this.db.query(funcsQuery, [dbValidation.database]);
+        const funcsResult: any[] = await this.db.query(funcsQuery, [
+          dbValidation.database,
+        ]);
         queryCount++;
 
         for (const func of funcsResult) {
@@ -635,7 +676,7 @@ export class BackupRestoreTools {
             if (createResult.length > 0) {
               schema.functions.push({
                 name: func.Name,
-                create_statement: createResult[0]['Create Function']
+                create_statement: createResult[0]["Create Function"],
               });
             }
           } catch (e) {
@@ -659,7 +700,7 @@ export class BackupRestoreTools {
             if (createResult.length > 0) {
               schema.triggers.push({
                 name: trigger.Trigger,
-                create_statement: createResult[0]['SQL Original Statement']
+                create_statement: createResult[0]["SQL Original Statement"],
               });
             }
           } catch (e) {
@@ -669,15 +710,13 @@ export class BackupRestoreTools {
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: schema,
-        queryLog: this.db.getFormattedQueryLogs(queryCount)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

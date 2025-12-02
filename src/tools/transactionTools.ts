@@ -1,7 +1,7 @@
-import DatabaseConnection from '../db/connection';
+import DatabaseConnection from "../db/connection";
 
 export interface TransactionResult {
-  status: 'success' | 'error';
+  status: "success" | "error";
   transactionId?: string;
   message?: string;
   activeTransactions?: string[];
@@ -18,21 +18,25 @@ export class TransactionTools {
   /**
    * Begin a new transaction
    */
-  async beginTransaction(params?: { transactionId?: string }): Promise<TransactionResult> {
+  async beginTransaction(params?: {
+    transactionId?: string;
+  }): Promise<TransactionResult> {
     try {
-      const transactionId = params?.transactionId || `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+      const transactionId =
+        params?.transactionId ||
+        `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       await this.db.beginTransaction(transactionId);
-      
+
       return {
-        status: 'success',
+        status: "success",
         transactionId,
-        message: `Transaction ${transactionId} started successfully`
+        message: `Transaction ${transactionId} started successfully`,
       };
     } catch (error: any) {
       return {
-        status: 'error',
-        error: error.message
+        status: "error",
+        error: error.message,
       };
     }
   }
@@ -40,25 +44,27 @@ export class TransactionTools {
   /**
    * Commit a transaction
    */
-  async commitTransaction(params: { transactionId: string }): Promise<TransactionResult> {
+  async commitTransaction(params: {
+    transactionId: string;
+  }): Promise<TransactionResult> {
     try {
       if (!params.transactionId) {
         return {
-          status: 'error',
-          error: 'Transaction ID is required'
+          status: "error",
+          error: "Transaction ID is required",
         };
       }
 
       await this.db.commitTransaction(params.transactionId);
-      
+
       return {
-        status: 'success',
-        message: `Transaction ${params.transactionId} committed successfully`
+        status: "success",
+        message: `Transaction ${params.transactionId} committed successfully`,
       };
     } catch (error: any) {
       return {
-        status: 'error',
-        error: error.message
+        status: "error",
+        error: error.message,
       };
     }
   }
@@ -66,25 +72,27 @@ export class TransactionTools {
   /**
    * Rollback a transaction
    */
-  async rollbackTransaction(params: { transactionId: string }): Promise<TransactionResult> {
+  async rollbackTransaction(params: {
+    transactionId: string;
+  }): Promise<TransactionResult> {
     try {
       if (!params.transactionId) {
         return {
-          status: 'error',
-          error: 'Transaction ID is required'
+          status: "error",
+          error: "Transaction ID is required",
         };
       }
 
       await this.db.rollbackTransaction(params.transactionId);
-      
+
       return {
-        status: 'success',
-        message: `Transaction ${params.transactionId} rolled back successfully`
+        status: "success",
+        message: `Transaction ${params.transactionId} rolled back successfully`,
       };
     } catch (error: any) {
       return {
-        status: 'error',
-        error: error.message
+        status: "error",
+        error: error.message,
       };
     }
   }
@@ -95,16 +103,16 @@ export class TransactionTools {
   async getTransactionStatus(): Promise<TransactionResult> {
     try {
       const activeTransactions = this.db.getActiveTransactionIds();
-      
+
       return {
-        status: 'success',
+        status: "success",
         activeTransactions,
-        message: `Found ${activeTransactions.length} active transaction(s)`
+        message: `Found ${activeTransactions.length} active transaction(s)`,
       };
     } catch (error: any) {
       return {
-        status: 'error',
-        error: error.message
+        status: "error",
+        error: error.message,
       };
     }
   }
@@ -117,42 +125,39 @@ export class TransactionTools {
     query: string;
     params?: any[];
   }): Promise<{
-    status: 'success' | 'error';
+    status: "success" | "error";
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       if (!params.transactionId) {
         return {
-          status: 'error',
-          error: 'Transaction ID is required'
+          status: "error",
+          error: "Transaction ID is required",
         };
       }
 
       if (!params.query) {
         return {
-          status: 'error',
-          error: 'Query is required'
+          status: "error",
+          error: "Query is required",
         };
       }
 
       const result = await this.db.executeInTransaction(
         params.transactionId,
         params.query,
-        params.params
+        params.params,
       );
-      
+
       return {
-        status: 'success',
+        status: "success",
         data: result,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

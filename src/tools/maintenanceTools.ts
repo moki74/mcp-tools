@@ -1,6 +1,6 @@
-import DatabaseConnection from '../db/connection';
-import { SecurityLayer } from '../security/securityLayer';
-import { dbConfig } from '../config/config';
+import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
+import { dbConfig } from "../config/config";
 
 export class MaintenanceTools {
   private db: DatabaseConnection;
@@ -14,46 +14,58 @@ export class MaintenanceTools {
   /**
    * Validate database access - ensures only the connected database can be accessed
    */
-  private validateDatabaseAccess(requestedDatabase?: string): { valid: boolean; database: string; error?: string } {
+  private validateDatabaseAccess(requestedDatabase?: string): {
+    valid: boolean;
+    database: string;
+    error?: string;
+  } {
     const connectedDatabase = dbConfig.database;
 
     if (!connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: 'No database specified in connection string. Cannot access any database.'
+        database: "",
+        error:
+          "No database specified in connection string. Cannot access any database.",
       };
     }
 
     if (!requestedDatabase) {
       return {
         valid: true,
-        database: connectedDatabase
+        database: connectedDatabase,
       };
     }
 
     if (requestedDatabase !== connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`
+        database: "",
+        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`,
       };
     }
 
     return {
       valid: true,
-      database: connectedDatabase
+      database: connectedDatabase,
     };
   }
 
   /**
    * Analyze table to update index statistics
    */
-  async analyzeTable(params: { table_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async analyzeTable(params: {
+    table_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name } = params;
@@ -61,22 +73,20 @@ export class MaintenanceTools {
 
       // Validate table name
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
 
       const query = `ANALYZE TABLE \`${database}\`.\`${table_name}\``;
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -84,11 +94,18 @@ export class MaintenanceTools {
   /**
    * Optimize table to reclaim unused space and defragment
    */
-  async optimizeTable(params: { table_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async optimizeTable(params: {
+    table_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name } = params;
@@ -96,22 +113,20 @@ export class MaintenanceTools {
 
       // Validate table name
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
 
       const query = `OPTIMIZE TABLE \`${database}\`.\`${table_name}\``;
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -121,13 +136,17 @@ export class MaintenanceTools {
    */
   async checkTable(params: {
     table_name: string;
-    check_type?: 'QUICK' | 'FAST' | 'MEDIUM' | 'EXTENDED' | 'CHANGED';
+    check_type?: "QUICK" | "FAST" | "MEDIUM" | "EXTENDED" | "CHANGED";
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name, check_type } = params;
@@ -135,7 +154,7 @@ export class MaintenanceTools {
 
       // Validate table name
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
 
       let query = `CHECK TABLE \`${database}\`.\`${table_name}\``;
@@ -146,15 +165,13 @@ export class MaintenanceTools {
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -168,44 +185,51 @@ export class MaintenanceTools {
     extended?: boolean;
     use_frm?: boolean;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
-      const { table_name, quick = false, extended = false, use_frm = false } = params;
+      const {
+        table_name,
+        quick = false,
+        extended = false,
+        use_frm = false,
+      } = params;
       const database = dbValidation.database;
 
       // Validate table name
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
 
       let query = `REPAIR TABLE \`${database}\`.\`${table_name}\``;
       const options: string[] = [];
 
-      if (quick) options.push('QUICK');
-      if (extended) options.push('EXTENDED');
-      if (use_frm) options.push('USE_FRM');
+      if (quick) options.push("QUICK");
+      if (extended) options.push("EXTENDED");
+      if (use_frm) options.push("USE_FRM");
 
       if (options.length > 0) {
-        query += ` ${options.join(' ')}`;
+        query += ` ${options.join(" ")}`;
       }
 
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -213,11 +237,18 @@ export class MaintenanceTools {
   /**
    * Truncate table (remove all rows quickly)
    */
-  async truncateTable(params: { table_name: string; database?: string }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async truncateTable(params: {
+    table_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name } = params;
@@ -225,22 +256,20 @@ export class MaintenanceTools {
 
       // Validate table name
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
 
       const query = `TRUNCATE TABLE \`${database}\`.\`${table_name}\``;
       await this.db.query(query);
 
       return {
-        status: 'success',
+        status: "success",
         message: `Table '${table_name}' truncated successfully`,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -248,11 +277,18 @@ export class MaintenanceTools {
   /**
    * Get table status and statistics
    */
-  async getTableStatus(params: { table_name?: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getTableStatus(params: {
+    table_name?: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name } = params;
@@ -262,7 +298,7 @@ export class MaintenanceTools {
 
       if (table_name) {
         if (!this.security.validateIdentifier(table_name).valid) {
-          return { status: 'error', error: 'Invalid table name' };
+          return { status: "error", error: "Invalid table name" };
         }
         query += ` LIKE '${table_name}'`;
       }
@@ -270,7 +306,7 @@ export class MaintenanceTools {
       const results = await this.db.query<any[]>(query);
 
       // Format results for better readability
-      const formattedResults = results.map(row => ({
+      const formattedResults = results.map((row) => ({
         table_name: row.Name,
         engine: row.Engine,
         version: row.Version,
@@ -288,19 +324,17 @@ export class MaintenanceTools {
         collation: row.Collation,
         checksum: row.Checksum,
         create_options: row.Create_options,
-        comment: row.Comment
+        comment: row.Comment,
       }));
 
       return {
-        status: 'success',
+        status: "success",
         data: table_name ? formattedResults[0] : formattedResults,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -308,11 +342,19 @@ export class MaintenanceTools {
   /**
    * Flush table (close and reopen)
    */
-  async flushTable(params: { table_name?: string; with_read_lock?: boolean; database?: string }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async flushTable(params: {
+    table_name?: string;
+    with_read_lock?: boolean;
+    database?: string;
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name, with_read_lock = false } = params;
@@ -322,30 +364,28 @@ export class MaintenanceTools {
 
       if (table_name) {
         if (!this.security.validateIdentifier(table_name).valid) {
-          return { status: 'error', error: 'Invalid table name' };
+          return { status: "error", error: "Invalid table name" };
         }
         query = `FLUSH TABLES \`${database}\`.\`${table_name}\``;
         if (with_read_lock) {
-          query += ' WITH READ LOCK';
+          query += " WITH READ LOCK";
         }
       } else {
-        query = with_read_lock ? 'FLUSH TABLES WITH READ LOCK' : 'FLUSH TABLES';
+        query = with_read_lock ? "FLUSH TABLES WITH READ LOCK" : "FLUSH TABLES";
       }
 
       await this.db.query(query);
 
       return {
-        status: 'success',
+        status: "success",
         message: table_name
-          ? `Table '${table_name}' flushed successfully${with_read_lock ? ' with read lock' : ''}`
-          : `All tables flushed successfully${with_read_lock ? ' with read lock' : ''}`,
-        queryLog: this.db.getFormattedQueryLogs(1)
+          ? `Table '${table_name}' flushed successfully${with_read_lock ? " with read lock" : ""}`
+          : `All tables flushed successfully${with_read_lock ? " with read lock" : ""}`,
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -353,11 +393,18 @@ export class MaintenanceTools {
   /**
    * Get table size information
    */
-  async getTableSize(params: { table_name?: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getTableSize(params: {
+    table_name?: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name } = params;
@@ -382,7 +429,7 @@ export class MaintenanceTools {
 
       if (table_name) {
         if (!this.security.validateIdentifier(table_name).valid) {
-          return { status: 'error', error: 'Invalid table name' };
+          return { status: "error", error: "Invalid table name" };
         }
         query += ` AND TABLE_NAME = ?`;
         queryParams.push(table_name);
@@ -398,25 +445,31 @@ export class MaintenanceTools {
         totalStats = {
           total_tables: results.length,
           total_rows: results.reduce((sum, r) => sum + (r.row_count || 0), 0),
-          total_data_size_bytes: results.reduce((sum, r) => sum + (r.data_size_bytes || 0), 0),
-          total_index_size_bytes: results.reduce((sum, r) => sum + (r.index_size_bytes || 0), 0),
-          total_size_mb: results.reduce((sum, r) => sum + (parseFloat(r.total_size_mb) || 0), 0).toFixed(2)
+          total_data_size_bytes: results.reduce(
+            (sum, r) => sum + (r.data_size_bytes || 0),
+            0,
+          ),
+          total_index_size_bytes: results.reduce(
+            (sum, r) => sum + (r.index_size_bytes || 0),
+            0,
+          ),
+          total_size_mb: results
+            .reduce((sum, r) => sum + (parseFloat(r.total_size_mb) || 0), 0)
+            .toFixed(2),
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           tables: table_name ? results[0] : results,
-          ...(totalStats && { summary: totalStats })
+          ...(totalStats && { summary: totalStats }),
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

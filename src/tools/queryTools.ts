@@ -30,7 +30,6 @@ export class QueryTools {
     status: string;
     data?: any[];
     error?: string;
-    queryLog?: string;
     optimizedQuery?: string;
   }> {
     // Validate input schema
@@ -98,14 +97,12 @@ export class QueryTools {
       return {
         status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1),
         optimizedQuery,
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -132,7 +129,6 @@ export class QueryTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     // Validate input schema
     if (!validateRunQuery(queryParams)) {
@@ -185,13 +181,11 @@ export class QueryTools {
           affectedRows: result.affectedRows || 0,
           insertId: result.insertId || null,
         },
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }

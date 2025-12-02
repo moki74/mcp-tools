@@ -1,5 +1,5 @@
-import DatabaseConnection from '../db/connection';
-import { SecurityLayer } from '../security/securityLayer';
+import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
 
 export class ProcessTools {
   private db: DatabaseConnection;
@@ -13,13 +13,17 @@ export class ProcessTools {
   /**
    * Show all running processes/connections
    */
-  async showProcessList(params?: { full?: boolean }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async showProcessList(params?: { full?: boolean }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
-      const query = params?.full ? 'SHOW FULL PROCESSLIST' : 'SHOW PROCESSLIST';
+      const query = params?.full ? "SHOW FULL PROCESSLIST" : "SHOW PROCESSLIST";
       const results = await this.db.query<any[]>(query);
 
       // Format results for better readability
-      const formattedResults = results.map(row => ({
+      const formattedResults = results.map((row) => ({
         id: row.Id,
         user: row.User,
         host: row.Host,
@@ -28,19 +32,17 @@ export class ProcessTools {
         time: row.Time,
         state: row.State,
         info: row.Info,
-        progress: row.Progress
+        progress: row.Progress,
       }));
 
       return {
-        status: 'success',
+        status: "success",
         data: formattedResults,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -48,33 +50,41 @@ export class ProcessTools {
   /**
    * Kill a specific process/connection
    */
-  async killProcess(params: { process_id: number; type?: 'CONNECTION' | 'QUERY' }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async killProcess(params: {
+    process_id: number;
+    type?: "CONNECTION" | "QUERY";
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
-      const { process_id, type = 'CONNECTION' } = params;
+      const { process_id, type = "CONNECTION" } = params;
 
       // Validate process_id is a positive integer
       if (!Number.isInteger(process_id) || process_id <= 0) {
-        return { status: 'error', error: 'Process ID must be a positive integer' };
+        return {
+          status: "error",
+          error: "Process ID must be a positive integer",
+        };
       }
 
-      const query = type === 'QUERY'
-        ? `KILL QUERY ${process_id}`
-        : `KILL ${process_id}`;
+      const query =
+        type === "QUERY" ? `KILL QUERY ${process_id}` : `KILL ${process_id}`;
 
       await this.db.query(query);
 
       return {
-        status: 'success',
-        message: type === 'QUERY'
-          ? `Query for process ${process_id} killed successfully`
-          : `Process ${process_id} killed successfully`,
-        queryLog: this.db.getFormattedQueryLogs(1)
+        status: "success",
+        message:
+          type === "QUERY"
+            ? `Query for process ${process_id} killed successfully`
+            : `Process ${process_id} killed successfully`,
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -82,14 +92,18 @@ export class ProcessTools {
   /**
    * Show server status variables
    */
-  async showStatus(params?: { like?: string; global?: boolean }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async showStatus(params?: { like?: string; global?: boolean }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      let query = params?.global ? 'SHOW GLOBAL STATUS' : 'SHOW STATUS';
+      let query = params?.global ? "SHOW GLOBAL STATUS" : "SHOW STATUS";
 
       if (params?.like) {
         // Validate the LIKE pattern (basic check)
-        if (params.like.includes(';') || params.like.includes('--')) {
-          return { status: 'error', error: 'Invalid pattern' };
+        if (params.like.includes(";") || params.like.includes("--")) {
+          return { status: "error", error: "Invalid pattern" };
         }
         query += ` LIKE '${params.like}'`;
       }
@@ -103,18 +117,18 @@ export class ProcessTools {
       }
 
       return {
-        status: 'success',
-        data: params?.like ? statusObj : {
-          variables: statusObj,
-          count: results.length
-        },
-        queryLog: this.db.getFormattedQueryLogs(1)
+        status: "success",
+        data: params?.like
+          ? statusObj
+          : {
+              variables: statusObj,
+              count: results.length,
+            },
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -122,14 +136,18 @@ export class ProcessTools {
   /**
    * Show server variables
    */
-  async showVariables(params?: { like?: string; global?: boolean }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async showVariables(params?: { like?: string; global?: boolean }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      let query = params?.global ? 'SHOW GLOBAL VARIABLES' : 'SHOW VARIABLES';
+      let query = params?.global ? "SHOW GLOBAL VARIABLES" : "SHOW VARIABLES";
 
       if (params?.like) {
         // Validate the LIKE pattern (basic check)
-        if (params.like.includes(';') || params.like.includes('--')) {
-          return { status: 'error', error: 'Invalid pattern' };
+        if (params.like.includes(";") || params.like.includes("--")) {
+          return { status: "error", error: "Invalid pattern" };
         }
         query += ` LIKE '${params.like}'`;
       }
@@ -143,18 +161,18 @@ export class ProcessTools {
       }
 
       return {
-        status: 'success',
-        data: params?.like ? varsObj : {
-          variables: varsObj,
-          count: results.length
-        },
-        queryLog: this.db.getFormattedQueryLogs(1)
+        status: "success",
+        data: params?.like
+          ? varsObj
+          : {
+              variables: varsObj,
+              count: results.length,
+            },
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -162,22 +180,36 @@ export class ProcessTools {
   /**
    * Explain a query (show execution plan)
    */
-  async explainQuery(params: { query: string; format?: 'TRADITIONAL' | 'JSON' | 'TREE'; analyze?: boolean }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async explainQuery(params: {
+    query: string;
+    format?: "TRADITIONAL" | "JSON" | "TREE";
+    analyze?: boolean;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      const { query, format = 'TRADITIONAL', analyze = false } = params;
+      const { query, format = "TRADITIONAL", analyze = false } = params;
 
       // Only allow SELECT, UPDATE, DELETE, INSERT queries to be explained
       const normalizedQuery = query.trim().toUpperCase();
-      if (!normalizedQuery.startsWith('SELECT') &&
-          !normalizedQuery.startsWith('UPDATE') &&
-          !normalizedQuery.startsWith('DELETE') &&
-          !normalizedQuery.startsWith('INSERT')) {
-        return { status: 'error', error: 'EXPLAIN only supports SELECT, UPDATE, DELETE, and INSERT statements' };
+      if (
+        !normalizedQuery.startsWith("SELECT") &&
+        !normalizedQuery.startsWith("UPDATE") &&
+        !normalizedQuery.startsWith("DELETE") &&
+        !normalizedQuery.startsWith("INSERT")
+      ) {
+        return {
+          status: "error",
+          error:
+            "EXPLAIN only supports SELECT, UPDATE, DELETE, and INSERT statements",
+        };
       }
 
-      let explainQuery = analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN ';
+      let explainQuery = analyze ? "EXPLAIN ANALYZE " : "EXPLAIN ";
 
-      if (format !== 'TRADITIONAL') {
+      if (format !== "TRADITIONAL") {
         explainQuery += `FORMAT=${format} `;
       }
 
@@ -186,15 +218,13 @@ export class ProcessTools {
       const results = await this.db.query<any[]>(explainQuery);
 
       return {
-        status: 'success',
-        data: format === 'JSON' ? JSON.parse(results[0]['EXPLAIN']) : results,
-        queryLog: this.db.getFormattedQueryLogs(1)
+        status: "success",
+        data: format === "JSON" ? JSON.parse(results[0]["EXPLAIN"]) : results,
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -202,29 +232,39 @@ export class ProcessTools {
   /**
    * Show engine status (InnoDB, etc.)
    */
-  async showEngineStatus(params?: { engine?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async showEngineStatus(params?: { engine?: string }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      const engine = params?.engine || 'INNODB';
+      const engine = params?.engine || "INNODB";
 
       // Validate engine name
-      const validEngines = ['INNODB', 'PERFORMANCE_SCHEMA', 'NDB', 'NDBCLUSTER'];
+      const validEngines = [
+        "INNODB",
+        "PERFORMANCE_SCHEMA",
+        "NDB",
+        "NDBCLUSTER",
+      ];
       if (!validEngines.includes(engine.toUpperCase())) {
-        return { status: 'error', error: `Invalid engine. Supported: ${validEngines.join(', ')}` };
+        return {
+          status: "error",
+          error: `Invalid engine. Supported: ${validEngines.join(", ")}`,
+        };
       }
 
       const query = `SHOW ENGINE ${engine.toUpperCase()} STATUS`;
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -232,14 +272,18 @@ export class ProcessTools {
   /**
    * Get server information
    */
-  async getServerInfo(): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getServerInfo(): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       // Get various server info
       const queries = [
-        { key: 'version', query: 'SELECT VERSION() as value' },
-        { key: 'connection_id', query: 'SELECT CONNECTION_ID() as value' },
-        { key: 'current_user', query: 'SELECT CURRENT_USER() as value' },
-        { key: 'database', query: 'SELECT DATABASE() as value' }
+        { key: "version", query: "SELECT VERSION() as value" },
+        { key: "connection_id", query: "SELECT CONNECTION_ID() as value" },
+        { key: "current_user", query: "SELECT CURRENT_USER() as value" },
+        { key: "database", query: "SELECT DATABASE() as value" },
       ];
 
       const info: Record<string, any> = {};
@@ -267,15 +311,13 @@ export class ProcessTools {
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: info,
-        queryLog: this.db.getFormattedQueryLogs(queries.length + 1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -283,21 +325,23 @@ export class ProcessTools {
   /**
    * Show binary logs
    */
-  async showBinaryLogs(): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async showBinaryLogs(): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
-      const query = 'SHOW BINARY LOGS';
+      const query = "SHOW BINARY LOGS";
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -305,30 +349,34 @@ export class ProcessTools {
   /**
    * Show master/replica status
    */
-  async showReplicationStatus(params?: { type?: 'MASTER' | 'REPLICA' | 'SLAVE' }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async showReplicationStatus(params?: {
+    type?: "MASTER" | "REPLICA" | "SLAVE";
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      const type = params?.type || 'REPLICA';
+      const type = params?.type || "REPLICA";
 
       let query: string;
-      if (type === 'MASTER') {
-        query = 'SHOW MASTER STATUS';
+      if (type === "MASTER") {
+        query = "SHOW MASTER STATUS";
       } else {
         // MySQL 8.0.22+ uses REPLICA, older versions use SLAVE
-        query = type === 'SLAVE' ? 'SHOW SLAVE STATUS' : 'SHOW REPLICA STATUS';
+        query = type === "SLAVE" ? "SHOW SLAVE STATUS" : "SHOW REPLICA STATUS";
       }
 
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results.length > 0 ? results[0] : null,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

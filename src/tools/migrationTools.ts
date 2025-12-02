@@ -84,7 +84,11 @@ export class MigrationTools {
     truncate_target?: boolean;
     batch_size?: number;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const {
         source_table,
@@ -105,12 +109,18 @@ export class MigrationTools {
       // Validate table names
       const sourceValidation = this.security.validateIdentifier(source_table);
       if (!sourceValidation.valid) {
-        return { status: "error", error: `Invalid source table name: ${sourceValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid source table name: ${sourceValidation.error}`,
+        };
       }
 
       const targetValidation = this.security.validateIdentifier(target_table);
       if (!targetValidation.valid) {
-        return { status: "error", error: `Invalid target table name: ${targetValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid target table name: ${targetValidation.error}`,
+        };
       }
 
       const escapedSource = this.security.escapeIdentifier(source_table);
@@ -147,15 +157,15 @@ export class MigrationTools {
           }
         }
         selectColumns = Object.keys(column_mapping).map((c) =>
-          this.security.escapeIdentifier(c)
+          this.security.escapeIdentifier(c),
         );
         insertColumns = Object.values(column_mapping).map((c) =>
-          this.security.escapeIdentifier(c)
+          this.security.escapeIdentifier(c),
         );
       } else {
         // Use all source columns
         selectColumns = sourceColumnNames.map((c) =>
-          this.security.escapeIdentifier(c)
+          this.security.escapeIdentifier(c),
         );
         insertColumns = selectColumns;
       }
@@ -178,7 +188,6 @@ export class MigrationTools {
             source_table,
             target_table,
           },
-          queryLog: this.db.getFormattedQueryLogs(queryCount),
         };
       }
 
@@ -202,7 +211,7 @@ export class MigrationTools {
         const values = rows
           .map((row) => {
             const rowValues = Object.values(row).map((val) =>
-              this.escapeValue(val)
+              this.escapeValue(val),
             );
             return `(${rowValues.join(", ")})`;
           })
@@ -225,13 +234,11 @@ export class MigrationTools {
           target_table,
           truncated_target: truncate_target,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -246,7 +253,11 @@ export class MigrationTools {
     where_clause?: string;
     batch_size?: number;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const {
         source_table,
@@ -266,12 +277,18 @@ export class MigrationTools {
       // Validate table names
       const sourceValidation = this.security.validateIdentifier(source_table);
       if (!sourceValidation.valid) {
-        return { status: "error", error: `Invalid source table name: ${sourceValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid source table name: ${sourceValidation.error}`,
+        };
       }
 
       const targetValidation = this.security.validateIdentifier(target_table);
       if (!targetValidation.valid) {
-        return { status: "error", error: `Invalid target table name: ${targetValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid target table name: ${targetValidation.error}`,
+        };
       }
 
       // First, copy the data
@@ -309,13 +326,11 @@ export class MigrationTools {
           target_table,
           rows_deleted_from_source: rowsCopied,
         },
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -329,7 +344,11 @@ export class MigrationTools {
     include_data?: boolean;
     include_indexes?: boolean;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const {
         source_table,
@@ -348,12 +367,18 @@ export class MigrationTools {
       // Validate table names
       const sourceValidation = this.security.validateIdentifier(source_table);
       if (!sourceValidation.valid) {
-        return { status: "error", error: `Invalid source table name: ${sourceValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid source table name: ${sourceValidation.error}`,
+        };
       }
 
       const newValidation = this.security.validateIdentifier(new_table_name);
       if (!newValidation.valid) {
-        return { status: "error", error: `Invalid new table name: ${newValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid new table name: ${newValidation.error}`,
+        };
       }
 
       const escapedSource = this.security.escapeIdentifier(source_table);
@@ -388,7 +413,7 @@ export class MigrationTools {
       let rowCount = 0;
       if (include_data) {
         const countResult: any[] = await this.db.query(
-          `SELECT COUNT(*) as cnt FROM ${escapedNew}`
+          `SELECT COUNT(*) as cnt FROM ${escapedNew}`,
         );
         queryCount++;
         rowCount = countResult[0].cnt;
@@ -404,13 +429,11 @@ export class MigrationTools {
           include_indexes,
           rows_copied: rowCount,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -422,7 +445,11 @@ export class MigrationTools {
     table1: string;
     table2: string;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { table1, table2, database } = params;
 
@@ -435,12 +462,18 @@ export class MigrationTools {
       // Validate table names
       const table1Validation = this.security.validateIdentifier(table1);
       if (!table1Validation.valid) {
-        return { status: "error", error: `Invalid table1 name: ${table1Validation.error}` };
+        return {
+          status: "error",
+          error: `Invalid table1 name: ${table1Validation.error}`,
+        };
       }
 
       const table2Validation = this.security.validateIdentifier(table2);
       if (!table2Validation.valid) {
-        return { status: "error", error: `Invalid table2 name: ${table2Validation.error}` };
+        return {
+          status: "error",
+          error: `Invalid table2 name: ${table2Validation.error}`,
+        };
       }
 
       const escapedTable1 = this.security.escapeIdentifier(table1);
@@ -448,9 +481,13 @@ export class MigrationTools {
       let queryCount = 0;
 
       // Get columns for both tables
-      const cols1: any[] = await this.db.query(`SHOW COLUMNS FROM ${escapedTable1}`);
+      const cols1: any[] = await this.db.query(
+        `SHOW COLUMNS FROM ${escapedTable1}`,
+      );
       queryCount++;
-      const cols2: any[] = await this.db.query(`SHOW COLUMNS FROM ${escapedTable2}`);
+      const cols2: any[] = await this.db.query(
+        `SHOW COLUMNS FROM ${escapedTable2}`,
+      );
       queryCount++;
 
       const columns1 = new Map(cols1.map((c) => [c.Field, c]));
@@ -476,8 +513,18 @@ export class MigrationTools {
           ) {
             different.push({
               column: name,
-              table1: { type: col1.Type, nullable: col1.Null, key: col1.Key, default: col1.Default },
-              table2: { type: col2.Type, nullable: col2.Null, key: col2.Key, default: col2.Default },
+              table1: {
+                type: col1.Type,
+                nullable: col1.Null,
+                key: col1.Key,
+                default: col1.Default,
+              },
+              table2: {
+                type: col2.Type,
+                nullable: col2.Null,
+                key: col2.Key,
+                default: col2.Default,
+              },
             });
           } else {
             identical.push(name);
@@ -514,13 +561,11 @@ export class MigrationTools {
             different_count: different.length,
           },
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -536,7 +581,11 @@ export class MigrationTools {
     sync_mode?: "insert_only" | "update_only" | "upsert";
     batch_size?: number;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const {
         source_table,
@@ -557,17 +606,26 @@ export class MigrationTools {
       // Validate identifiers
       const sourceValidation = this.security.validateIdentifier(source_table);
       if (!sourceValidation.valid) {
-        return { status: "error", error: `Invalid source table: ${sourceValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid source table: ${sourceValidation.error}`,
+        };
       }
 
       const targetValidation = this.security.validateIdentifier(target_table);
       if (!targetValidation.valid) {
-        return { status: "error", error: `Invalid target table: ${targetValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid target table: ${targetValidation.error}`,
+        };
       }
 
       const keyValidation = this.security.validateIdentifier(key_column);
       if (!keyValidation.valid) {
-        return { status: "error", error: `Invalid key column: ${keyValidation.error}` };
+        return {
+          status: "error",
+          error: `Invalid key column: ${keyValidation.error}`,
+        };
       }
 
       const escapedSource = this.security.escapeIdentifier(source_table);
@@ -587,25 +645,29 @@ export class MigrationTools {
         columnsToUse = columns_to_sync;
       } else {
         // Get all columns from source
-        const cols: any[] = await this.db.query(`SHOW COLUMNS FROM ${escapedSource}`);
+        const cols: any[] = await this.db.query(
+          `SHOW COLUMNS FROM ${escapedSource}`,
+        );
         queryCount++;
         columnsToUse = cols.map((c) => c.Field);
       }
 
-      const escapedColumns = columnsToUse.map((c) => this.security.escapeIdentifier(c));
+      const escapedColumns = columnsToUse.map((c) =>
+        this.security.escapeIdentifier(c),
+      );
 
       let insertedCount = 0;
       let updatedCount = 0;
 
       // Get source data
       const sourceData: any[] = await this.db.query(
-        `SELECT ${escapedColumns.join(", ")} FROM ${escapedSource}`
+        `SELECT ${escapedColumns.join(", ")} FROM ${escapedSource}`,
       );
       queryCount++;
 
       // Get existing keys in target
       const targetKeys: any[] = await this.db.query(
-        `SELECT ${escapedKey} FROM ${escapedTarget}`
+        `SELECT ${escapedKey} FROM ${escapedTarget}`,
       );
       queryCount++;
       const existingKeys = new Set(targetKeys.map((r) => r[key_column]));
@@ -633,7 +695,9 @@ export class MigrationTools {
           const batch = rowsToInsert.slice(i, i + batch_size);
           const values = batch
             .map((row) => {
-              const rowValues = columnsToUse.map((col) => this.escapeValue(row[col]));
+              const rowValues = columnsToUse.map((col) =>
+                this.escapeValue(row[col]),
+              );
               return `(${rowValues.join(", ")})`;
             })
             .join(", ");
@@ -650,7 +714,10 @@ export class MigrationTools {
         for (const row of rowsToUpdate) {
           const setClause = columnsToUse
             .filter((col) => col !== key_column)
-            .map((col) => `${this.security.escapeIdentifier(col)} = ${this.escapeValue(row[col])}`)
+            .map(
+              (col) =>
+                `${this.security.escapeIdentifier(col)} = ${this.escapeValue(row[col])}`,
+            )
             .join(", ");
 
           if (setClause) {
@@ -673,13 +740,11 @@ export class MigrationTools {
           rows_updated: updatedCount,
           total_source_rows: sourceData.length,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }

@@ -1,5 +1,5 @@
-import DatabaseConnection from '../db/connection';
-import { SecurityLayer } from '../security/securityLayer';
+import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
 
 export class PerformanceTools {
   private db: DatabaseConnection;
@@ -13,7 +13,11 @@ export class PerformanceTools {
   /**
    * Get comprehensive performance metrics
    */
-  async getPerformanceMetrics(): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getPerformanceMetrics(): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const metrics: Record<string, any> = {};
 
@@ -80,10 +84,16 @@ export class PerformanceTools {
       }
 
       // Calculate buffer pool hit ratio
-      if (metrics.innodb.innodb_buffer_pool_read_requests && metrics.innodb.innodb_buffer_pool_reads) {
-        const requests = parseFloat(metrics.innodb.innodb_buffer_pool_read_requests);
+      if (
+        metrics.innodb.innodb_buffer_pool_read_requests &&
+        metrics.innodb.innodb_buffer_pool_reads
+      ) {
+        const requests = parseFloat(
+          metrics.innodb.innodb_buffer_pool_read_requests,
+        );
         const reads = parseFloat(metrics.innodb.innodb_buffer_pool_reads);
-        metrics.innodb.buffer_pool_hit_ratio = ((requests - reads) / requests * 100).toFixed(2) + '%';
+        metrics.innodb.buffer_pool_hit_ratio =
+          (((requests - reads) / requests) * 100).toFixed(2) + "%";
       }
 
       // Get slow query metrics
@@ -100,19 +110,18 @@ export class PerformanceTools {
       if (metrics.slow_queries.questions && metrics.slow_queries.slow_queries) {
         const total = parseFloat(metrics.slow_queries.questions);
         const slow = parseFloat(metrics.slow_queries.slow_queries);
-        metrics.slow_queries.slow_query_percentage = ((slow / total) * 100).toFixed(4) + '%';
+        metrics.slow_queries.slow_query_percentage =
+          ((slow / total) * 100).toFixed(4) + "%";
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: metrics,
-        queryLog: this.db.getFormattedQueryLogs(5)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -120,12 +129,19 @@ export class PerformanceTools {
   /**
    * Get top queries by execution time
    */
-  async getTopQueriesByTime(params?: { limit?: number }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async getTopQueriesByTime(params?: { limit?: number }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const limit = params?.limit || 10;
 
       if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-        return { status: 'error', error: 'Limit must be a positive integer between 1 and 100' };
+        return {
+          status: "error",
+          error: "Limit must be a positive integer between 1 and 100",
+        };
       }
 
       const query = `
@@ -150,15 +166,13 @@ export class PerformanceTools {
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -166,12 +180,19 @@ export class PerformanceTools {
   /**
    * Get top queries by execution count
    */
-  async getTopQueriesByCount(params?: { limit?: number }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async getTopQueriesByCount(params?: { limit?: number }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const limit = params?.limit || 10;
 
       if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-        return { status: 'error', error: 'Limit must be a positive integer between 1 and 100' };
+        return {
+          status: "error",
+          error: "Limit must be a positive integer between 1 and 100",
+        };
       }
 
       const query = `
@@ -194,15 +215,13 @@ export class PerformanceTools {
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -210,17 +229,30 @@ export class PerformanceTools {
   /**
    * Get slow queries
    */
-  async getSlowQueries(params?: { limit?: number; threshold_seconds?: number }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async getSlowQueries(params?: {
+    limit?: number;
+    threshold_seconds?: number;
+  }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const limit = params?.limit || 10;
       const thresholdSec = params?.threshold_seconds || 1;
 
       if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-        return { status: 'error', error: 'Limit must be a positive integer between 1 and 100' };
+        return {
+          status: "error",
+          error: "Limit must be a positive integer between 1 and 100",
+        };
       }
 
-      if (typeof thresholdSec !== 'number' || thresholdSec <= 0) {
-        return { status: 'error', error: 'Threshold must be a positive number' };
+      if (typeof thresholdSec !== "number" || thresholdSec <= 0) {
+        return {
+          status: "error",
+          error: "Threshold must be a positive number",
+        };
       }
 
       const thresholdPico = thresholdSec * 1000000000000;
@@ -247,15 +279,13 @@ export class PerformanceTools {
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -263,13 +293,23 @@ export class PerformanceTools {
   /**
    * Get table I/O statistics
    */
-  async getTableIOStats(params?: { limit?: number; table_schema?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async getTableIOStats(params?: {
+    limit?: number;
+    table_schema?: string;
+  }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const limit = params?.limit || 20;
       const schema = params?.table_schema;
 
       if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-        return { status: 'error', error: 'Limit must be a positive integer between 1 and 100' };
+        return {
+          status: "error",
+          error: "Limit must be a positive integer between 1 and 100",
+        };
       }
 
       let query = `
@@ -298,15 +338,13 @@ export class PerformanceTools {
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -314,13 +352,23 @@ export class PerformanceTools {
   /**
    * Get index usage statistics
    */
-  async getIndexUsageStats(params?: { limit?: number; table_schema?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async getIndexUsageStats(params?: {
+    limit?: number;
+    table_schema?: string;
+  }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const limit = params?.limit || 20;
       const schema = params?.table_schema;
 
       if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-        return { status: 'error', error: 'Limit must be a positive integer between 1 and 100' };
+        return {
+          status: "error",
+          error: "Limit must be a positive integer between 1 and 100",
+        };
       }
 
       let query = `
@@ -349,15 +397,13 @@ export class PerformanceTools {
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -365,7 +411,11 @@ export class PerformanceTools {
   /**
    * Get unused indexes
    */
-  async getUnusedIndexes(params?: { table_schema?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async getUnusedIndexes(params?: { table_schema?: string }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const schema = params?.table_schema;
 
@@ -400,15 +450,13 @@ export class PerformanceTools {
       const results = await this.db.query<any[]>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -416,7 +464,11 @@ export class PerformanceTools {
   /**
    * Get connection pool statistics
    */
-  async getConnectionPoolStats(): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getConnectionPoolStats(): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const statusQuery = `
         SHOW GLOBAL STATUS WHERE Variable_name IN (
@@ -439,7 +491,7 @@ export class PerformanceTools {
       const stats: Record<string, any> = {
         current_status: {},
         configuration: {},
-        health_indicators: {}
+        health_indicators: {},
       };
 
       for (const row of statusResult) {
@@ -451,39 +503,57 @@ export class PerformanceTools {
       }
 
       // Calculate health indicators
-      const threadsConnected = parseInt(stats.current_status.threads_connected || '0');
-      const maxConnections = parseInt(stats.configuration.max_connections || '0');
-      const maxUsedConnections = parseInt(stats.current_status.max_used_connections || '0');
+      const threadsConnected = parseInt(
+        stats.current_status.threads_connected || "0",
+      );
+      const maxConnections = parseInt(
+        stats.configuration.max_connections || "0",
+      );
+      const maxUsedConnections = parseInt(
+        stats.current_status.max_used_connections || "0",
+      );
 
       if (maxConnections > 0) {
-        stats.health_indicators.connection_usage_percentage = ((threadsConnected / maxConnections) * 100).toFixed(2) + '%';
-        stats.health_indicators.max_usage_percentage = ((maxUsedConnections / maxConnections) * 100).toFixed(2) + '%';
-        stats.health_indicators.available_connections = maxConnections - threadsConnected;
+        stats.health_indicators.connection_usage_percentage =
+          ((threadsConnected / maxConnections) * 100).toFixed(2) + "%";
+        stats.health_indicators.max_usage_percentage =
+          ((maxUsedConnections / maxConnections) * 100).toFixed(2) + "%";
+        stats.health_indicators.available_connections =
+          maxConnections - threadsConnected;
       }
 
       // Connection efficiency
-      const totalConnections = parseInt(stats.current_status.connections || '0');
-      const abortedConnects = parseInt(stats.current_status.aborted_connects || '0');
+      const totalConnections = parseInt(
+        stats.current_status.connections || "0",
+      );
+      const abortedConnects = parseInt(
+        stats.current_status.aborted_connects || "0",
+      );
       if (totalConnections > 0) {
-        stats.health_indicators.aborted_connection_percentage = ((abortedConnects / totalConnections) * 100).toFixed(4) + '%';
+        stats.health_indicators.aborted_connection_percentage =
+          ((abortedConnects / totalConnections) * 100).toFixed(4) + "%";
       }
 
       // Thread cache efficiency
-      const threadsCreated = parseInt(stats.current_status.threads_created || '0');
+      const threadsCreated = parseInt(
+        stats.current_status.threads_created || "0",
+      );
       if (totalConnections > 0) {
-        stats.health_indicators.thread_cache_hit_rate = (((totalConnections - threadsCreated) / totalConnections) * 100).toFixed(2) + '%';
+        stats.health_indicators.thread_cache_hit_rate =
+          (
+            ((totalConnections - threadsCreated) / totalConnections) *
+            100
+          ).toFixed(2) + "%";
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: stats,
-        queryLog: this.db.getFormattedQueryLogs(2)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -491,13 +561,17 @@ export class PerformanceTools {
   /**
    * Get database health check
    */
-  async getDatabaseHealthCheck(): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getDatabaseHealthCheck(): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const health: Record<string, any> = {
-        overall_status: 'healthy',
+        overall_status: "healthy",
         checks: [],
         warnings: [],
-        errors: []
+        errors: [],
       };
 
       // Check 1: Connection usage
@@ -514,8 +588,10 @@ export class PerformanceTools {
       let maxConnections = 0;
 
       for (const row of connResult) {
-        if (row.Variable_name === 'Threads_connected') threadsConnected = parseInt(row.Value);
-        if (row.Variable_name === 'Max_used_connections') maxUsedConnections = parseInt(row.Value);
+        if (row.Variable_name === "Threads_connected")
+          threadsConnected = parseInt(row.Value);
+        if (row.Variable_name === "Max_used_connections")
+          maxUsedConnections = parseInt(row.Value);
       }
       for (const row of maxConnResult) {
         maxConnections = parseInt(row.Value);
@@ -525,19 +601,21 @@ export class PerformanceTools {
       const maxConnUsage = (maxUsedConnections / maxConnections) * 100;
 
       health.checks.push({
-        name: 'Connection Usage',
-        status: connUsage < 80 ? 'healthy' : connUsage < 90 ? 'warning' : 'critical',
+        name: "Connection Usage",
+        status:
+          connUsage < 80 ? "healthy" : connUsage < 90 ? "warning" : "critical",
         current: threadsConnected,
         max: maxConnections,
-        usage_percentage: connUsage.toFixed(2) + '%'
+        usage_percentage: connUsage.toFixed(2) + "%",
       });
 
       if (connUsage >= 90) {
-        health.errors.push('Connection usage is critically high (>90%)');
-        health.overall_status = 'critical';
+        health.errors.push("Connection usage is critically high (>90%)");
+        health.overall_status = "critical";
       } else if (connUsage >= 80) {
-        health.warnings.push('Connection usage is high (>80%)');
-        if (health.overall_status === 'healthy') health.overall_status = 'warning';
+        health.warnings.push("Connection usage is high (>80%)");
+        if (health.overall_status === "healthy")
+          health.overall_status = "warning";
       }
 
       // Check 2: Buffer pool hit ratio
@@ -550,24 +628,29 @@ export class PerformanceTools {
       let reads = 0;
 
       for (const row of bufferResult) {
-        if (row.Variable_name === 'Innodb_buffer_pool_read_requests') readRequests = parseInt(row.Value);
-        if (row.Variable_name === 'Innodb_buffer_pool_reads') reads = parseInt(row.Value);
+        if (row.Variable_name === "Innodb_buffer_pool_read_requests")
+          readRequests = parseInt(row.Value);
+        if (row.Variable_name === "Innodb_buffer_pool_reads")
+          reads = parseInt(row.Value);
       }
 
-      const hitRatio = readRequests > 0 ? ((readRequests - reads) / readRequests) * 100 : 100;
+      const hitRatio =
+        readRequests > 0 ? ((readRequests - reads) / readRequests) * 100 : 100;
 
       health.checks.push({
-        name: 'Buffer Pool Hit Ratio',
-        status: hitRatio > 95 ? 'healthy' : hitRatio > 85 ? 'warning' : 'critical',
-        hit_ratio: hitRatio.toFixed(2) + '%'
+        name: "Buffer Pool Hit Ratio",
+        status:
+          hitRatio > 95 ? "healthy" : hitRatio > 85 ? "warning" : "critical",
+        hit_ratio: hitRatio.toFixed(2) + "%",
       });
 
       if (hitRatio <= 85) {
-        health.errors.push('Buffer pool hit ratio is too low (<85%)');
-        health.overall_status = 'critical';
+        health.errors.push("Buffer pool hit ratio is too low (<85%)");
+        health.overall_status = "critical";
       } else if (hitRatio <= 95) {
-        health.warnings.push('Buffer pool hit ratio could be improved (<95%)');
-        if (health.overall_status === 'healthy') health.overall_status = 'warning';
+        health.warnings.push("Buffer pool hit ratio could be improved (<95%)");
+        if (health.overall_status === "healthy")
+          health.overall_status = "warning";
       }
 
       // Check 3: Aborted connections
@@ -580,26 +663,32 @@ export class PerformanceTools {
       let abortedConnects = 0;
 
       for (const row of abortResult) {
-        if (row.Variable_name === 'Connections') totalConnections = parseInt(row.Value);
-        if (row.Variable_name === 'Aborted_connects') abortedConnects = parseInt(row.Value);
+        if (row.Variable_name === "Connections")
+          totalConnections = parseInt(row.Value);
+        if (row.Variable_name === "Aborted_connects")
+          abortedConnects = parseInt(row.Value);
       }
 
-      const abortRate = totalConnections > 0 ? (abortedConnects / totalConnections) * 100 : 0;
+      const abortRate =
+        totalConnections > 0 ? (abortedConnects / totalConnections) * 100 : 0;
 
       health.checks.push({
-        name: 'Aborted Connections',
-        status: abortRate < 1 ? 'healthy' : abortRate < 5 ? 'warning' : 'critical',
+        name: "Aborted Connections",
+        status:
+          abortRate < 1 ? "healthy" : abortRate < 5 ? "warning" : "critical",
         aborted: abortedConnects,
         total: totalConnections,
-        abort_rate: abortRate.toFixed(4) + '%'
+        abort_rate: abortRate.toFixed(4) + "%",
       });
 
       if (abortRate >= 5) {
-        health.errors.push('High rate of aborted connections (>5%)');
-        if (health.overall_status !== 'critical') health.overall_status = 'warning';
+        health.errors.push("High rate of aborted connections (>5%)");
+        if (health.overall_status !== "critical")
+          health.overall_status = "warning";
       } else if (abortRate >= 1) {
-        health.warnings.push('Elevated rate of aborted connections (>1%)');
-        if (health.overall_status === 'healthy') health.overall_status = 'warning';
+        health.warnings.push("Elevated rate of aborted connections (>1%)");
+        if (health.overall_status === "healthy")
+          health.overall_status = "warning";
       }
 
       // Check 4: Slow queries
@@ -612,38 +701,44 @@ export class PerformanceTools {
       let slowQueries = 0;
 
       for (const row of slowResult) {
-        if (row.Variable_name === 'Questions') questions = parseInt(row.Value);
-        if (row.Variable_name === 'Slow_queries') slowQueries = parseInt(row.Value);
+        if (row.Variable_name === "Questions") questions = parseInt(row.Value);
+        if (row.Variable_name === "Slow_queries")
+          slowQueries = parseInt(row.Value);
       }
 
       const slowQueryRate = questions > 0 ? (slowQueries / questions) * 100 : 0;
 
       health.checks.push({
-        name: 'Slow Queries',
-        status: slowQueryRate < 1 ? 'healthy' : slowQueryRate < 5 ? 'warning' : 'critical',
+        name: "Slow Queries",
+        status:
+          slowQueryRate < 1
+            ? "healthy"
+            : slowQueryRate < 5
+              ? "warning"
+              : "critical",
         slow_queries: slowQueries,
         total_queries: questions,
-        slow_query_rate: slowQueryRate.toFixed(4) + '%'
+        slow_query_rate: slowQueryRate.toFixed(4) + "%",
       });
 
       if (slowQueryRate >= 5) {
-        health.warnings.push('High rate of slow queries (>5%)');
-        if (health.overall_status === 'healthy') health.overall_status = 'warning';
+        health.warnings.push("High rate of slow queries (>5%)");
+        if (health.overall_status === "healthy")
+          health.overall_status = "warning";
       } else if (slowQueryRate >= 1) {
-        health.warnings.push('Elevated rate of slow queries (>1%)');
-        if (health.overall_status === 'healthy') health.overall_status = 'warning';
+        health.warnings.push("Elevated rate of slow queries (>1%)");
+        if (health.overall_status === "healthy")
+          health.overall_status = "warning";
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: health,
-        queryLog: this.db.getFormattedQueryLogs(6)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -651,14 +746,18 @@ export class PerformanceTools {
   /**
    * Reset performance schema statistics
    */
-  async resetPerformanceStats(): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async resetPerformanceStats(): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       // Truncate performance schema summary tables
       const tables = [
-        'events_statements_summary_by_digest',
-        'events_statements_summary_global_by_event_name',
-        'table_io_waits_summary_by_table',
-        'table_io_waits_summary_by_index_usage'
+        "events_statements_summary_by_digest",
+        "events_statements_summary_global_by_event_name",
+        "table_io_waits_summary_by_table",
+        "table_io_waits_summary_by_index_usage",
       ];
 
       for (const table of tables) {
@@ -666,15 +765,13 @@ export class PerformanceTools {
       }
 
       return {
-        status: 'success',
-        message: 'Performance statistics reset successfully',
-        queryLog: this.db.getFormattedQueryLogs(tables.length)
+        status: "success",
+        message: "Performance statistics reset successfully",
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

@@ -85,7 +85,6 @@ export class DataExportTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       const {
@@ -279,7 +278,6 @@ export class DataExportTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       const {
@@ -316,7 +314,6 @@ export class DataExportTools {
             csv: include_headers ? "" : "",
             row_count: 0,
           },
-          queryLog: this.db.getFormattedQueryLogs(1),
         };
       }
 
@@ -357,13 +354,11 @@ export class DataExportTools {
           csv: csv,
           row_count: results.length,
         },
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -382,7 +377,6 @@ export class DataExportTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       const {
@@ -522,13 +516,11 @@ export class DataExportTools {
           row_count: results.length,
           table_name: table_name,
         },
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -544,7 +536,6 @@ export class DataExportTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       const { query, params: queryParams = [], pretty = true } = params;
@@ -577,13 +568,11 @@ export class DataExportTools {
           json: json,
           row_count: results.length,
         },
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -601,7 +590,6 @@ export class DataExportTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       const {
@@ -750,13 +738,11 @@ export class DataExportTools {
           row_count: results.length,
           table_name: table_name,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -776,7 +762,6 @@ export class DataExportTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       const {
@@ -895,7 +880,6 @@ export class DataExportTools {
               status: "error",
               error: `Import failed at row ${i + 1}: ${error.message}`,
               data: { rows_imported: successCount },
-              queryLog: this.db.getFormattedQueryLogs(queryCount),
             };
           }
         }
@@ -912,13 +896,11 @@ export class DataExportTools {
           rows_failed: errorCount,
           errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -982,7 +964,6 @@ export class DataExportTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     try {
       const {
@@ -1092,7 +1073,6 @@ export class DataExportTools {
               status: "error",
               error: `Import failed at row ${i + 1}: ${error.message}`,
               data: { rows_imported: successCount },
-              queryLog: this.db.getFormattedQueryLogs(queryCount),
             };
           }
         }
@@ -1109,13 +1089,11 @@ export class DataExportTools {
           rows_failed: errorCount,
           errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }

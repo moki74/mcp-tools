@@ -1,6 +1,6 @@
-import DatabaseConnection from '../db/connection';
-import { SecurityLayer } from '../security/securityLayer';
-import { dbConfig } from '../config/config';
+import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
+import { dbConfig } from "../config/config";
 
 export class ViewTools {
   private db: DatabaseConnection;
@@ -14,46 +14,55 @@ export class ViewTools {
   /**
    * Validate database access - ensures only the connected database can be accessed
    */
-  private validateDatabaseAccess(requestedDatabase?: string): { valid: boolean; database: string; error?: string } {
+  private validateDatabaseAccess(requestedDatabase?: string): {
+    valid: boolean;
+    database: string;
+    error?: string;
+  } {
     const connectedDatabase = dbConfig.database;
 
     if (!connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: 'No database specified in connection string. Cannot access any database.'
+        database: "",
+        error:
+          "No database specified in connection string. Cannot access any database.",
       };
     }
 
     if (!requestedDatabase) {
       return {
         valid: true,
-        database: connectedDatabase
+        database: connectedDatabase,
       };
     }
 
     if (requestedDatabase !== connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`
+        database: "",
+        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`,
       };
     }
 
     return {
       valid: true,
-      database: connectedDatabase
+      database: connectedDatabase,
     };
   }
 
   /**
    * List all views in the current database
    */
-  async listViews(params: { database?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async listViews(params: { database?: string }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const database = dbValidation.database;
@@ -76,15 +85,13 @@ export class ViewTools {
       const results = await this.db.query<any[]>(query, [database]);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -92,11 +99,15 @@ export class ViewTools {
   /**
    * Get detailed information about a specific view
    */
-  async getViewInfo(params: { view_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getViewInfo(params: { view_name: string; database?: string }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { view_name } = params;
@@ -105,7 +116,10 @@ export class ViewTools {
       // Validate view name
       const identifierValidation = this.security.validateIdentifier(view_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid view name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid view name",
+        };
       }
 
       // Get view information
@@ -139,30 +153,27 @@ export class ViewTools {
 
       const [viewInfo, columns] = await Promise.all([
         this.db.query<any[]>(viewQuery, [database, view_name]),
-        this.db.query<any[]>(columnsQuery, [database, view_name])
+        this.db.query<any[]>(columnsQuery, [database, view_name]),
       ]);
 
       if (viewInfo.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `View '${view_name}' not found in database '${database}'`,
-          queryLog: this.db.getFormattedQueryLogs(2)
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           ...viewInfo[0],
-          columns: columns
+          columns: columns,
         },
-        queryLog: this.db.getFormattedQueryLogs(2)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(2)
       };
     }
   }
@@ -174,34 +185,51 @@ export class ViewTools {
     view_name: string;
     definition: string;
     or_replace?: boolean;
-    algorithm?: 'UNDEFINED' | 'MERGE' | 'TEMPTABLE';
-    security?: 'DEFINER' | 'INVOKER';
-    check_option?: 'CASCADED' | 'LOCAL';
+    algorithm?: "UNDEFINED" | "MERGE" | "TEMPTABLE";
+    security?: "DEFINER" | "INVOKER";
+    check_option?: "CASCADED" | "LOCAL";
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
-      const { view_name, definition, or_replace = false, algorithm, security, check_option } = params;
+      const {
+        view_name,
+        definition,
+        or_replace = false,
+        algorithm,
+        security,
+        check_option,
+      } = params;
       const database = dbValidation.database;
 
       // Validate view name
       const identifierValidation = this.security.validateIdentifier(view_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid view name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid view name",
+        };
       }
 
       // Validate that definition is a SELECT statement
       const trimmedDef = definition.trim().toUpperCase();
-      if (!trimmedDef.startsWith('SELECT')) {
-        return { status: 'error', error: 'View definition must be a SELECT statement' };
+      if (!trimmedDef.startsWith("SELECT")) {
+        return {
+          status: "error",
+          error: "View definition must be a SELECT statement",
+        };
       }
 
       // Build CREATE VIEW statement
-      let createQuery = or_replace ? 'CREATE OR REPLACE ' : 'CREATE ';
+      let createQuery = or_replace ? "CREATE OR REPLACE " : "CREATE ";
 
       if (algorithm) {
         createQuery += `ALGORITHM = ${algorithm} `;
@@ -220,19 +248,17 @@ export class ViewTools {
       await this.db.query(createQuery);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `View '${view_name}' created successfully`,
           view_name,
-          database
+          database,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -243,34 +269,45 @@ export class ViewTools {
   async alterView(params: {
     view_name: string;
     definition: string;
-    algorithm?: 'UNDEFINED' | 'MERGE' | 'TEMPTABLE';
-    security?: 'DEFINER' | 'INVOKER';
-    check_option?: 'CASCADED' | 'LOCAL';
+    algorithm?: "UNDEFINED" | "MERGE" | "TEMPTABLE";
+    security?: "DEFINER" | "INVOKER";
+    check_option?: "CASCADED" | "LOCAL";
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
-      const { view_name, definition, algorithm, security, check_option } = params;
+      const { view_name, definition, algorithm, security, check_option } =
+        params;
       const database = dbValidation.database;
 
       // Validate view name
       const identifierValidation = this.security.validateIdentifier(view_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid view name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid view name",
+        };
       }
 
       // Validate that definition is a SELECT statement
       const trimmedDef = definition.trim().toUpperCase();
-      if (!trimmedDef.startsWith('SELECT')) {
-        return { status: 'error', error: 'View definition must be a SELECT statement' };
+      if (!trimmedDef.startsWith("SELECT")) {
+        return {
+          status: "error",
+          error: "View definition must be a SELECT statement",
+        };
       }
 
       // Build ALTER VIEW statement
-      let alterQuery = 'ALTER ';
+      let alterQuery = "ALTER ";
 
       if (algorithm) {
         alterQuery += `ALGORITHM = ${algorithm} `;
@@ -289,19 +326,17 @@ export class ViewTools {
       await this.db.query(alterQuery);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `View '${view_name}' altered successfully`,
           view_name,
-          database
+          database,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -309,11 +344,19 @@ export class ViewTools {
   /**
    * Drop a view
    */
-  async dropView(params: { view_name: string; if_exists?: boolean; database?: string }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async dropView(params: {
+    view_name: string;
+    if_exists?: boolean;
+    database?: string;
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { view_name, if_exists = false } = params;
@@ -322,23 +365,24 @@ export class ViewTools {
       // Validate view name
       const identifierValidation = this.security.validateIdentifier(view_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid view name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid view name",
+        };
       }
 
-      const dropQuery = `DROP VIEW ${if_exists ? 'IF EXISTS' : ''} \`${database}\`.\`${view_name}\``;
+      const dropQuery = `DROP VIEW ${if_exists ? "IF EXISTS" : ""} \`${database}\`.\`${view_name}\``;
 
       await this.db.query(dropQuery);
 
       return {
-        status: 'success',
+        status: "success",
         message: `View '${view_name}' dropped successfully`,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -346,11 +390,18 @@ export class ViewTools {
   /**
    * Show the CREATE statement for a view
    */
-  async showCreateView(params: { view_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async showCreateView(params: {
+    view_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { view_name } = params;
@@ -359,7 +410,10 @@ export class ViewTools {
       // Validate view name
       const identifierValidation = this.security.validateIdentifier(view_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid view name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid view name",
+        };
       }
 
       const query = `SHOW CREATE VIEW \`${database}\`.\`${view_name}\``;
@@ -367,22 +421,19 @@ export class ViewTools {
 
       if (results.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `View '${view_name}' not found`,
-          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

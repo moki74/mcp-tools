@@ -54,7 +54,10 @@ export class SchemaVersioningTools {
    */
   private generateVersion(): string {
     const now = new Date();
-    return now.toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
+    return now
+      .toISOString()
+      .replace(/[-:T.Z]/g, "")
+      .slice(0, 14);
   }
 
   /**
@@ -82,9 +85,11 @@ export class SchemaVersioningTools {
   /**
    * Initialize the migrations tracking table if it doesn't exist
    */
-  async initMigrationsTable(params: {
-    database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async initMigrationsTable(params: { database?: string }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { database } = params;
 
@@ -123,13 +128,11 @@ export class SchemaVersioningTools {
           message: `Migrations table '${this.migrationsTable}' initialized successfully`,
           table_name: this.migrationsTable,
         },
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -144,16 +147,13 @@ export class SchemaVersioningTools {
     description?: string;
     version?: string;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      const {
-        name,
-        up_sql,
-        down_sql,
-        description,
-        version,
-        database,
-      } = params;
+      const { name, up_sql, down_sql, description, version, database } = params;
 
       // Validate database access
       const dbValidation = this.validateDatabaseAccess(database);
@@ -181,7 +181,9 @@ export class SchemaVersioningTools {
 
       // Check if version already exists
       const existingQuery = `SELECT id FROM ${this.migrationsTable} WHERE version = ?`;
-      const existing: any[] = await this.db.query(existingQuery, [migrationVersion]);
+      const existing: any[] = await this.db.query(existingQuery, [
+        migrationVersion,
+      ]);
 
       if (existing.length > 0) {
         return {
@@ -215,13 +217,11 @@ export class SchemaVersioningTools {
           checksum,
           status: "pending",
         },
-        queryLog: this.db.getFormattedQueryLogs(3),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -234,10 +234,10 @@ export class SchemaVersioningTools {
     const str = sql.trim();
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    return Math.abs(hash).toString(16).padStart(8, '0');
+    return Math.abs(hash).toString(16).padStart(8, "0");
   }
 
   /**
@@ -247,7 +247,11 @@ export class SchemaVersioningTools {
     target_version?: string;
     dry_run?: boolean;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { target_version, dry_run = false, database } = params;
 
@@ -288,7 +292,6 @@ export class SchemaVersioningTools {
             applied_count: 0,
             migrations: [],
           },
-          queryLog: this.db.getFormattedQueryLogs(queryCount),
         };
       }
 
@@ -301,10 +304,11 @@ export class SchemaVersioningTools {
             migrations: pendingMigrations.map((m) => ({
               version: m.version,
               name: m.name,
-              up_sql_preview: m.up_sql.substring(0, 200) + (m.up_sql.length > 200 ? "..." : ""),
+              up_sql_preview:
+                m.up_sql.substring(0, 200) +
+                (m.up_sql.length > 200 ? "..." : ""),
             })),
           },
-          queryLog: this.db.getFormattedQueryLogs(queryCount),
         };
       }
 
@@ -339,7 +343,11 @@ export class SchemaVersioningTools {
             WHERE id = ?
           `;
 
-          await this.db.query(updateQuery, [currentUser, executionTime, migration.id]);
+          await this.db.query(updateQuery, [
+            currentUser,
+            executionTime,
+            migration.id,
+          ]);
           queryCount++;
 
           appliedMigrations.push({
@@ -390,13 +398,11 @@ export class SchemaVersioningTools {
           applied_migrations: appliedMigrations,
           failed_migrations: failedMigrations,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -494,7 +500,11 @@ export class SchemaVersioningTools {
     steps?: number;
     dry_run?: boolean;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { target_version, steps = 1, dry_run = false, database } = params;
 
@@ -529,7 +539,10 @@ export class SchemaVersioningTools {
         queryParams = [steps];
       }
 
-      const migrationsToRollback: any[] = await this.db.query(rollbackQuery, queryParams);
+      const migrationsToRollback: any[] = await this.db.query(
+        rollbackQuery,
+        queryParams,
+      );
       queryCount++;
 
       if (migrationsToRollback.length === 0) {
@@ -540,12 +553,13 @@ export class SchemaVersioningTools {
             rolled_back_count: 0,
             migrations: [],
           },
-          queryLog: this.db.getFormattedQueryLogs(queryCount),
         };
       }
 
       // Check if all migrations have down_sql
-      const migrationsWithoutDown = migrationsToRollback.filter((m) => !m.down_sql);
+      const migrationsWithoutDown = migrationsToRollback.filter(
+        (m) => !m.down_sql,
+      );
       if (migrationsWithoutDown.length > 0 && !dry_run) {
         return {
           status: "error",
@@ -564,11 +578,11 @@ export class SchemaVersioningTools {
               name: m.name,
               has_down_sql: !!m.down_sql,
               down_sql_preview: m.down_sql
-                ? m.down_sql.substring(0, 200) + (m.down_sql.length > 200 ? "..." : "")
+                ? m.down_sql.substring(0, 200) +
+                  (m.down_sql.length > 200 ? "..." : "")
                 : null,
             })),
           },
-          queryLog: this.db.getFormattedQueryLogs(queryCount),
         };
       }
 
@@ -637,13 +651,11 @@ export class SchemaVersioningTools {
           rolled_back_migrations: rolledBackMigrations,
           failed_rollbacks: failedRollbacks,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -656,7 +668,11 @@ export class SchemaVersioningTools {
     status?: "pending" | "applied" | "failed" | "rolled_back";
     limit?: number;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { version, status, limit = 50, database } = params;
 
@@ -730,12 +746,14 @@ export class SchemaVersioningTools {
         ORDER BY version DESC
         LIMIT 1
       `;
-      const currentVersionResult: any[] = await this.db.query(currentVersionQuery);
+      const currentVersionResult: any[] =
+        await this.db.query(currentVersionQuery);
       queryCount++;
 
-      const currentVersion = currentVersionResult.length > 0
-        ? currentVersionResult[0].version
-        : null;
+      const currentVersion =
+        currentVersionResult.length > 0
+          ? currentVersionResult[0].version
+          : null;
 
       return {
         status: "success",
@@ -754,13 +772,11 @@ export class SchemaVersioningTools {
             created_at: m.created_at ? m.created_at.toISOString() : null,
           })),
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -768,9 +784,11 @@ export class SchemaVersioningTools {
   /**
    * Get the current schema version
    */
-  async getSchemaVersion(params: {
-    database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getSchemaVersion(params: { database?: string }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { database } = params;
 
@@ -787,7 +805,9 @@ export class SchemaVersioningTools {
         WHERE table_schema = DATABASE()
         AND table_name = ?
       `;
-      const tableExists: any[] = await this.db.query(tableExistsQuery, [this.migrationsTable]);
+      const tableExists: any[] = await this.db.query(tableExistsQuery, [
+        this.migrationsTable,
+      ]);
 
       if (tableExists[0].cnt === 0) {
         return {
@@ -797,7 +817,6 @@ export class SchemaVersioningTools {
             message: "No migrations have been tracked yet",
             migrations_table_exists: false,
           },
-          queryLog: this.db.getFormattedQueryLogs(1),
         };
       }
 
@@ -822,7 +841,6 @@ export class SchemaVersioningTools {
             message: "No migrations have been applied yet",
             migrations_table_exists: true,
           },
-          queryLog: this.db.getFormattedQueryLogs(2),
         };
       }
 
@@ -841,17 +859,17 @@ export class SchemaVersioningTools {
         data: {
           current_version: current.version,
           current_migration_name: current.name,
-          applied_at: current.applied_at ? current.applied_at.toISOString() : null,
+          applied_at: current.applied_at
+            ? current.applied_at.toISOString()
+            : null,
           pending_migrations: pendingResult[0].cnt,
           migrations_table_exists: true,
         },
-        queryLog: this.db.getFormattedQueryLogs(3),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -859,9 +877,11 @@ export class SchemaVersioningTools {
   /**
    * Validate pending migrations (check for conflicts or issues)
    */
-  async validateMigrations(params: {
-    database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async validateMigrations(params: { database?: string }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { database } = params;
 
@@ -943,7 +963,8 @@ export class SchemaVersioningTools {
       const failedMigrations = migrations.filter((m) => m.status === "failed");
       if (failedMigrations.length > 0) {
         const pendingAfterFailed = migrations.filter(
-          (m) => m.status === "pending" && m.version > failedMigrations[0].version
+          (m) =>
+            m.status === "pending" && m.version > failedMigrations[0].version,
         );
         if (pendingAfterFailed.length > 0) {
           warnings.push({
@@ -970,16 +991,15 @@ export class SchemaVersioningTools {
             pending: migrations.filter((m) => m.status === "pending").length,
             applied: migrations.filter((m) => m.status === "applied").length,
             failed: migrations.filter((m) => m.status === "failed").length,
-            rolled_back: migrations.filter((m) => m.status === "rolled_back").length,
+            rolled_back: migrations.filter((m) => m.status === "rolled_back")
+              .length,
           },
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -990,7 +1010,11 @@ export class SchemaVersioningTools {
   async resetFailedMigration(params: {
     version: string;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { version, database } = params;
 
@@ -1041,13 +1065,11 @@ export class SchemaVersioningTools {
           previous_status: "failed",
           new_status: "pending",
         },
-        queryLog: this.db.getFormattedQueryLogs(2),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }
@@ -1060,7 +1082,11 @@ export class SchemaVersioningTools {
     table2: string;
     migration_name: string;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { table1, table2, migration_name, database } = params;
 
@@ -1073,20 +1099,30 @@ export class SchemaVersioningTools {
       // Validate table names
       const table1Validation = this.security.validateIdentifier(table1);
       if (!table1Validation.valid) {
-        return { status: "error", error: `Invalid table1 name: ${table1Validation.error}` };
+        return {
+          status: "error",
+          error: `Invalid table1 name: ${table1Validation.error}`,
+        };
       }
 
       const table2Validation = this.security.validateIdentifier(table2);
       if (!table2Validation.valid) {
-        return { status: "error", error: `Invalid table2 name: ${table2Validation.error}` };
+        return {
+          status: "error",
+          error: `Invalid table2 name: ${table2Validation.error}`,
+        };
       }
 
       const escapedTable1 = this.security.escapeIdentifier(table1);
       const escapedTable2 = this.security.escapeIdentifier(table2);
 
       // Get columns for both tables
-      const cols1: any[] = await this.db.query(`SHOW COLUMNS FROM ${escapedTable1}`);
-      const cols2: any[] = await this.db.query(`SHOW COLUMNS FROM ${escapedTable2}`);
+      const cols1: any[] = await this.db.query(
+        `SHOW COLUMNS FROM ${escapedTable1}`,
+      );
+      const cols2: any[] = await this.db.query(
+        `SHOW COLUMNS FROM ${escapedTable2}`,
+      );
 
       const columns1 = new Map(cols1.map((c) => [c.Field, c]));
       const columns2 = new Map(cols2.map((c) => [c.Field, c]));
@@ -1098,22 +1134,32 @@ export class SchemaVersioningTools {
       for (const [name, col] of columns1) {
         if (!columns2.has(name)) {
           const nullable = col.Null === "YES" ? "NULL" : "NOT NULL";
-          const defaultVal = col.Default !== null ? ` DEFAULT ${this.escapeValue(col.Default)}` : "";
+          const defaultVal =
+            col.Default !== null
+              ? ` DEFAULT ${this.escapeValue(col.Default)}`
+              : "";
           upStatements.push(
-            `ALTER TABLE ${escapedTable2} ADD COLUMN \`${name}\` ${col.Type} ${nullable}${defaultVal};`
+            `ALTER TABLE ${escapedTable2} ADD COLUMN \`${name}\` ${col.Type} ${nullable}${defaultVal};`,
           );
-          downStatements.push(`ALTER TABLE ${escapedTable2} DROP COLUMN \`${name}\`;`);
+          downStatements.push(
+            `ALTER TABLE ${escapedTable2} DROP COLUMN \`${name}\`;`,
+          );
         }
       }
 
       // Find columns only in table2 (to remove from table2 to match table1)
       for (const [name, col] of columns2) {
         if (!columns1.has(name)) {
-          upStatements.push(`ALTER TABLE ${escapedTable2} DROP COLUMN \`${name}\`;`);
+          upStatements.push(
+            `ALTER TABLE ${escapedTable2} DROP COLUMN \`${name}\`;`,
+          );
           const nullable = col.Null === "YES" ? "NULL" : "NOT NULL";
-          const defaultVal = col.Default !== null ? ` DEFAULT ${this.escapeValue(col.Default)}` : "";
+          const defaultVal =
+            col.Default !== null
+              ? ` DEFAULT ${this.escapeValue(col.Default)}`
+              : "";
           downStatements.push(
-            `ALTER TABLE ${escapedTable2} ADD COLUMN \`${name}\` ${col.Type} ${nullable}${defaultVal};`
+            `ALTER TABLE ${escapedTable2} ADD COLUMN \`${name}\` ${col.Type} ${nullable}${defaultVal};`,
           );
         }
       }
@@ -1125,10 +1171,10 @@ export class SchemaVersioningTools {
           const nullable1 = col1.Null === "YES" ? "NULL" : "NOT NULL";
           const nullable2 = col2.Null === "YES" ? "NULL" : "NOT NULL";
           upStatements.push(
-            `ALTER TABLE ${escapedTable2} MODIFY COLUMN \`${name}\` ${col1.Type} ${nullable1};`
+            `ALTER TABLE ${escapedTable2} MODIFY COLUMN \`${name}\` ${col1.Type} ${nullable1};`,
           );
           downStatements.push(
-            `ALTER TABLE ${escapedTable2} MODIFY COLUMN \`${name}\` ${col2.Type} ${nullable2};`
+            `ALTER TABLE ${escapedTable2} MODIFY COLUMN \`${name}\` ${col2.Type} ${nullable2};`,
           );
         }
       }
@@ -1137,12 +1183,12 @@ export class SchemaVersioningTools {
         return {
           status: "success",
           data: {
-            message: "No differences found between tables - no migration needed",
+            message:
+              "No differences found between tables - no migration needed",
             table1,
             table2,
             differences: 0,
           },
-          queryLog: this.db.getFormattedQueryLogs(2),
         };
       }
 
@@ -1173,13 +1219,11 @@ export class SchemaVersioningTools {
           source_table: table1,
           target_table: table2,
         },
-        queryLog: this.db.getFormattedQueryLogs(4),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1),
       };
     }
   }

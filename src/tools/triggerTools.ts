@@ -1,6 +1,6 @@
-import DatabaseConnection from '../db/connection';
-import { SecurityLayer } from '../security/securityLayer';
-import { dbConfig } from '../config/config';
+import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
+import { dbConfig } from "../config/config";
 
 export class TriggerTools {
   private db: DatabaseConnection;
@@ -14,46 +14,58 @@ export class TriggerTools {
   /**
    * Validate database access - ensures only the connected database can be accessed
    */
-  private validateDatabaseAccess(requestedDatabase?: string): { valid: boolean; database: string; error?: string } {
+  private validateDatabaseAccess(requestedDatabase?: string): {
+    valid: boolean;
+    database: string;
+    error?: string;
+  } {
     const connectedDatabase = dbConfig.database;
 
     if (!connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: 'No database specified in connection string. Cannot access any database.'
+        database: "",
+        error:
+          "No database specified in connection string. Cannot access any database.",
       };
     }
 
     if (!requestedDatabase) {
       return {
         valid: true,
-        database: connectedDatabase
+        database: connectedDatabase,
       };
     }
 
     if (requestedDatabase !== connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`
+        database: "",
+        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`,
       };
     }
 
     return {
       valid: true,
-      database: connectedDatabase
+      database: connectedDatabase,
     };
   }
 
   /**
    * List all triggers in the current database
    */
-  async listTriggers(params: { database?: string; table_name?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async listTriggers(params: {
+    database?: string;
+    table_name?: string;
+  }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const database = dbValidation.database;
@@ -75,9 +87,14 @@ export class TriggerTools {
       const queryParams: any[] = [database];
 
       if (params?.table_name) {
-        const identifierValidation = this.security.validateIdentifier(params.table_name);
+        const identifierValidation = this.security.validateIdentifier(
+          params.table_name,
+        );
         if (!identifierValidation.valid) {
-          return { status: 'error', error: identifierValidation.error || 'Invalid table name' };
+          return {
+            status: "error",
+            error: identifierValidation.error || "Invalid table name",
+          };
         }
         query += ` AND EVENT_OBJECT_TABLE = ?`;
         queryParams.push(params.table_name);
@@ -88,15 +105,13 @@ export class TriggerTools {
       const results = await this.db.query<any[]>(query, queryParams);
 
       return {
-        status: 'success',
+        status: "success",
         data: results,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -104,20 +119,31 @@ export class TriggerTools {
   /**
    * Get detailed information about a specific trigger
    */
-  async getTriggerInfo(params: { trigger_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async getTriggerInfo(params: {
+    trigger_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { trigger_name } = params;
       const database = dbValidation.database;
 
       // Validate trigger name
-      const identifierValidation = this.security.validateIdentifier(trigger_name);
+      const identifierValidation =
+        this.security.validateIdentifier(trigger_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid trigger name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid trigger name",
+        };
       }
 
       const query = `
@@ -145,26 +171,26 @@ export class TriggerTools {
         WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME = ?
       `;
 
-      const results = await this.db.query<any[]>(query, [database, trigger_name]);
+      const results = await this.db.query<any[]>(query, [
+        database,
+        trigger_name,
+      ]);
 
       if (results.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `Trigger '${trigger_name}' not found in database '${database}'`,
-          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -175,16 +201,20 @@ export class TriggerTools {
   async createTrigger(params: {
     trigger_name: string;
     table_name: string;
-    timing: 'BEFORE' | 'AFTER';
-    event: 'INSERT' | 'UPDATE' | 'DELETE';
+    timing: "BEFORE" | "AFTER";
+    event: "INSERT" | "UPDATE" | "DELETE";
     body: string;
     definer?: string;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { trigger_name, table_name, timing, event, body, definer } = params;
@@ -193,27 +223,36 @@ export class TriggerTools {
       // Validate trigger name
       const triggerValidation = this.security.validateIdentifier(trigger_name);
       if (!triggerValidation.valid) {
-        return { status: 'error', error: triggerValidation.error || 'Invalid trigger name' };
+        return {
+          status: "error",
+          error: triggerValidation.error || "Invalid trigger name",
+        };
       }
 
       // Validate table name
       const tableValidation = this.security.validateIdentifier(table_name);
       if (!tableValidation.valid) {
-        return { status: 'error', error: tableValidation.error || 'Invalid table name' };
+        return {
+          status: "error",
+          error: tableValidation.error || "Invalid table name",
+        };
       }
 
       // Validate timing
-      if (!['BEFORE', 'AFTER'].includes(timing)) {
-        return { status: 'error', error: 'Timing must be BEFORE or AFTER' };
+      if (!["BEFORE", "AFTER"].includes(timing)) {
+        return { status: "error", error: "Timing must be BEFORE or AFTER" };
       }
 
       // Validate event
-      if (!['INSERT', 'UPDATE', 'DELETE'].includes(event)) {
-        return { status: 'error', error: 'Event must be INSERT, UPDATE, or DELETE' };
+      if (!["INSERT", "UPDATE", "DELETE"].includes(event)) {
+        return {
+          status: "error",
+          error: "Event must be INSERT, UPDATE, or DELETE",
+        };
       }
 
       // Build CREATE TRIGGER statement
-      let createQuery = 'CREATE';
+      let createQuery = "CREATE";
 
       if (definer) {
         createQuery += ` DEFINER = ${definer}`;
@@ -226,7 +265,10 @@ export class TriggerTools {
 
       // Check if body already contains BEGIN/END
       const trimmedBody = body.trim();
-      if (trimmedBody.toUpperCase().startsWith('BEGIN') && trimmedBody.toUpperCase().endsWith('END')) {
+      if (
+        trimmedBody.toUpperCase().startsWith("BEGIN") &&
+        trimmedBody.toUpperCase().endsWith("END")
+      ) {
         createQuery += `\n${body}`;
       } else {
         createQuery += `\nBEGIN\n${body}\nEND`;
@@ -235,22 +277,20 @@ export class TriggerTools {
       await this.db.query(createQuery);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Trigger '${trigger_name}' created successfully`,
           trigger_name,
           table_name,
           timing,
           event,
-          database
+          database,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -258,36 +298,46 @@ export class TriggerTools {
   /**
    * Drop a trigger
    */
-  async dropTrigger(params: { trigger_name: string; if_exists?: boolean; database?: string }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async dropTrigger(params: {
+    trigger_name: string;
+    if_exists?: boolean;
+    database?: string;
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { trigger_name, if_exists = false } = params;
       const database = dbValidation.database;
 
       // Validate trigger name
-      const identifierValidation = this.security.validateIdentifier(trigger_name);
+      const identifierValidation =
+        this.security.validateIdentifier(trigger_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid trigger name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid trigger name",
+        };
       }
 
-      const dropQuery = `DROP TRIGGER ${if_exists ? 'IF EXISTS' : ''} \`${database}\`.\`${trigger_name}\``;
+      const dropQuery = `DROP TRIGGER ${if_exists ? "IF EXISTS" : ""} \`${database}\`.\`${trigger_name}\``;
 
       await this.db.query(dropQuery);
 
       return {
-        status: 'success',
+        status: "success",
         message: `Trigger '${trigger_name}' dropped successfully`,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -295,20 +345,31 @@ export class TriggerTools {
   /**
    * Show the CREATE statement for a trigger
    */
-  async showCreateTrigger(params: { trigger_name: string; database?: string }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async showCreateTrigger(params: {
+    trigger_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { trigger_name } = params;
       const database = dbValidation.database;
 
       // Validate trigger name
-      const identifierValidation = this.security.validateIdentifier(trigger_name);
+      const identifierValidation =
+        this.security.validateIdentifier(trigger_name);
       if (!identifierValidation.valid) {
-        return { status: 'error', error: identifierValidation.error || 'Invalid trigger name' };
+        return {
+          status: "error",
+          error: identifierValidation.error || "Invalid trigger name",
+        };
       }
 
       const query = `SHOW CREATE TRIGGER \`${database}\`.\`${trigger_name}\``;
@@ -316,22 +377,19 @@ export class TriggerTools {
 
       if (results.length === 0) {
         return {
-          status: 'error',
+          status: "error",
           error: `Trigger '${trigger_name}' not found`,
-          queryLog: this.db.getFormattedQueryLogs(1)
         };
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: results[0],
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

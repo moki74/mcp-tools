@@ -1,6 +1,6 @@
-import DatabaseConnection from '../db/connection';
-import { SecurityLayer } from '../security/securityLayer';
-import { dbConfig } from '../config/config';
+import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
+import { dbConfig } from "../config/config";
 
 export class ConstraintTools {
   private db: DatabaseConnection;
@@ -14,46 +14,58 @@ export class ConstraintTools {
   /**
    * Validate database access - ensures only the connected database can be accessed
    */
-  private validateDatabaseAccess(requestedDatabase?: string): { valid: boolean; database: string; error?: string } {
+  private validateDatabaseAccess(requestedDatabase?: string): {
+    valid: boolean;
+    database: string;
+    error?: string;
+  } {
     const connectedDatabase = dbConfig.database;
 
     if (!connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: 'No database specified in connection string. Cannot access any database.'
+        database: "",
+        error:
+          "No database specified in connection string. Cannot access any database.",
       };
     }
 
     if (!requestedDatabase) {
       return {
         valid: true,
-        database: connectedDatabase
+        database: connectedDatabase,
       };
     }
 
     if (requestedDatabase !== connectedDatabase) {
       return {
         valid: false,
-        database: '',
-        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`
+        database: "",
+        error: `Access denied. You can only access the connected database '${connectedDatabase}'. Requested database '${requestedDatabase}' is not allowed.`,
       };
     }
 
     return {
       valid: true,
-      database: connectedDatabase
+      database: connectedDatabase,
     };
   }
 
   /**
    * List all foreign keys for a table
    */
-  async listForeignKeys(params: { table_name: string; database?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async listForeignKeys(params: {
+    table_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name } = params;
@@ -61,7 +73,7 @@ export class ConstraintTools {
 
       // Validate table name
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
 
       const query = `
@@ -98,26 +110,24 @@ export class ConstraintTools {
             referenced_table: row.referenced_table,
             on_update: row.on_update,
             on_delete: row.on_delete,
-            columns: []
+            columns: [],
           });
         }
         fkMap.get(constraintName)!.columns.push({
           column_name: row.column_name,
           referenced_column: row.referenced_column,
-          ordinal_position: row.ordinal_position
+          ordinal_position: row.ordinal_position,
         });
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: Array.from(fkMap.values()),
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -125,11 +135,18 @@ export class ConstraintTools {
   /**
    * List all constraints (PK, FK, UNIQUE, CHECK) for a table
    */
-  async listConstraints(params: { table_name: string; database?: string }): Promise<{ status: string; data?: any[]; error?: string; queryLog?: string }> {
+  async listConstraints(params: {
+    table_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    data?: any[];
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name } = params;
@@ -137,7 +154,7 @@ export class ConstraintTools {
 
       // Validate table name
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
 
       const query = `
@@ -160,24 +177,24 @@ export class ConstraintTools {
       const results = await this.db.query<any[]>(query, [database, table_name]);
 
       // Format results
-      const constraints = results.map(row => ({
+      const constraints = results.map((row) => ({
         constraint_name: row.constraint_name,
         constraint_type: row.constraint_type,
-        columns: row.columns ? row.columns.split(',') : [],
+        columns: row.columns ? row.columns.split(",") : [],
         referenced_table: row.referenced_table || null,
-        referenced_columns: row.referenced_columns ? row.referenced_columns.split(',') : null
+        referenced_columns: row.referenced_columns
+          ? row.referenced_columns.split(",")
+          : null,
       }));
 
       return {
-        status: 'success',
+        status: "success",
         data: constraints,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -191,14 +208,28 @@ export class ConstraintTools {
     columns: string[];
     referenced_table: string;
     referenced_columns: string[];
-    on_delete?: 'CASCADE' | 'SET NULL' | 'RESTRICT' | 'NO ACTION' | 'SET DEFAULT';
-    on_update?: 'CASCADE' | 'SET NULL' | 'RESTRICT' | 'NO ACTION' | 'SET DEFAULT';
+    on_delete?:
+      | "CASCADE"
+      | "SET NULL"
+      | "RESTRICT"
+      | "NO ACTION"
+      | "SET DEFAULT";
+    on_update?:
+      | "CASCADE"
+      | "SET NULL"
+      | "RESTRICT"
+      | "NO ACTION"
+      | "SET DEFAULT";
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const {
@@ -207,41 +238,49 @@ export class ConstraintTools {
         columns,
         referenced_table,
         referenced_columns,
-        on_delete = 'RESTRICT',
-        on_update = 'RESTRICT'
+        on_delete = "RESTRICT",
+        on_update = "RESTRICT",
       } = params;
       const database = dbValidation.database;
 
       // Validate names
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
       if (!this.security.validateIdentifier(constraint_name).valid) {
-        return { status: 'error', error: 'Invalid constraint name' };
+        return { status: "error", error: "Invalid constraint name" };
       }
       if (!this.security.validateIdentifier(referenced_table).valid) {
-        return { status: 'error', error: 'Invalid referenced table name' };
+        return { status: "error", error: "Invalid referenced table name" };
       }
 
       // Validate column names
       for (const col of columns) {
         if (!this.security.validateIdentifier(col).valid) {
-          return { status: 'error', error: `Invalid column name: ${col}` };
+          return { status: "error", error: `Invalid column name: ${col}` };
         }
       }
       for (const col of referenced_columns) {
         if (!this.security.validateIdentifier(col).valid) {
-          return { status: 'error', error: `Invalid referenced column name: ${col}` };
+          return {
+            status: "error",
+            error: `Invalid referenced column name: ${col}`,
+          };
         }
       }
 
       // Column counts must match
       if (columns.length !== referenced_columns.length) {
-        return { status: 'error', error: 'Column count must match referenced column count' };
+        return {
+          status: "error",
+          error: "Column count must match referenced column count",
+        };
       }
 
-      const columnList = columns.map(c => `\`${c}\``).join(', ');
-      const refColumnList = referenced_columns.map(c => `\`${c}\``).join(', ');
+      const columnList = columns.map((c) => `\`${c}\``).join(", ");
+      const refColumnList = referenced_columns
+        .map((c) => `\`${c}\``)
+        .join(", ");
 
       const alterQuery = `
         ALTER TABLE \`${database}\`.\`${table_name}\`
@@ -255,21 +294,19 @@ export class ConstraintTools {
       await this.db.query(alterQuery);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Foreign key '${constraint_name}' added successfully`,
           constraint_name,
           table_name,
           referenced_table,
-          database
+          database,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -277,11 +314,19 @@ export class ConstraintTools {
   /**
    * Drop a foreign key constraint
    */
-  async dropForeignKey(params: { table_name: string; constraint_name: string; database?: string }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  async dropForeignKey(params: {
+    table_name: string;
+    constraint_name: string;
+    database?: string;
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name, constraint_name } = params;
@@ -289,10 +334,10 @@ export class ConstraintTools {
 
       // Validate names
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
       if (!this.security.validateIdentifier(constraint_name).valid) {
-        return { status: 'error', error: 'Invalid constraint name' };
+        return { status: "error", error: "Invalid constraint name" };
       }
 
       const alterQuery = `ALTER TABLE \`${database}\`.\`${table_name}\` DROP FOREIGN KEY \`${constraint_name}\``;
@@ -300,15 +345,13 @@ export class ConstraintTools {
       await this.db.query(alterQuery);
 
       return {
-        status: 'success',
+        status: "success",
         message: `Foreign key '${constraint_name}' dropped successfully from table '${table_name}'`,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -321,11 +364,15 @@ export class ConstraintTools {
     constraint_name: string;
     columns: string[];
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name, constraint_name, columns } = params;
@@ -333,40 +380,38 @@ export class ConstraintTools {
 
       // Validate names
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
       if (!this.security.validateIdentifier(constraint_name).valid) {
-        return { status: 'error', error: 'Invalid constraint name' };
+        return { status: "error", error: "Invalid constraint name" };
       }
 
       // Validate column names
       for (const col of columns) {
         if (!this.security.validateIdentifier(col).valid) {
-          return { status: 'error', error: `Invalid column name: ${col}` };
+          return { status: "error", error: `Invalid column name: ${col}` };
         }
       }
 
-      const columnList = columns.map(c => `\`${c}\``).join(', ');
+      const columnList = columns.map((c) => `\`${c}\``).join(", ");
       const alterQuery = `ALTER TABLE \`${database}\`.\`${table_name}\` ADD CONSTRAINT \`${constraint_name}\` UNIQUE (${columnList})`;
 
       await this.db.query(alterQuery);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Unique constraint '${constraint_name}' added successfully`,
           constraint_name,
           table_name,
           columns,
-          database
+          database,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -377,13 +422,17 @@ export class ConstraintTools {
   async dropConstraint(params: {
     table_name: string;
     constraint_name: string;
-    constraint_type: 'UNIQUE' | 'CHECK';
+    constraint_type: "UNIQUE" | "CHECK";
     database?: string;
-  }): Promise<{ status: string; message?: string; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    message?: string;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
       const { table_name, constraint_name, constraint_type } = params;
@@ -391,34 +440,35 @@ export class ConstraintTools {
 
       // Validate names
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
       if (!this.security.validateIdentifier(constraint_name).valid) {
-        return { status: 'error', error: 'Invalid constraint name' };
+        return { status: "error", error: "Invalid constraint name" };
       }
 
       let alterQuery: string;
-      if (constraint_type === 'UNIQUE') {
+      if (constraint_type === "UNIQUE") {
         // UNIQUE constraints are implemented as indexes in MySQL
         alterQuery = `ALTER TABLE \`${database}\`.\`${table_name}\` DROP INDEX \`${constraint_name}\``;
-      } else if (constraint_type === 'CHECK') {
+      } else if (constraint_type === "CHECK") {
         alterQuery = `ALTER TABLE \`${database}\`.\`${table_name}\` DROP CHECK \`${constraint_name}\``;
       } else {
-        return { status: 'error', error: 'Invalid constraint type. Use UNIQUE or CHECK.' };
+        return {
+          status: "error",
+          error: "Invalid constraint type. Use UNIQUE or CHECK.",
+        };
       }
 
       await this.db.query(alterQuery);
 
       return {
-        status: 'success',
+        status: "success",
         message: `${constraint_type} constraint '${constraint_name}' dropped successfully from table '${table_name}'`,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -432,49 +482,56 @@ export class ConstraintTools {
     expression: string;
     enforced?: boolean;
     database?: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const dbValidation = this.validateDatabaseAccess(params?.database);
       if (!dbValidation.valid) {
-        return { status: 'error', error: dbValidation.error! };
+        return { status: "error", error: dbValidation.error! };
       }
 
-      const { table_name, constraint_name, expression, enforced = true } = params;
+      const {
+        table_name,
+        constraint_name,
+        expression,
+        enforced = true,
+      } = params;
       const database = dbValidation.database;
 
       // Validate names
       if (!this.security.validateIdentifier(table_name).valid) {
-        return { status: 'error', error: 'Invalid table name' };
+        return { status: "error", error: "Invalid table name" };
       }
       if (!this.security.validateIdentifier(constraint_name).valid) {
-        return { status: 'error', error: 'Invalid constraint name' };
+        return { status: "error", error: "Invalid constraint name" };
       }
 
       let alterQuery = `ALTER TABLE \`${database}\`.\`${table_name}\` ADD CONSTRAINT \`${constraint_name}\` CHECK (${expression})`;
 
       if (!enforced) {
-        alterQuery += ' NOT ENFORCED';
+        alterQuery += " NOT ENFORCED";
       }
 
       await this.db.query(alterQuery);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Check constraint '${constraint_name}' added successfully`,
           constraint_name,
           table_name,
           expression,
           enforced,
-          database
+          database,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

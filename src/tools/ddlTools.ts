@@ -1,4 +1,4 @@
-import DatabaseConnection from '../db/connection';
+import DatabaseConnection from "../db/connection";
 
 export class DdlTools {
   private db: DatabaseConnection;
@@ -10,8 +10,8 @@ export class DdlTools {
   /**
    * Create a new table
    */
-  async createTable(params: { 
-    table_name: string; 
+  async createTable(params: {
+    table_name: string;
     columns: Array<{
       name: string;
       type: string;
@@ -25,32 +25,38 @@ export class DdlTools {
       columns: string[];
       unique?: boolean;
     }>;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { table_name, columns, indexes } = params;
 
       // Build column definitions
-      const columnDefs = columns.map(col => {
-        let def = `\`${col.name}\` ${col.type}`;
-        
-        if (col.nullable === false) {
-          def += ' NOT NULL';
-        }
-        
-        if (col.auto_increment) {
-          def += ' AUTO_INCREMENT';
-        }
-        
-        if (col.default !== undefined) {
-          def += ` DEFAULT ${col.default}`;
-        }
-        
-        if (col.primary_key) {
-          def += ' PRIMARY KEY';
-        }
-        
-        return def;
-      }).join(', ');
+      const columnDefs = columns
+        .map((col) => {
+          let def = `\`${col.name}\` ${col.type}`;
+
+          if (col.nullable === false) {
+            def += " NOT NULL";
+          }
+
+          if (col.auto_increment) {
+            def += " AUTO_INCREMENT";
+          }
+
+          if (col.default !== undefined) {
+            def += ` DEFAULT ${col.default}`;
+          }
+
+          if (col.primary_key) {
+            def += " PRIMARY KEY";
+          }
+
+          return def;
+        })
+        .join(", ");
 
       // Build the CREATE TABLE query
       let query = `CREATE TABLE \`${table_name}\` (${columnDefs})`;
@@ -62,8 +68,8 @@ export class DdlTools {
       let queryCount = 1;
       if (indexes && indexes.length > 0) {
         for (const index of indexes) {
-          const indexType = index.unique ? 'UNIQUE INDEX' : 'INDEX';
-          const indexColumns = index.columns.map(c => `\`${c}\``).join(', ');
+          const indexType = index.unique ? "UNIQUE INDEX" : "INDEX";
+          const indexColumns = index.columns.map((c) => `\`${c}\``).join(", ");
           const indexQuery = `CREATE ${indexType} \`${index.name}\` ON \`${table_name}\` (${indexColumns})`;
           await this.db.query(indexQuery);
           queryCount++;
@@ -71,18 +77,16 @@ export class DdlTools {
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Table '${table_name}' created successfully`,
-          table_name
+          table_name,
         },
-        queryLog: this.db.getFormattedQueryLogs(queryCount)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(10)
       };
     }
   }
@@ -93,7 +97,13 @@ export class DdlTools {
   async alterTable(params: {
     table_name: string;
     operations: Array<{
-      type: 'add_column' | 'drop_column' | 'modify_column' | 'rename_column' | 'add_index' | 'drop_index';
+      type:
+        | "add_column"
+        | "drop_column"
+        | "modify_column"
+        | "rename_column"
+        | "add_index"
+        | "drop_index";
       column_name?: string;
       new_column_name?: string;
       column_type?: string;
@@ -103,7 +113,11 @@ export class DdlTools {
       index_columns?: string[];
       unique?: boolean;
     }>;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { table_name, operations } = params;
 
@@ -111,75 +125,95 @@ export class DdlTools {
         let query = `ALTER TABLE \`${table_name}\``;
 
         switch (op.type) {
-          case 'add_column':
+          case "add_column":
             if (!op.column_name || !op.column_type) {
-              return { status: 'error', error: 'column_name and column_type required for add_column' };
+              return {
+                status: "error",
+                error: "column_name and column_type required for add_column",
+              };
             }
             query += ` ADD COLUMN \`${op.column_name}\` ${op.column_type}`;
-            if (op.nullable === false) query += ' NOT NULL';
+            if (op.nullable === false) query += " NOT NULL";
             if (op.default !== undefined) query += ` DEFAULT ${op.default}`;
             break;
 
-          case 'drop_column':
+          case "drop_column":
             if (!op.column_name) {
-              return { status: 'error', error: 'column_name required for drop_column' };
+              return {
+                status: "error",
+                error: "column_name required for drop_column",
+              };
             }
             query += ` DROP COLUMN \`${op.column_name}\``;
             break;
 
-          case 'modify_column':
+          case "modify_column":
             if (!op.column_name || !op.column_type) {
-              return { status: 'error', error: 'column_name and column_type required for modify_column' };
+              return {
+                status: "error",
+                error: "column_name and column_type required for modify_column",
+              };
             }
             query += ` MODIFY COLUMN \`${op.column_name}\` ${op.column_type}`;
-            if (op.nullable === false) query += ' NOT NULL';
+            if (op.nullable === false) query += " NOT NULL";
             if (op.default !== undefined) query += ` DEFAULT ${op.default}`;
             break;
 
-          case 'rename_column':
+          case "rename_column":
             if (!op.column_name || !op.new_column_name || !op.column_type) {
-              return { status: 'error', error: 'column_name, new_column_name, and column_type required for rename_column' };
+              return {
+                status: "error",
+                error:
+                  "column_name, new_column_name, and column_type required for rename_column",
+              };
             }
             query += ` CHANGE COLUMN \`${op.column_name}\` \`${op.new_column_name}\` ${op.column_type}`;
             break;
 
-          case 'add_index':
+          case "add_index":
             if (!op.index_name || !op.index_columns) {
-              return { status: 'error', error: 'index_name and index_columns required for add_index' };
+              return {
+                status: "error",
+                error: "index_name and index_columns required for add_index",
+              };
             }
-            const indexType = op.unique ? 'UNIQUE INDEX' : 'INDEX';
-            const columns = op.index_columns.map(c => `\`${c}\``).join(', ');
+            const indexType = op.unique ? "UNIQUE INDEX" : "INDEX";
+            const columns = op.index_columns.map((c) => `\`${c}\``).join(", ");
             query += ` ADD ${indexType} \`${op.index_name}\` (${columns})`;
             break;
 
-          case 'drop_index':
+          case "drop_index":
             if (!op.index_name) {
-              return { status: 'error', error: 'index_name required for drop_index' };
+              return {
+                status: "error",
+                error: "index_name required for drop_index",
+              };
             }
             query += ` DROP INDEX \`${op.index_name}\``;
             break;
 
           default:
-            return { status: 'error', error: `Unknown operation type: ${op.type}` };
+            return {
+              status: "error",
+              error: `Unknown operation type: ${op.type}`,
+            };
         }
 
         await this.db.query(query);
       }
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Table '${table_name}' altered successfully`,
           table_name,
-          operations_count: operations.length
+          operations_count: operations.length,
         },
-        queryLog: this.db.getFormattedQueryLogs(operations.length)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(10)
       };
     }
   }
@@ -187,31 +221,33 @@ export class DdlTools {
   /**
    * Drop a table
    */
-  async dropTable(params: { 
+  async dropTable(params: {
     table_name: string;
     if_exists?: boolean;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { table_name, if_exists } = params;
 
-      const ifExistsClause = if_exists ? 'IF EXISTS ' : '';
+      const ifExistsClause = if_exists ? "IF EXISTS " : "";
       const query = `DROP TABLE ${ifExistsClause}\`${table_name}\``;
 
       await this.db.query(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
           message: `Table '${table_name}' dropped successfully`,
-          table_name
+          table_name,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }
@@ -219,42 +255,44 @@ export class DdlTools {
   /**
    * Execute raw DDL SQL
    */
-  async executeDdl(params: { 
-    query: string;
-  }): Promise<{ status: string; data?: any; error?: string; queryLog?: string }> {
+  async executeDdl(params: { query: string }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
     try {
       const { query } = params;
 
       // Basic validation - ensure it's a DDL query
       const upperQuery = query.trim().toUpperCase();
-      const isDdl = upperQuery.startsWith('CREATE') || 
-                     upperQuery.startsWith('ALTER') || 
-                     upperQuery.startsWith('DROP') ||
-                     upperQuery.startsWith('TRUNCATE') ||
-                     upperQuery.startsWith('RENAME');
+      const isDdl =
+        upperQuery.startsWith("CREATE") ||
+        upperQuery.startsWith("ALTER") ||
+        upperQuery.startsWith("DROP") ||
+        upperQuery.startsWith("TRUNCATE") ||
+        upperQuery.startsWith("RENAME");
 
       if (!isDdl) {
         return {
-          status: 'error',
-          error: 'Only DDL operations (CREATE, ALTER, DROP, TRUNCATE, RENAME) are allowed with executeDdl'
+          status: "error",
+          error:
+            "Only DDL operations (CREATE, ALTER, DROP, TRUNCATE, RENAME) are allowed with executeDdl",
         };
       }
 
       const result = await this.db.query<any>(query);
 
       return {
-        status: 'success',
+        status: "success",
         data: {
-          message: 'DDL query executed successfully',
-          affected_rows: result.affectedRows || 0
+          message: "DDL query executed successfully",
+          affected_rows: result.affectedRows || 0,
         },
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     } catch (error: any) {
       return {
-        status: 'error',
+        status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(1)
       };
     }
   }

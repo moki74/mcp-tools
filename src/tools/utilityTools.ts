@@ -160,7 +160,6 @@ export class UtilityTools {
     status: string;
     data?: any;
     error?: string;
-    queryLog?: string;
   }> {
     // Validate input
     if (!validateGetTableRelationships(params)) {
@@ -220,13 +219,11 @@ export class UtilityTools {
           as_parent: parentRelationships,
           as_child: childRelationships,
         },
-        queryLog: this.db.getFormattedQueryLogs(2),
       };
     } catch (error: any) {
       return {
         status: "error",
         error: error.message,
-        queryLog: this.db.getFormattedQueryLogs(2),
       };
     }
   }
