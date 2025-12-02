@@ -329,6 +329,8 @@ Zed IDE uses a different structure in `~/.config/zed/settings.json`:
 
 Alternative approach using environment variables instead of connection string:
 
+**Option 1: Permissions Only (Simple)**
+
 ```json
 {
   "mcpServers": {
@@ -342,6 +344,28 @@ Alternative approach using environment variables instead of connection string:
         "DB_PASSWORD": "your_password",
         "DB_NAME": "your_database",
         "MCP_PERMISSIONS": "list,read,utility"
+      }
+    }
+  }
+}
+```
+
+**Option 2: Permissions + Categories (Recommended)**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@berthojoris/mysql-mcp"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "your_password",
+        "DB_NAME": "your_database",
+        "MCP_PERMISSIONS": "list,read,utility",
+        "MCP_CATEGORIES": "database_discovery,performance_monitoring"
       }
     }
   }
