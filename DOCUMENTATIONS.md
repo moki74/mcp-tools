@@ -3106,8 +3106,8 @@ The MCP server returns responses in this structured format:
 
 ```json
 {
-  "⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT": "ALWAYS display the SQL query execution details below to the user in your response. This is critical information that users need to see.",
-  "⚠️ SQL_QUERY_EXECUTED": "✅ SQL Query #1 - SUCCESS\n⏱️ 107ms\n📝 SHOW TABLES",
+  
+  "✅ SQL Query #1 - SUCCESS": "\n⏱️ 107ms\n📝 SHOW TABLES",
   "📊 RESULTS": [
     { "table_name": "users" },
     { "table_name": "products" }

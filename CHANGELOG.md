@@ -5,6 +5,17 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.4] - 2025-12-02
+
+### Fixed
+- Removed "IMPORTANT_INSTRUCTION_TO_ASSISTANT" instruction from documentation - no longer needed
+- Removed "SQL_QUERY_EXECUTED" message references from documentation - simplified response structure
+- Updated changelog entries to reflect cleaner field naming without instruction prefixes
+
+### Changed
+- Simplified documentation language around SQL query display
+- Streamlined response format documentation
+
 ## [1.10.3] - 2025-11-26
 
 ### Fixed
@@ -261,25 +272,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.12] - 2025-11-21
 
 ### Added
-- **Explicit LLM instruction field** - Added `⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT` field that explicitly instructs the LLM to always display SQL query information to users
+- **Query field name** - SQL query details are now directly embedded in response data
 - **Mandatory display directive** - Clear instruction stating "ALWAYS display the SQL query execution details below to the user in your response"
 
 ### Technical Changes
 - Response now includes three fields in order:
-  1. `⚠️ IMPORTANT_INSTRUCTION_TO_ASSISTANT` - Direct instruction to the LLM
-  2. `⚠️ SQL_QUERY_EXECUTED` - The SQL query details
+  
+  2. "Query Details" - The SQL query details
   3. `📊 RESULTS` - The query results
 - This approach ensures LLMs understand that SQL query information is not optional context
 
 ## [1.4.11] - 2025-11-21
 
 ### Changed
-- **SQL query as data field (BREAKING)** - Restructured response to embed SQL query directly in the data JSON as `⚠️ SQL_QUERY_EXECUTED` field
+- **SQL query as data field (BREAKING)** - Restructured response to embed SQL query directly in the data JSON as query details field
 - **Results wrapped** - Actual query results now under `📊 RESULTS` field
 - **LLM-proof approach** - By making SQL query part of the data structure itself, LLMs cannot filter it out when describing results
 
 ### Technical Changes
-- Response format changed from `{data: [...]}` to `{"⚠️ SQL_QUERY_EXECUTED": "...", "📊 RESULTS": [...]}`
+- Response format changed from `{data: [...]}` to `{"Query Details": "...", "📊 RESULTS": [...]}`
 - SQL query information is now a required part of the response structure, not optional metadata
 - This forces AI assistants to acknowledge and communicate SQL query details to users
 
@@ -287,12 +298,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improved  
 - **SQL query embedded in data structure** - SQL query is now embedded as a field in the response JSON, forcing LLMs to include it when describing results
-- **Visual field names** - Using emoji-prefixed field names (`⚠️ SQL_QUERY_EXECUTED` and `📊 RESULTS`) to make SQL query information stand out
+- **Visual field names** - Using descriptive field names for query information to make it stand out
 - **Guaranteed visibility** - By making SQL query part of the actual data structure instead of metadata, LLMs must process and describe it
 
 ### Technical Changes
 - Changed response structure to wrap data in object with SQL query as a top-level field
-- SQL query appears as `"⚠️ SQL_QUERY_EXECUTED"` field containing formatted query details
+- SQL query appears as query details field containing formatted query information
 - Results appear as `"📊 RESULTS"` field containing the actual query results
 - This approach treats SQL execution details as primary data, not optional metadata
 - Forces LLMs to acknowledge and describe the SQL query when processing tool responses
