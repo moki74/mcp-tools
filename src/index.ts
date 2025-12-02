@@ -17,6 +17,7 @@ import { BackupRestoreTools } from "./tools/backupRestoreTools";
 import { MigrationTools } from "./tools/migrationTools";
 import { SchemaVersioningTools } from "./tools/schemaVersioningTools";
 import { PerformanceTools } from "./tools/performanceTools";
+import { AnalysisTools } from "./tools/analysisTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -45,6 +46,7 @@ export class MySQLMCP {
   private migrationTools: MigrationTools;
   private schemaVersioningTools: SchemaVersioningTools;
   private performanceTools: PerformanceTools;
+  private analysisTools: AnalysisTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -70,6 +72,7 @@ export class MySQLMCP {
     this.migrationTools = new MigrationTools(this.security);
     this.schemaVersioningTools = new SchemaVersioningTools(this.security);
     this.performanceTools = new PerformanceTools(this.security);
+    this.analysisTools = new AnalysisTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -109,6 +112,22 @@ export class MySQLMCP {
       return { status: "error", error: check.error };
     }
     return await this.dbTools.readTableSchema(params);
+  }
+
+  async getDatabaseSummary(params: { database?: string }) {
+    const check = this.checkToolEnabled("getDatabaseSummary");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.dbTools.getDatabaseSummary(params);
+  }
+
+  async getSchemaERD(params: { database?: string }) {
+    const check = this.checkToolEnabled("getSchemaERD");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.dbTools.getSchemaERD(params);
   }
 
   // CRUD Tools
@@ -157,7 +176,7 @@ export class MySQLMCP {
   }
 
   // Query Tools
-  async runQuery(params: { query: string; params?: any[] }) {
+  async runQuery(params: { query: string; params?: any[]; hints?: any; useCache?: boolean; dry_run?: boolean }) {
     const check = this.checkToolEnabled("runQuery");
     if (!check.enabled) {
       return { status: "error", error: check.error };
@@ -192,6 +211,15 @@ export class MySQLMCP {
       }
     }
     return await this.queryTools.executeSql(params);
+  }
+
+  // Analysis Tools
+  async getColumnStatistics(params: { table_name: string; column_name: string; database?: string }) {
+    const check = this.checkToolEnabled("getColumnStatistics");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.analysisTools.getColumnStatistics(params);
   }
 
   // DDL Tools

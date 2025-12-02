@@ -46,6 +46,7 @@ export enum DocCategory {
   IMPORT_EXPORT = "import_export",
   DATA_MIGRATION = "data_migration",
   SCHEMA_MIGRATIONS = "schema_migrations",
+  ANALYSIS = "analysis",
 }
 
 /**
@@ -56,12 +57,17 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   listDatabases: ToolCategory.LIST,
   listTables: ToolCategory.LIST,
   readTableSchema: ToolCategory.LIST,
+  // Analysis tools (added here to group with database tools)
+  getDatabaseSummary: ToolCategory.LIST,
+  getSchemaERD: ToolCategory.LIST,
 
   // CRUD tools
   createRecord: ToolCategory.CREATE,
   readRecords: ToolCategory.READ,
   updateRecord: ToolCategory.UPDATE,
   deleteRecord: ToolCategory.DELETE,
+  // Analysis tools (added here to group with read tools)
+  getColumnStatistics: ToolCategory.READ,
 
   // Bulk operations
   bulkInsert: ToolCategory.CREATE,
@@ -202,6 +208,9 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   validateMigrations: ToolCategory.LIST,
   resetFailedMigration: ToolCategory.DDL,
   generateMigrationFromDiff: ToolCategory.DDL,
+
+  // Analysis tools - MOVED here to avoid duplication
+  // Note: keys must be unique in the object literal
 
   // Performance monitoring tools
   getPerformanceMetrics: ToolCategory.UTILITY,
@@ -382,6 +391,11 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   validateMigrations: DocCategory.SCHEMA_MIGRATIONS,
   resetFailedMigration: DocCategory.SCHEMA_MIGRATIONS,
   generateMigrationFromDiff: DocCategory.SCHEMA_MIGRATIONS,
+
+  // Analysis
+  getDatabaseSummary: DocCategory.ANALYSIS,
+  getSchemaERD: DocCategory.ANALYSIS,
+  getColumnStatistics: DocCategory.ANALYSIS,
 };
 
 /**
@@ -400,8 +414,9 @@ const legacyToDocCategoryMap: Record<string, DocCategory[]> = {
     DocCategory.TABLE_MAINTENANCE,
     DocCategory.SERVER_MANAGEMENT,
     DocCategory.SCHEMA_MIGRATIONS,
+    DocCategory.ANALYSIS,
   ],
-  read: [DocCategory.CRUD_OPERATIONS, DocCategory.CUSTOM_QUERIES],
+  read: [DocCategory.CRUD_OPERATIONS, DocCategory.CUSTOM_QUERIES, DocCategory.ANALYSIS],
   create: [
     DocCategory.CRUD_OPERATIONS,
     DocCategory.BULK_OPERATIONS,

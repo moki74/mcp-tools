@@ -474,6 +474,7 @@ Use these categories for fine-grained control that matches the tool organization
 | `import_export` | 5 | Import/export JSON, CSV, SQL |
 | `data_migration` | 5 | Copy, move, clone, sync table data |
 | `schema_migrations` | 9 | Version control for database schema |
+| `analysis` | 3 | AI context optimization and data analysis |
 
 ### Legacy Categories (Backward Compatible)
 
@@ -636,6 +637,7 @@ The MCP server provides **119 powerful tools** organized into categories:
 | Data Migration | 5 | `copy_table_data`, `sync_table_data` |
 | Schema Migrations | 9 | `create_migration`, `apply_migrations` |
 | Utilities | 4 | `test_connection`, `export_table_to_csv` |
+| Analysis | 3 | `get_column_statistics`, `get_database_summary`, `get_schema_erd` |
 
 > **📖 For detailed tool descriptions, parameters, and examples, see [DOCUMENTATIONS.md](DOCUMENTATIONS.md#🔧-complete-tools-reference)**
 

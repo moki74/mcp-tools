@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.10.4] - 2025-12-02
 
+### Added
+- **AI Context Optimization** - Added 4 new AI-centric tools:
+  - `get_database_summary` - High-level database overview (tables, columns, row counts) optimized for context window
+  - `get_schema_erd` - Generates Mermaid.js ER diagrams for visual schema representation
+  - `get_column_statistics` - Deep data profiling (min/max, nulls, distinct counts) for intelligent query building
+  - `run_query` Safe Mode - Added `dry_run` flag to preview query plans and costs without execution
+
 ### Fixed
 - Removed "IMPORTANT_INSTRUCTION_TO_ASSISTANT" instruction from documentation - no longer needed
 - Removed "SQL_QUERY_EXECUTED" message references from documentation - simplified response structure

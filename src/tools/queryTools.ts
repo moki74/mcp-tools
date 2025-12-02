@@ -26,11 +26,16 @@ export class QueryTools {
     params?: any[];
     hints?: QueryHints;
     useCache?: boolean;
+    dry_run?: boolean;
   }): Promise<{
     status: string;
     data?: any[];
     error?: string;
     optimizedQuery?: string;
+    dry_run?: boolean;
+    execution_plan?: any;
+    estimated_cost?: string;
+    message?: string;
   }> {
     // Validate input schema
     if (!validateRunQuery(queryParams)) {
@@ -85,6 +90,39 @@ export class QueryTools {
         if (finalQuery !== query) {
           optimizedQuery = finalQuery;
         }
+      }
+
+      // Handle dry_run: return query plan and cost estimate without executing
+      if (queryParams.dry_run) {
+        const explainQuery = `EXPLAIN FORMAT=JSON ${finalQuery}`;
+        const explainResult = await this.db.query<any[]>(
+          explainQuery,
+          paramValidation.sanitizedParams!,
+        );
+        
+        // Try to get cost from JSON format
+        let estimatedCost = "Unknown";
+        let executionPlan = explainResult;
+
+        if (explainResult[0] && explainResult[0].EXPLAIN) {
+          try {
+             const explainJson = JSON.parse(explainResult[0].EXPLAIN);
+             estimatedCost = explainJson.query_block?.cost_info?.query_cost || "Unknown";
+             executionPlan = explainJson;
+          } catch (e) {
+             // Ignore parsing error
+          }
+        }
+
+        return {
+          status: "success",
+          data: [],
+          optimizedQuery,
+          dry_run: true,
+          execution_plan: executionPlan,
+          estimated_cost: estimatedCost,
+          message: "Dry run completed. Query was not executed."
+        };
       }
 
       // Execute the query with sanitized parameters

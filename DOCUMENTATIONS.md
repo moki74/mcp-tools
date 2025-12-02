@@ -71,7 +71,8 @@ schema_management,utilities,transaction_management,stored_procedures,
 views_management,triggers_management,functions_management,index_management,
 constraint_management,table_maintenance,server_management,
 performance_monitoring,cache_management,query_optimization,
-backup_restore,import_export,data_migration,schema_migrations
+backup_restore,import_export,data_migration,schema_migrations,
+analysis
 ```
 
 ### Configuration Examples
@@ -497,6 +498,14 @@ This section provides a comprehensive reference of all 119 available tools organ
 | `validate_migrations` | Validate migrations for issues | `list` |
 | `reset_failed_migration` | Reset failed migration to pending | `ddl` |
 | `generate_migration_from_diff` | Generate migration from table diff | `ddl` |
+
+### AI Context & Analysis Tools
+
+| Tool | Description | Requires |
+|------|-------------|----------|
+| `get_database_summary` | High-level overview (tables, columns, rows) for AI context | `list` |
+| `get_schema_erd` | Generate Mermaid.js ER diagram for visualization | `list` |
+| `get_column_statistics` | Profile data (min, max, nulls, distinct) for analysis | `read` |
 
 ---
 

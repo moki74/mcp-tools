@@ -42,6 +42,57 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: "get_database_summary",
+    description:
+      "Get a high-level summary of the database (tables, columns, row counts) optimized for AI context.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
+  {
+    name: "get_schema_erd",
+    description:
+      "Get a Mermaid.js ER diagram string representing the database schema and relationships.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
+  {
+    name: "get_column_statistics",
+    description:
+      "Get detailed statistics for a specific column (min, max, avg, distinct counts, nulls).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table",
+        },
+        column_name: {
+          type: "string",
+          description: "Name of the column",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name", "column_name"],
+    },
+  },
+  {
     name: "read_table_schema",
     description:
       "Reads the schema of a specified table, including columns, types, keys, and indexes.",
@@ -397,6 +448,11 @@ const TOOLS: Tool[] = [
         useCache: {
           type: "boolean",
           description: "Whether to use query result caching (default: true)",
+        },
+        dry_run: {
+          type: "boolean",
+          description:
+            "If true, returns query plan and estimated cost without executing (Safe Mode)",
         },
       },
       required: ["query"],
