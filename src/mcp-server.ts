@@ -14,6 +14,8 @@ import { MySQLMCP } from "./index.js";
 // Layer 2 (Categories): MCP_CATEGORIES (optional, for fine-grained control)
 const permissions = process.env.MCP_PERMISSIONS || process.env.MCP_CONFIG || "";
 const categories = process.env.MCP_CATEGORIES || "";
+const preset =
+  process.env.MCP_PRESET || process.env.MCP_PERMISSION_PRESET || "";
 
 // Declare the MySQL MCP instance (will be initialized in main())
 let mysqlMCP: MySQLMCP;
@@ -65,6 +67,32 @@ const TOOLS: Tool[] = [
         database: {
           type: "string",
           description: "Optional: specific database name",
+        },
+      },
+    },
+  },
+  {
+    name: "get_schema_rag_context",
+    description:
+      "Return a compact schema-aware context pack (tables, PK/FK, columns, row estimates) optimized for RAG prompts.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+        max_tables: {
+          type: "number",
+          description: "Optional: maximum number of tables to include (default 50, max 200)",
+        },
+        max_columns: {
+          type: "number",
+          description: "Optional: maximum number of columns per table (default 12, max 200)",
+        },
+        include_relationships: {
+          type: "boolean",
+          description: "Whether to include FK relationships section (default: true)",
         },
       },
     },
@@ -2865,7 +2893,7 @@ const TOOLS: Tool[] = [
 const server = new Server(
   {
     name: "mysql-mcp-server",
-    version: "1.4.4",
+    version: "1.12.0",
   },
   {
     capabilities: {
@@ -2913,6 +2941,39 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       case "list_tables":
         result = await mysqlMCP.listTables(
           (args || {}) as { database?: string },
+        );
+        break;
+
+      case "get_database_summary":
+        result = await mysqlMCP.getDatabaseSummary(
+          (args || {}) as { database?: string },
+        );
+        break;
+
+      case "get_schema_erd":
+        result = await mysqlMCP.getSchemaERD(
+          (args || {}) as { database?: string },
+        );
+        break;
+
+      case "get_schema_rag_context":
+        result = await mysqlMCP.getSchemaRagContext(
+          (args || {}) as {
+            database?: string;
+            max_tables?: number;
+            max_columns?: number;
+            include_relationships?: boolean;
+          },
+        );
+        break;
+
+      case "get_column_statistics":
+        result = await mysqlMCP.getColumnStatistics(
+          (args || {}) as {
+            table_name: string;
+            column_name: string;
+            database?: string;
+          },
         );
         break;
 
@@ -3480,19 +3541,22 @@ async function main() {
 
   // Initialize the MySQL MCP instance AFTER transport is connected
   // This ensures the database connection pool is created when the server is ready
-  mysqlMCP = new MySQLMCP(permissions, categories);
+  mysqlMCP = new MySQLMCP(permissions, categories, preset);
 
   // Log the effective filtering configuration to stderr
-  if (permissions && categories) {
-    console.error(`Active permissions (Layer 1): ${permissions}`);
-    console.error(`Active categories (Layer 2): ${categories}`);
-    console.error("Filtering mode: Dual-layer");
-  } else if (permissions) {
-    console.error(`Active permissions: ${permissions}`);
-    console.error("Filtering mode: Single-layer");
-  } else {
-    console.error("Active permissions: all (default)");
+  const accessProfile = mysqlMCP.getAccessProfile();
+  if (accessProfile.preset) {
+    console.error(
+      `Preset: ${accessProfile.preset.name} (${accessProfile.preset.description})`,
+    );
+  } else if (preset) {
+    console.error(`Preset requested but not recognized: ${preset}`);
   }
+  console.error(`Permissions (resolved): ${accessProfile.permissions}`);
+  if (accessProfile.categories) {
+    console.error(`Categories (resolved): ${accessProfile.categories}`);
+  }
+  console.error(`Filtering mode: ${accessProfile.filteringMode}`);
 
   // Log to stderr (not stdout, which is used for MCP protocol)
   console.error("MySQL MCP Server running on stdio");

@@ -46,11 +46,11 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 - [AI Agent Configuration](#-ai-agent-configuration)
   - [Standard JSON Config](#standard-json-configuration)
   - [OpenAI Codex (TOML)](#openai-codex-cli--vs-code-extension)
-  - [Zed IDE](#zed-ide)
+- [Zed IDE](#zed-ide)
   - [Environment Variables](#environment-variables-configuration)
   - [Local Development](#local-path-configuration)
 - [Permission System](#-permission-system)
-- [Available Tools (119 total)](#-available-tools)
+- [Available Tools (120 total)](#-available-tools)
 - [Documentation](#-detailed-documentation)
 - [Comparison: MCP vs Manual Access](#-mysql-mcp-vs-manual-database-access)
 - [License](#-license)
@@ -63,8 +63,10 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 |----------|-------------|
 | **Full MCP Support** | Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent |
 | **Security First** | Parameterized queries, SQL injection protection, permission-based access control |
-| **119 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
-| **🆕 Category Filtering** | 22 documentation categories for intuitive, fine-grained access control (backward compatible with 10 legacy categories) |
+| **120 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
+| **Adaptive Presets** | Built-in ReadOnly/Analyst/DBA Lite permission bundles with override merging |
+| **Schema-Aware RAG Pack** | Compact schema snapshots (tables, PK/FK, row estimates) tailored for embeddings-friendly prompts |
+| **Category Filtering** | 22 documentation categories for intuitive, fine-grained access control (backward compatible with 10 legacy categories) |
 | **Transaction Support** | Full ACID transaction management (BEGIN, COMMIT, ROLLBACK) |
 | **Schema Migrations** | Version control for database schema with up/down migrations |
 | **Dual Mode** | Run as MCP server OR as REST API |
@@ -372,6 +374,31 @@ Alternative approach using environment variables instead of connection string:
 }
 ```
 
+**Option 3: Adaptive Preset (Merges with Overrides)**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@berthojoris/mysql-mcp"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "your_password",
+        "DB_NAME": "your_database",
+        "MCP_PRESET": "readonly",
+        "MCP_PERMISSIONS": "list,read,utility",
+        "MCP_CATEGORIES": "performance_monitoring"
+      }
+    }
+  }
+}
+```
+
+Add `MCP_PRESET` for the base bundle and optionally layer on `MCP_PERMISSIONS` / `MCP_CATEGORIES` for project-specific overrides.
+
 ---
 
 ### Local Path Configuration
@@ -446,7 +473,7 @@ Control database access with a **dual-layer filtering system** that provides bot
 
 **Filtering Logic**: `Tool enabled = (Has Permission) AND (Has Category OR No categories specified)`
 
-### 🆕 Documentation Categories (Recommended)
+### Documentation Categories (Recommended)
 
 Use these categories for fine-grained control that matches the tool organization:
 
@@ -504,7 +531,7 @@ Use these categories for fine-grained control that matches the tool organization
 | **Application Backend** | `database_discovery,crud_operations,bulk_operations,custom_queries,transaction_management` | Full app support |
 | **Development & Testing** | `database_discovery,crud_operations,bulk_operations,custom_queries,schema_management,utilities,transaction_management` | Development access |
 | **DBA & DevOps** | `database_discovery,schema_management,table_maintenance,backup_restore,schema_migrations,performance_monitoring` | Admin tasks |
-| **Full Access** | *(leave empty)* | All 119 tools enabled |
+| **Full Access** | *(leave empty)* | All 120 tools enabled |
 
 #### Using Legacy Categories (Backward Compatible)
 
@@ -516,6 +543,24 @@ Use these categories for fine-grained control that matches the tool organization
 | **With Transactions** | `list,read,create,update,delete,transaction,utility` | CRUD + ACID |
 | **Development** | `list,read,create,update,delete,execute,ddl,transaction,utility` | Full access |
 | **DBA Tasks** | `list,ddl,utility` | Schema management only |
+
+### Adaptive Permission Presets (ReadOnly/Analyst/DBA Lite)
+
+Use presets to bootstrap safe defaults. They **merge** with any explicit permissions/categories you pass via CLI args or env vars.
+
+| Preset | Permissions | Categories | Ideal for |
+|--------|-------------|------------|-----------|
+| `readonly` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis` | Safe read-only data access + exports |
+| `analyst` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis,query_optimization,cache_management,server_management` | Analytics with plan insights and cache/perf visibility |
+| `dba-lite` | `list,read,utility,ddl,transaction,procedure` | `database_discovery,custom_queries,utilities,server_management,schema_management,table_maintenance,index_management,constraint_management,backup_restore,schema_migrations,performance_monitoring,views_management,triggers_management,functions_management,stored_procedures` | Admin-lite schema care, migrations, and maintenance |
+
+**Usage**
+
+- CLI: `mcp-mysql mysql://user:pass@host:3306/db --preset readonly`
+- CLI with overrides: `mcp-mysql mysql://... --preset analyst "list,read,utility" "performance_monitoring"`
+- Env: `MCP_PRESET=analyst` (or `MCP_PERMISSION_PRESET=analyst`) plus optional `MCP_PERMISSIONS` / `MCP_CATEGORIES` to extend
+
+If an unknown preset is requested without overrides, the server falls back to a safe read-only baseline instead of enabling everything.
 
 ### Per-Project Configuration
 
@@ -607,11 +652,11 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 
 ## Available Tools
 
-The MCP server provides **119 powerful tools** organized into categories:
+The MCP server provides **120 powerful tools** organized into categories:
 
 ### Quick Reference
 
-**119 Tools Available** - Organized into 22 categories
+**120 Tools Available** - Organized into 22 categories
 
 | Category | Count | Key Tools |
 |----------|-------|-----------|
@@ -637,7 +682,7 @@ The MCP server provides **119 powerful tools** organized into categories:
 | Data Migration | 5 | `copy_table_data`, `sync_table_data` |
 | Schema Migrations | 9 | `create_migration`, `apply_migrations` |
 | Utilities | 4 | `test_connection`, `export_table_to_csv` |
-| Analysis | 3 | `get_column_statistics`, `get_database_summary`, `get_schema_erd` |
+| Analysis | 4 | `get_column_statistics`, `get_database_summary`, `get_schema_erd`, `get_schema_rag_context` |
 
 > **📖 For detailed tool descriptions, parameters, and examples, see [DOCUMENTATIONS.md](DOCUMENTATIONS.md#🔧-complete-tools-reference)**
 

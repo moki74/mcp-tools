@@ -50,6 +50,85 @@ export enum DocCategory {
 }
 
 /**
+ * Permission preset bundles for faster, safer configuration
+ */
+export interface PermissionPreset {
+  name: string;
+  description: string;
+  permissions: ToolCategory[];
+  categories: DocCategory[];
+}
+
+const normalizePresetName = (value?: string): string =>
+  (value || "").toLowerCase().replace(/[\s_-]/g, "");
+
+const permissionPresets: Record<string, PermissionPreset> = {
+  readonly: {
+    name: "readonly",
+    description:
+      "Safe read-only profile with discovery, querying, exports, and diagnostics",
+    permissions: [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY],
+    categories: [
+      DocCategory.DATABASE_DISCOVERY,
+      DocCategory.CRUD_OPERATIONS,
+      DocCategory.CUSTOM_QUERIES,
+      DocCategory.UTILITIES,
+      DocCategory.IMPORT_EXPORT,
+      DocCategory.PERFORMANCE_MONITORING,
+      DocCategory.ANALYSIS,
+    ],
+  },
+  analyst: {
+    name: "analyst",
+    description:
+      "Exploratory analytics profile with query insights and safe exports",
+    permissions: [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY],
+    categories: [
+      DocCategory.DATABASE_DISCOVERY,
+      DocCategory.CRUD_OPERATIONS,
+      DocCategory.CUSTOM_QUERIES,
+      DocCategory.UTILITIES,
+      DocCategory.IMPORT_EXPORT,
+      DocCategory.PERFORMANCE_MONITORING,
+      DocCategory.ANALYSIS,
+      DocCategory.QUERY_OPTIMIZATION,
+      DocCategory.CACHE_MANAGEMENT,
+      DocCategory.SERVER_MANAGEMENT,
+    ],
+  },
+  dbalite: {
+    name: "dba-lite",
+    description:
+      "Admin-lite profile for schema care, migrations, and maintenance",
+    permissions: [
+      ToolCategory.LIST,
+      ToolCategory.READ,
+      ToolCategory.UTILITY,
+      ToolCategory.DDL,
+      ToolCategory.TRANSACTION,
+      ToolCategory.PROCEDURE,
+    ],
+    categories: [
+      DocCategory.DATABASE_DISCOVERY,
+      DocCategory.CUSTOM_QUERIES,
+      DocCategory.UTILITIES,
+      DocCategory.SERVER_MANAGEMENT,
+      DocCategory.SCHEMA_MANAGEMENT,
+      DocCategory.TABLE_MAINTENANCE,
+      DocCategory.INDEX_MANAGEMENT,
+      DocCategory.CONSTRAINT_MANAGEMENT,
+      DocCategory.BACKUP_RESTORE,
+      DocCategory.SCHEMA_MIGRATIONS,
+      DocCategory.PERFORMANCE_MONITORING,
+      DocCategory.VIEWS_MANAGEMENT,
+      DocCategory.TRIGGERS_MANAGEMENT,
+      DocCategory.FUNCTIONS_MANAGEMENT,
+      DocCategory.STORED_PROCEDURES,
+    ],
+  },
+};
+
+/**
  * Map of tool names to their legacy categories
  */
 export const toolCategoryMap: Record<string, ToolCategory> = {
@@ -60,6 +139,7 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   // Analysis tools (added here to group with database tools)
   getDatabaseSummary: ToolCategory.LIST,
   getSchemaERD: ToolCategory.LIST,
+  getSchemaRagContext: ToolCategory.LIST,
 
   // CRUD tools
   createRecord: ToolCategory.CREATE,
@@ -396,6 +476,7 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   getDatabaseSummary: DocCategory.ANALYSIS,
   getSchemaERD: DocCategory.ANALYSIS,
   getColumnStatistics: DocCategory.ANALYSIS,
+  getSchemaRagContext: DocCategory.ANALYSIS,
 };
 
 /**
@@ -470,23 +551,91 @@ export class FeatureConfig {
   private originalPermissionsString: string;
   private originalCategoriesString: string;
   private useDualLayer: boolean; // Flag to determine if using dual-layer filtering
+  private activePreset?: PermissionPreset;
+  private presetName?: string;
 
-  constructor(permissionsStr?: string, categoriesStr?: string) {
+  constructor(
+    permissionsStr?: string,
+    categoriesStr?: string,
+    presetName?: string,
+  ) {
+    const presetInput =
+      presetName ||
+      process.env.MCP_PERMISSION_PRESET ||
+      process.env.MCP_PRESET ||
+      "";
+
+    this.activePreset = this.resolvePreset(presetInput);
+    this.presetName = this.activePreset?.name;
+    const presetRequested = !!presetInput.trim();
+
     // Support both old single-parameter and new dual-parameter signatures
-    const permissions =
+    const permissionsInput =
       permissionsStr ||
       process.env.MCP_PERMISSIONS ||
       process.env.MCP_CONFIG ||
       "";
-    const categories = categoriesStr || process.env.MCP_CATEGORIES || "";
+    const categoriesInput = categoriesStr || process.env.MCP_CATEGORIES || "";
 
-    this.originalPermissionsString = permissions;
-    this.originalCategoriesString = categories;
-    this.useDualLayer = !!categories.trim();
+    // Use preset values when available, otherwise fall back to user input
+    // If an unknown preset is requested without explicit permissions/categories,
+    // default to a safe read-only baseline rather than enabling everything.
+    const basePermissions = this.activePreset
+      ? this.activePreset.permissions.join(",")
+      : presetRequested && !permissionsInput
+        ? [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY].join(",")
+        : "";
+    const baseCategories = this.activePreset
+      ? this.activePreset.categories.join(",")
+      : presetRequested && !categoriesInput
+        ? [
+            DocCategory.DATABASE_DISCOVERY,
+            DocCategory.CRUD_OPERATIONS,
+            DocCategory.CUSTOM_QUERIES,
+            DocCategory.UTILITIES,
+          ].join(",")
+        : "";
 
-    const parsed = this.parseConfig(permissions, categories);
+    if (presetRequested && !this.activePreset) {
+      console.warn(
+        `Preset '${presetInput}' not recognized. Falling back to safe read-only defaults.`,
+      );
+    }
+
+    const mergedPermissions = this.mergeConfigStrings(
+      basePermissions,
+      permissionsInput,
+    );
+    const mergedCategories = this.mergeConfigStrings(
+      baseCategories,
+      categoriesInput,
+    );
+
+    this.originalPermissionsString = mergedPermissions;
+    this.originalCategoriesString = mergedCategories;
+    this.useDualLayer = !!mergedCategories.trim();
+
+    const parsed = this.parseConfig(mergedPermissions, mergedCategories);
     this.enabledLegacyCategories = parsed.legacy;
     this.enabledDocCategories = parsed.doc;
+  }
+
+  /**
+   * Normalize and merge preset + user-supplied configuration lists
+   */
+  private mergeConfigStrings(base: string, override: string): string {
+    const items = [...(base || "").split(","), ...(override || "").split(",")]
+      .map((c) => c.trim().toLowerCase())
+      .filter(Boolean);
+    return Array.from(new Set(items)).join(",");
+  }
+
+  /**
+   * Resolve a preset name to its configuration
+   */
+  private resolvePreset(name?: string): PermissionPreset | undefined {
+    const normalized = normalizePresetName(name);
+    return normalized ? permissionPresets[normalized] : undefined;
   }
 
   /**
@@ -541,7 +690,7 @@ export class FeatureConfig {
       });
     }
 
-    return {
+   return {
       legacy: legacySet,
       doc: docSet,
     };
@@ -550,11 +699,55 @@ export class FeatureConfig {
   /**
    * Update configuration at runtime
    */
-  setConfig(permissionsStr: string, categoriesStr?: string): void {
-    this.originalPermissionsString = permissionsStr;
-    this.originalCategoriesString = categoriesStr || "";
-    this.useDualLayer = !!(categoriesStr && categoriesStr.trim());
-    const parsed = this.parseConfig(permissionsStr, categoriesStr || "");
+  setConfig(
+    permissionsStr: string,
+    categoriesStr?: string,
+    presetName?: string,
+  ): void {
+    const presetRequested =
+      presetName !== undefined ? !!presetName.trim() : !!this.presetName;
+
+    this.activePreset =
+      presetName === ""
+        ? undefined
+        : this.resolvePreset(presetName || this.presetName);
+    this.presetName = this.activePreset?.name;
+
+    const basePermissions = this.activePreset
+      ? this.activePreset.permissions.join(",")
+      : presetRequested && !permissionsStr
+        ? [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY].join(",")
+        : "";
+    const baseCategories = this.activePreset
+      ? this.activePreset.categories.join(",")
+      : presetRequested && !categoriesStr
+        ? [
+            DocCategory.DATABASE_DISCOVERY,
+            DocCategory.CRUD_OPERATIONS,
+            DocCategory.CUSTOM_QUERIES,
+            DocCategory.UTILITIES,
+          ].join(",")
+        : "";
+
+    if (presetRequested && !this.activePreset) {
+      console.warn(
+        `Preset '${presetName}' not recognized. Falling back to safe read-only defaults.`,
+      );
+    }
+
+    const mergedPermissions = this.mergeConfigStrings(
+      basePermissions,
+      permissionsStr,
+    );
+    const mergedCategories = this.mergeConfigStrings(
+      baseCategories,
+      categoriesStr || "",
+    );
+
+    this.originalPermissionsString = mergedPermissions;
+    this.originalCategoriesString = mergedCategories;
+    this.useDualLayer = !!(mergedCategories && mergedCategories.trim());
+    const parsed = this.parseConfig(mergedPermissions, mergedCategories || "");
     this.enabledLegacyCategories = parsed.legacy;
     this.enabledDocCategories = parsed.doc;
   }
@@ -710,6 +903,41 @@ export class FeatureConfig {
    */
   isUsingDualLayer(): boolean {
     return this.useDualLayer;
+  }
+
+  /**
+   * Get the active preset (if any)
+   */
+  getActivePreset(): PermissionPreset | undefined {
+    return this.activePreset;
+  }
+
+  /**
+   * Snapshot of the resolved configuration for logging/telemetry
+   */
+  getConfigSnapshot(): {
+    preset?: { name: string; description: string };
+    permissions: string;
+    categories: string;
+    filteringMode: string;
+    enabledLegacy: ToolCategory[];
+    enabledDoc: DocCategory[];
+  } {
+    return {
+      preset: this.activePreset
+        ? {
+            name: this.activePreset.name,
+            description: this.activePreset.description,
+          }
+        : undefined,
+      permissions: this.originalPermissionsString || "all",
+      categories:
+        this.originalCategoriesString ||
+        (this.useDualLayer ? "" : "derived from permissions"),
+      filteringMode: this.getFilteringMode(),
+      enabledLegacy: this.getEnabledCategories(),
+      enabledDoc: this.getEnabledDocCategories(),
+    };
   }
 
   /**

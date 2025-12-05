@@ -6,8 +6,8 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 ## Table of Contents
 
-1. [🆕 Category Filtering System](#🆕-category-filtering-system) - NEW!
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 119 tools organized by category
+1. [Category Filtering System](#🆕-category-filtering-system) - NEW!
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 120 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -37,7 +37,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 ---
 
-## 🆕 Dual-Layer Filtering System
+## Dual-Layer Filtering System
 
 Control which database operations are available to AI using a **dual-layer filtering system**:
 
@@ -195,6 +195,24 @@ Data operations without schema changes:
 
 **Enabled**: Full data CRUD + bulk ops + transactions - NO schema changes (no `ddl` permission).
 
+### Adaptive Permission Presets (ReadOnly/Analyst/DBA Lite)
+
+Preset bundles provide safe starting points and **merge** with any explicit permissions/categories you pass (CLI args or env vars).
+
+| Preset | Permissions | Categories | Intended Use |
+|--------|-------------|------------|--------------|
+| `readonly` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis` | Safe read-only access, exports, and diagnostics |
+| `analyst` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis,query_optimization,cache_management,server_management` | Exploration with EXPLAIN, cache, and performance visibility |
+| `dba-lite` | `list,read,utility,ddl,transaction,procedure` | `database_discovery,custom_queries,utilities,server_management,schema_management,table_maintenance,index_management,constraint_management,backup_restore,schema_migrations,performance_monitoring,views_management,triggers_management,functions_management,stored_procedures` | Admin-lite schema care, maintenance, and migrations |
+
+**Usage**
+
+- CLI: `mcp-mysql mysql://user:pass@host:3306/db --preset readonly`
+- CLI with overrides: `mcp-mysql mysql://... --preset analyst "list,read,utility" "performance_monitoring"`
+- Env: `MCP_PRESET=analyst` (or `MCP_PERMISSION_PRESET=analyst`) and optionally extend with `MCP_PERMISSIONS` / `MCP_CATEGORIES`
+
+If a preset name is not recognized and no overrides are provided, the server falls back to a safe read-only baseline instead of enabling everything.
+
 ### Permissions Reference (Layer 1)
 
 | Permission | Operations Allowed | Example Tools |
@@ -223,7 +241,7 @@ The system uses both arguments to determine access:
 - **3rd argument**: Categories (Layer 2, optional) - comma-separated documentation categories
 
 **Decision logic**:
-1. If no arguments: All 119 tools enabled
+1. If no arguments: All 120 tools enabled
 2. If only 2nd argument (permissions): Tools enabled if they match permission
 3. If both arguments: Tools enabled if they match BOTH permission AND category
 
@@ -268,7 +286,7 @@ Add 'bulk_operations' to the categories argument.
 
 ## 🔧 Complete Tools Reference
 
-This section provides a comprehensive reference of all 119 available tools organized by category.
+This section provides a comprehensive reference of all 120 available tools organized by category.
 
 ### Database Discovery
 
@@ -505,7 +523,14 @@ This section provides a comprehensive reference of all 119 available tools organ
 |------|-------------|----------|
 | `get_database_summary` | High-level overview (tables, columns, rows) for AI context | `list` |
 | `get_schema_erd` | Generate Mermaid.js ER diagram for visualization | `list` |
+| `get_schema_rag_context` | Condensed schema snapshot (tables, PK/FK, row estimates) for RAG prompts | `list` |
 | `get_column_statistics` | Profile data (min, max, nulls, distinct) for analysis | `read` |
+
+#### Schema-Aware RAG Context Pack
+- Purpose-built for embeddings: returns a `context_text` block plus structured `tables` and `relationships` so agents can self-orient without pulling a full ERD.
+- Tunable size: `max_tables` (default 50, max 200) and `max_columns` (default 12) to control output length; set `include_relationships` to `false` to omit FK lines.
+- Safety: respects the connected database only—cannot introspect other schemas—and notes when tables/columns are truncated.
+- Output includes per-table PKs, FK targets, nullable flags, and approximate row counts from `INFORMATION_SCHEMA.TABLES` (InnoDB estimates).
 
 ---
 
@@ -4027,16 +4052,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **Data export/import utilities** (CSV, JSON, SQL dumps) - **COMPLETED!**
 - ✅ **Data migration utilities** - **COMPLETED!**
 - ✅ **Schema versioning and migrations** - **COMPLETED!**
-- [ ] **Performance monitoring and metrics**
-- [ ] **Connection pool monitoring**
-- [ ] **Audit logging and compliance**
-
-### Database Adapters
-- [ ] PostgreSQL adapter
-- [ ] MongoDB adapter
-- [ ] SQLite adapter
-- [ ] Oracle Database adapter
-- [ ] SQL Server adapter
 
 ### Recommended Implementation Order
 
@@ -4050,19 +4065,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **Database backup and restore tools** - Essential for production data safety - **COMPLETED!**
 - ✅ **Data migration utilities** - Move data between databases and environments - **COMPLETED!**
 - ✅ **Enhanced export/import** - Support for JSON, SQL dump formats - **COMPLETED!**
-- [ ] **Query history & analytics** - Track and analyze database usage patterns
 
 #### **Phase 3: Enterprise Features** 🏢
-- [ ] **Audit logging and compliance** - Track all database operations for security
 - ✅ **Schema versioning and migrations** - Version control for database schema changes - **COMPLETED!**
 - ✅ **Query optimization** - Automatic query analysis and optimization suggestions - **COMPLETED!**
-- [ ] **Advanced security features** - Enhanced access control and monitoring
-
-#### **Phase 4: Multi-Database Support** 🌐
-- [ ] **PostgreSQL adapter** - Extend support to PostgreSQL databases
-- [ ] **MongoDB adapter** - Add NoSQL document database support
-- [ ] **SQLite adapter** - Support for lightweight embedded databases
-- [ ] **Database-agnostic operations** - Unified API across different database types
 
 #### **Implementation Priority Matrix**
 
@@ -4082,8 +4088,21 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Data Migration | High | High | 12 | ✅ COMPLETED |
 | Schema Versioning | Medium | Medium | 13 | ✅ COMPLETED |
 | Performance Monitoring | High | Medium | 14 | ✅ COMPLETED |
-| PostgreSQL Adapter | High | High | 15 | Pending |
-| Audit Logging | Medium | Low | 16 | Pending |
+
+#### **Proposed Enhancements (AI Productivity)**
+
+| Feature | Impact | Effort | Priority | Status |
+|---------|--------|--------|----------|--------|
+| Adaptive Permission Presets (ReadOnly/Analyst/DBA Lite) | High | Medium | 1 | ✅ Completed |
+| Schema-Aware RAG Context Pack | High | Medium | 2 | ✅ Completed |
+| Guided Query Builder/Fixer (Intent → Safe SQL + EXPLAIN Repair) | High | Medium | 3 | Planned |
+| Drift & Migration Assistant (Schema diff + risk summary) | High | High | 4 | Planned |
+| Safety Sandbox Mode (runQuery dry-run/EXPLAIN-only) | Medium | Low | 5 | Planned |
+| Anomaly & Slow-Query Watcher | Medium | Medium | 6 | Planned |
+| Data Masking Profiles for Responses | Medium | Medium | 7 | Planned |
+| Workflow Macros (e.g., safe_export_table) | Medium | Low | 8 | Planned |
+| Agent-Facing Changelog Feed | Medium | Low | 9 | Planned |
+| Connection Profiles (dev/stage/prod with allow/deny) | High | Low | 10 | Planned |
 
 ---
 

@@ -10,15 +10,54 @@ const path = require("path");
 const { spawn } = require("child_process");
 require("dotenv").config();
 
-// Get MySQL connection string, permissions, and optional categories from command line arguments
-const mysqlUrl = process.argv[2];
-const permissions = process.argv[3]; // Optional: comma-separated list of permissions (legacy categories)
-const categories = process.argv[4]; // Optional: comma-separated list of documentation categories
+// Get MySQL connection string, permissions, categories, and optional preset
+const args = process.argv.slice(2);
+const mysqlUrl = args.shift();
+
+let permissions;
+let categories;
+let preset;
+
+for (let i = 0; i < args.length; i++) {
+  const arg = args[i];
+  const normalized = (arg || "").toLowerCase();
+
+  if (normalized === "--preset") {
+    preset = args[i + 1];
+    i++;
+    continue;
+  }
+
+  if (normalized.startsWith("--preset=")) {
+    preset = arg.split("=")[1];
+    continue;
+  }
+
+  if (normalized.startsWith("preset:")) {
+    preset = arg.split(":")[1];
+    continue;
+  }
+
+  if (["readonly", "analyst", "dba-lite", "dba_lite", "dba lite"].includes(normalized)) {
+    preset = arg;
+    continue;
+  }
+
+  if (permissions === undefined) {
+    permissions = arg;
+    continue;
+  }
+
+  if (categories === undefined) {
+    categories = arg;
+    continue;
+  }
+}
 
 if (!mysqlUrl) {
   console.error("Error: MySQL connection URL is required");
   console.error(
-    "Usage: mcp-mysql mysql://user:password@host:port/dbname [permissions] [categories]",
+    "Usage: mcp-mysql mysql://user:password@host:port/dbname [permissions] [categories] [--preset <name>]",
   );
   console.error("");
   console.error("Examples:");
@@ -35,6 +74,14 @@ if (!mysqlUrl) {
   );
   console.error(
     '  mcp-mysql mysql://root:pass@localhost:3306/mydb "list,read,utility" "database_discovery,performance_monitoring"',
+  );
+  console.error("");
+  console.error("  # Adaptive presets (auto-merge with overrides)");
+  console.error(
+    '  mcp-mysql mysql://root:pass@localhost:3306/mydb --preset readonly',
+  );
+  console.error(
+    '  mcp-mysql mysql://root:pass@localhost:3306/mydb --preset analyst "performance_monitoring"',
   );
   console.error("");
   console.error("Permissions (Layer 1 - Broad Control):");
@@ -70,6 +117,12 @@ if (!mysqlUrl) {
     "  - If permissions + categories: Only tools matching BOTH layers enabled",
   );
   console.error("  - If nothing specified: All 119 tools enabled");
+  console.error("");
+  console.error("Presets:");
+  console.error("  readonly, analyst, dba-lite");
+  console.error(
+    "  Presets merge with provided permissions/categories so you can add project-specific overrides.",
+  );
   process.exit(1);
 }
 
@@ -115,7 +168,7 @@ const dbMessage = database
   ? `${connectionConfig.host}:${connectionConfig.port}/${database}`
   : `${connectionConfig.host}:${connectionConfig.port} (no specific database selected)`;
 
-// Set permissions/categories as environment variables if provided
+// Set permissions/categories/preset as environment variables if provided
 if (permissions) {
   process.env.MCP_PERMISSIONS = permissions;
   console.error(`Permissions (Layer 1): ${permissions}`);
@@ -126,12 +179,27 @@ if (categories) {
   console.error(`Categories (Layer 2): ${categories}`);
 }
 
-if (!permissions && !categories) {
+if (preset) {
+  process.env.MCP_PRESET = preset;
+  console.error(`Permission preset: ${preset}`);
+}
+
+if (!permissions && !categories && !preset) {
   console.error("Access Control: All tools enabled (no filtering)");
-} else if (permissions && !categories) {
-  console.error("Filtering Mode: Permission-based only");
+} else if (preset && !permissions && !categories) {
+  console.error("Filtering Mode: Preset-based (auto permissions + categories)");
 } else if (permissions && categories) {
-  console.error("Filtering Mode: Dual-layer (Permissions + Categories)");
+  console.error(
+    `Filtering Mode: Dual-layer (Permissions + Categories${preset ? ", preset merged" : ""})`,
+  );
+} else if (permissions && !categories) {
+  console.error(
+    `Filtering Mode: Permission-based only${preset ? " (preset merged)" : ""}`,
+  );
+} else if (!permissions && categories) {
+  console.error(
+    `Filtering Mode: Category-only${preset ? " (preset merged)" : ""}`,
+  );
 }
 
 // Log to stderr (not stdout, which is used for MCP protocol)

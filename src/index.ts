@@ -50,8 +50,16 @@ export class MySQLMCP {
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
-  constructor(permissionsConfig?: string, categoriesConfig?: string) {
-    this.featureConfig = new FeatureConfig(permissionsConfig, categoriesConfig);
+  constructor(
+    permissionsConfig?: string,
+    categoriesConfig?: string,
+    presetName?: string,
+  ) {
+    this.featureConfig = new FeatureConfig(
+      permissionsConfig,
+      categoriesConfig,
+      presetName,
+    );
     this.security = new SecurityLayer(this.featureConfig);
     this.dbTools = new DatabaseTools();
     this.crudTools = new CrudTools(this.security);
@@ -220,6 +228,19 @@ export class MySQLMCP {
       return { status: "error", error: check.error };
     }
     return await this.analysisTools.getColumnStatistics(params);
+  }
+
+  async getSchemaRagContext(params: {
+    database?: string;
+    max_tables?: number;
+    max_columns?: number;
+    include_relationships?: boolean;
+  }) {
+    const check = this.checkToolEnabled("getSchemaRagContext");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.analysisTools.getSchemaRagContext(params);
   }
 
   // DDL Tools
@@ -767,11 +788,16 @@ export class MySQLMCP {
 
   // Get feature configuration status
   getFeatureStatus() {
+    const snapshot = this.featureConfig.getConfigSnapshot();
     return {
       status: "success",
       data: {
+        config: snapshot,
+        preset: this.featureConfig.getActivePreset(),
+        filteringMode: this.featureConfig.getFilteringMode(),
         enabledCategories: this.featureConfig.getEnabledCategories(),
         categoryStatus: this.featureConfig.getCategoryStatus(),
+        docCategoryStatus: this.featureConfig.getDocCategoryStatus(),
       },
     };
   }
@@ -783,6 +809,13 @@ export class MySQLMCP {
    */
   isToolEnabled(toolName: string): boolean {
     return this.featureConfig.isToolEnabled(toolName);
+  }
+
+  /**
+   * Expose resolved access profile (preset + merged permissions/categories)
+   */
+  getAccessProfile() {
+    return this.featureConfig.getConfigSnapshot();
   }
 
   /**

@@ -5,6 +5,17 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2025-12-05
+
+### Added
+- Schema-Aware RAG Context Pack via `get_schema_rag_context`, delivering compact table/column/PK/FK snapshots with row estimates for embeddings-friendly prompts.
+
+### Fixed
+- Exposed analysis tools (`get_database_summary`, `get_schema_erd`, `get_column_statistics`) and the new RAG context pack through MCP tool registration and routing.
+
+### Changed
+- Updated documentation and tool counts to 120, reflecting the new analysis capability and refreshed README guidance.
+
 ## [1.10.5] - 2025-12-02
 
 ### Changed
@@ -474,6 +485,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Direct access to `mysql`, `performance_schema`, `sys` databases
   - `USER` / `PASSWORD` manipulation
 
+## [1.11.0] - 2025-12-05
+
+### Added
+- Adaptive permission presets (`readonly`, `analyst`, `dba-lite`) with mergeable overrides
+- CLI `--preset` flag and `MCP_PRESET`/`MCP_PERMISSION_PRESET` env support with resolved-config logging
+
+### Changed
+- Safe fallback to read-only defaults when an unknown preset is requested without overrides
+- Feature status endpoint now exposes preset-aware configuration snapshots for easier debugging
+
 ## [1.4.3] - 2025-01-06
 
 ### Added
@@ -519,6 +540,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
+- **1.11.0** - Adaptive permission presets with CLI/env support and preset-aware logging
 - **1.9.0** - Schema Versioning & Migrations (9 new tools), MCP integration for 12 AI tools
 - **1.8.0** - Data Migration Tools
 - **1.7.0** - Database Backup/Restore, Data Import/Export
