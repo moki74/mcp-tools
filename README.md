@@ -50,7 +50,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
   - [Environment Variables](#environment-variables-configuration)
   - [Local Development](#local-path-configuration)
 - [Permission System](#-permission-system)
-- [Available Tools (120 total)](#-available-tools)
+- [Available Tools (124 total)](#-available-tools)
 - [Documentation](#-detailed-documentation)
 - [Comparison: MCP vs Manual Access](#-mysql-mcp-vs-manual-database-access)
 - [License](#-license)
@@ -63,7 +63,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 |----------|-------------|
 | **Full MCP Support** | Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent |
 | **Security First** | Parameterized queries, SQL injection protection, permission-based access control |
-| **121 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
+| **124 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
 | **Adaptive Presets** | Built-in ReadOnly/Analyst/DBA Lite permission bundles with override merging |
 | **Schema-Aware RAG Pack** | Compact schema snapshots (tables, PK/FK, row estimates) tailored for embeddings-friendly prompts |
 | **Category Filtering** | 22 documentation categories for intuitive, fine-grained access control (backward compatible with 10 legacy categories) |
@@ -496,12 +496,12 @@ Use these categories for fine-grained control that matches the tool organization
 | `server_management` | 9 | Process list, explain queries, server info |
 | `performance_monitoring` | 10 | Metrics, slow queries, health checks |
 | `cache_management` | 5 | Query cache stats and configuration |
-| `query_optimization` | 2 | Analyze queries, get optimization hints |
+| `query_optimization` | 3 | Analyze queries, get optimization hints |
 | `backup_restore` | 5 | Backup/restore database and tables |
 | `import_export` | 5 | Import/export JSON, CSV, SQL |
 | `data_migration` | 5 | Copy, move, clone, sync table data |
 | `schema_migrations` | 9 | Version control for database schema |
-| `analysis` | 3 | AI context optimization and data analysis |
+| `analysis` | 4 | AI context optimization and data analysis |
 
 ### Legacy Categories (Backward Compatible)
 
@@ -531,7 +531,7 @@ Use these categories for fine-grained control that matches the tool organization
 | **Application Backend** | `database_discovery,crud_operations,bulk_operations,custom_queries,transaction_management` | Full app support |
 | **Development & Testing** | `database_discovery,crud_operations,bulk_operations,custom_queries,schema_management,utilities,transaction_management` | Development access |
 | **DBA & DevOps** | `database_discovery,schema_management,table_maintenance,backup_restore,schema_migrations,performance_monitoring` | Admin tasks |
-| **Full Access** | *(leave empty)* | All 120 tools enabled |
+| **Full Access** | *(leave empty)* | All 124 tools enabled |
 
 #### Using Legacy Categories (Backward Compatible)
 
@@ -652,11 +652,11 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 
 ## Available Tools
 
-The MCP server provides **120 powerful tools** organized into categories:
+The MCP server provides **124 powerful tools** organized into categories:
 
 ### Quick Reference
 
-**121 Tools Available** - Organized into 22 categories
+**124 Tools Available** - Organized into 22 categories
 
 | Category | Count | Key Tools |
 |----------|-------|-----------|

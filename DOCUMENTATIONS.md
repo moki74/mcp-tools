@@ -7,7 +7,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Category Filtering System](#🆕-category-filtering-system) - NEW!
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 120 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 124 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
