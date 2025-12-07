@@ -29,11 +29,12 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 21. [Security Features](#🔒-security-features)
 22. [Query Result Caching](#💾-query-result-caching)
 23. [Query Optimization Hints](#🎯-query-optimization-hints)
-24. [Bulk Operations](#🚀-bulk-operations)
-25. [OpenAI Codex Integration](#🤖-openai-codex-integration)
-26. [Troubleshooting](#🛠️-troubleshooting)
-27. [License](#📄-license)
-28. [Roadmap](#🗺️-roadmap)
+24. [Guided Query Builder/Fixer](#🤖-guided-query-builderfixer)
+25. [Bulk Operations](#🚀-bulk-operations)
+26. [OpenAI Codex Integration](#🤖-openai-codex-integration)
+27. [Troubleshooting](#🛠️-troubleshooting)
+28. [License](#📄-license)
+29. [Roadmap](#🗺️-roadmap)
 
 ---
 
@@ -3639,6 +3640,50 @@ Available goals:
 
 ---
 
+---
+
+## 🤖 Guided Query Builder/Fixer
+
+The `repair_query` tool acts as an AI-powered assistant for SQL query optimization and troubleshooting.
+
+### Features
+
+- **Query Analysis**: Uses `EXPLAIN` to understand query execution plans.
+- **Auto-Fixing**: Identifying missing indexes, inefficient scans, and syntax errors.
+- **Heuristic suggestions**: Provides actionable advice (e.g. "Add index on column X", "Add LIMIT clause").
+
+### Usage Example
+
+**Request:**
+```json
+{
+  "tool": "repair_query",
+  "arguments": {
+    "query": "SELECT * FROM users WHERE email = 'test@example.com'",
+    "error_message": "Optional error message if query failed"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "analysis": {
+    "complexity": "HIGH",
+    "issues": ["Full Table Scan on table 'users'"],
+    "suggestions": ["Consider adding an index on table 'users' for the columns used in WHERE clause."]
+  },
+  "fixed_query": "SELECT * FROM users WHERE email = 'test@example.com'",
+  "suggestions": [
+    "Consider adding an index on table 'users' for the columns used in WHERE clause.",
+    "Consider adding 'LIMIT 100' to prevent massive data transfer."
+  ]
+}
+```
+
+---
+
 ## 🚀 Bulk Operations
 
 The MySQL MCP server includes powerful bulk operation tools designed for high-performance data processing. These tools are optimized for handling large datasets efficiently.
@@ -4095,10 +4140,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 |---------|--------|--------|----------|--------|
 | Adaptive Permission Presets (ReadOnly/Analyst/DBA Lite) | High | Medium | 1 | ✅ Completed |
 | Schema-Aware RAG Context Pack | High | Medium | 2 | ✅ Completed |
-| Guided Query Builder/Fixer (Intent → Safe SQL + EXPLAIN Repair) | High | Medium | 3 | Planned |
-| Drift & Migration Assistant (Schema diff + risk summary) | High | High | 4 | Planned |
-| Safety Sandbox Mode (runQuery dry-run/EXPLAIN-only) | Medium | Low | 5 | Planned |
-| Anomaly & Slow-Query Watcher | Medium | Medium | 6 | Planned |
+| Guided Query Builder/Fixer (Intent → Safe SQL + EXPLAIN Repair) | High | Medium | 3 | ✅ Completed |
+| Drift & Migration Assistant (Schema diff + risk summary) | High | High | 4 | ✅ Completed |
+| Safety Sandbox Mode (runQuery dry-run/EXPLAIN-only) | Medium | Low | 5 | ✅ Completed |
+| Anomaly & Slow-Query Watcher | Medium | Medium | 6 | ✅ Completed |
 | Data Masking Profiles for Responses | Medium | Medium | 7 | Planned |
 | Workflow Macros (e.g., safe_export_table) | Medium | Low | 8 | Planned |
 | Agent-Facing Changelog Feed | Medium | Low | 9 | Planned |

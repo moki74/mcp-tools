@@ -18,6 +18,7 @@ import { MigrationTools } from "./tools/migrationTools";
 import { SchemaVersioningTools } from "./tools/schemaVersioningTools";
 import { PerformanceTools } from "./tools/performanceTools";
 import { AnalysisTools } from "./tools/analysisTools";
+import { AiTools } from "./tools/aiTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -47,6 +48,7 @@ export class MySQLMCP {
   private schemaVersioningTools: SchemaVersioningTools;
   private performanceTools: PerformanceTools;
   private analysisTools: AnalysisTools;
+  private aiTools: AiTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -81,6 +83,7 @@ export class MySQLMCP {
     this.schemaVersioningTools = new SchemaVersioningTools(this.security);
     this.performanceTools = new PerformanceTools(this.security);
     this.analysisTools = new AnalysisTools(this.security);
+    this.aiTools = new AiTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -784,6 +787,15 @@ export class MySQLMCP {
       return { status: "error", error: check.error };
     }
     return await this.schemaVersioningTools.generateMigrationFromDiff(params);
+  }
+
+  // AI Productivity Tools
+  async repairQuery(params: { query: string; error_message?: string }) {
+    const check = this.checkToolEnabled("repairQuery");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.aiTools.repairQuery(params);
   }
 
   // Get feature configuration status

@@ -5,6 +5,14 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2025-12-07
+
+### Added
+- **Guided Query Builder/Fixer** - New `repair_query` tool that uses deterministic heuristics and `EXPLAIN` to analyze and fix SQL queries.
+  - Suggests optimizations (e.g., adding indexes, limits).
+  - Analyzes execution plans for performance issues like full table scans.
+  - Provides actionable feedback for specific error messages.
+
 ## [1.12.0] - 2025-12-05
 
 ### Added

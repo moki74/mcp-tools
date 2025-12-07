@@ -1,5 +1,9 @@
-- This is a MCP MySQL using the latest version of Node.js
-- When creating a new feature, make sure to update the README.md file with the new feature and increment the version number in package.json when the task is completed
-- Always update the CHANGELOG.md file with the new feature and increment the version number when the task is completed
-- When creating a new file for testing, make sure the file needs to be deleted when the test is completed
-- Before publish to npmjs, make sure to set `dist-tag latest` for this current version
+# AGENTS Development Guidelines
+
+- This project uses MCP MySQL with the latest version of Node.js.
+- When creating a new feature:
+  - Update both `README.md` and `DOCUMENTATIONS.md` with the feature details.
+  - Increment the version number in `package.json` after the task is completed.
+- Always update `CHANGELOG.md` for each new feature and increment the version number upon completion.
+- Any temporary test file created during development must be removed after the test is completed.
+- Before publishing to npmjs, ensure the `dist-tag` is set to `latest` for the current version.

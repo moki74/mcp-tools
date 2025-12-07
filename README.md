@@ -63,7 +63,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 |----------|-------------|
 | **Full MCP Support** | Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent |
 | **Security First** | Parameterized queries, SQL injection protection, permission-based access control |
-| **120 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
+| **121 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
 | **Adaptive Presets** | Built-in ReadOnly/Analyst/DBA Lite permission bundles with override merging |
 | **Schema-Aware RAG Pack** | Compact schema snapshots (tables, PK/FK, row estimates) tailored for embeddings-friendly prompts |
 | **Category Filtering** | 22 documentation categories for intuitive, fine-grained access control (backward compatible with 10 legacy categories) |
@@ -656,7 +656,7 @@ The MCP server provides **120 powerful tools** organized into categories:
 
 ### Quick Reference
 
-**120 Tools Available** - Organized into 22 categories
+**121 Tools Available** - Organized into 22 categories
 
 | Category | Count | Key Tools |
 |----------|-------|-----------|
@@ -676,7 +676,7 @@ The MCP server provides **120 powerful tools** organized into categories:
 | Server Management | 9 | `show_process_list`, `explain_query` |
 | Performance Monitoring | 10 | `get_performance_metrics`, `get_database_health_check` |
 | Cache | 5 | `get_cache_stats`, `clear_cache` |
-| Query Optimization | 2 | `analyze_query`, `get_optimization_hints` |
+| Query Optimization | 3 | `analyze_query`, `get_optimization_hints`, `repair_query` |
 | Backup & Restore | 5 | `backup_database`, `restore_from_sql` |
 | Import/Export | 5 | `export_table_to_json`, `import_from_csv` |
 | Data Migration | 5 | `copy_table_data`, `sync_table_data` |

@@ -507,2386 +507,2404 @@ const TOOLS: Tool[] = [
       required: ["query"],
     },
   },
-  {
-    name: "create_table",
-    description:
-      'Creates a new table with the specified columns and indexes. Requires "ddl" permission.',
-    inputSchema: {
-      type: "object",
+{
+  name: "repair_query",
+    description: "Analyzes a SQL query (and optional error) to suggest repairs or optimizations using EXPLAIN and heuristics.",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      query: {
+        type: "string",
+          description: "The SQL query to analyze or repair",
+        },
+      error_message: {
+        type: "string",
+          description: "Optional error message received when executing the query",
+        },
+    },
+    required: ["query"],
+    },
+},
+{
+  name: "create_table",
+    description:
+  'Creates a new table with the specified columns and indexes. Requires "ddl" permission.',
+    inputSchema: {
+    type: "object",
+      properties: {
+      table_name: {
+        type: "string",
           description: "Name of the table to create",
         },
-        columns: {
-          type: "array",
+      columns: {
+        type: "array",
           description: "Array of column definitions",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              name: { type: "string", description: "Column name" },
-              type: {
-                type: "string",
+            name: { type: "string", description: "Column name" },
+            type: {
+              type: "string",
                 description: "MySQL data type (e.g., VARCHAR(255), INT, TEXT)",
               },
-              nullable: {
-                type: "boolean",
+            nullable: {
+              type: "boolean",
                 description: "Whether column can be NULL",
               },
-              primary_key: {
-                type: "boolean",
+            primary_key: {
+              type: "boolean",
                 description: "Whether this is the primary key",
               },
-              auto_increment: {
-                type: "boolean",
+            auto_increment: {
+              type: "boolean",
                 description: "Whether column auto-increments",
               },
               default: { type: "string", description: "Default value" },
-            },
-            required: ["name", "type"],
           },
-        },
-        indexes: {
-          type: "array",
+          required: ["name", "type"],
+          },
+      },
+      indexes: {
+        type: "array",
           description: "Optional indexes to create",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              name: { type: "string" },
-              columns: { type: "array", items: { type: "string" } },
-              unique: { type: "boolean" },
-            },
+            name: { type: "string" },
+            columns: { type: "array", items: { type: "string" } },
+            unique: { type: "boolean" },
           },
         },
       },
-      required: ["table_name", "columns"],
     },
-  },
-  {
-    name: "alter_table",
+    required: ["table_name", "columns"],
+    },
+},
+{
+  name: "alter_table",
     description:
-      'Alters an existing table structure (add/drop/modify columns, add/drop indexes). Requires "ddl" permission.',
+  'Alters an existing table structure (add/drop/modify columns, add/drop indexes). Requires "ddl" permission.',
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to alter",
         },
-        operations: {
-          type: "array",
+      operations: {
+        type: "array",
           description: "Array of alter operations to perform",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              type: {
-                type: "string",
+            type: {
+              type: "string",
                 enum: [
-                  "add_column",
-                  "drop_column",
-                  "modify_column",
-                  "rename_column",
-                  "add_index",
-                  "drop_index",
-                ],
+                "add_column",
+                "drop_column",
+                "modify_column",
+                "rename_column",
+                "add_index",
+                "drop_index",
+              ],
                 description: "Type of alteration",
               },
-              column_name: { type: "string" },
-              new_column_name: { type: "string" },
-              column_type: { type: "string" },
-              nullable: { type: "boolean" },
+            column_name: { type: "string" },
+            new_column_name: { type: "string" },
+            column_type: { type: "string" },
+            nullable: { type: "boolean" },
               default: { type: "string" },
-              index_name: { type: "string" },
-              index_columns: { type: "array", items: { type: "string" } },
-              unique: { type: "boolean" },
-            },
-            required: ["type"],
+            index_name: { type: "string" },
+            index_columns: { type: "array", items: { type: "string" } },
+            unique: { type: "boolean" },
           },
-        },
+          required: ["type"],
+          },
       },
-      required: ["table_name", "operations"],
     },
-  },
-  {
-    name: "drop_table",
+    required: ["table_name", "operations"],
+    },
+},
+{
+  name: "drop_table",
     description:
-      'Drops (deletes) a table and all its data. Requires "ddl" permission. WARNING: This is irreversible!',
+  'Drops (deletes) a table and all its data. Requires "ddl" permission. WARNING: This is irreversible!',
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to drop",
         },
-        if_exists: {
-          type: "boolean",
+      if_exists: {
+        type: "boolean",
           description: "If true, will not error if table does not exist",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "execute_ddl",
+    required: ["table_name"],
+    },
+},
+{
+  name: "execute_ddl",
     description:
-      'Executes raw DDL SQL (CREATE, ALTER, DROP, TRUNCATE, RENAME). Requires "ddl" permission.',
+  'Executes raw DDL SQL (CREATE, ALTER, DROP, TRUNCATE, RENAME). Requires "ddl" permission.',
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        query: {
-          type: "string",
+      query: {
+        type: "string",
           description: "DDL SQL query to execute",
         },
-      },
-      required: ["query"],
     },
-  },
-  {
-    name: "describe_connection",
+    required: ["query"],
+    },
+},
+{
+  name: "describe_connection",
     description: "Returns information about the current database connection.",
-    inputSchema: {
-      type: "object",
-      properties: {},
-    },
+      inputSchema: {
+    type: "object",
+      properties: { },
   },
-  {
-    name: "test_connection",
+},
+{
+  name: "test_connection",
     description:
-      "Tests the database connection and returns latency information.",
+  "Tests the database connection and returns latency information.",
     inputSchema: {
-      type: "object",
-      properties: {},
-    },
+    type: "object",
+      properties: { },
   },
-  {
-    name: "get_table_relationships",
+},
+{
+  name: "get_table_relationships",
     description: "Returns foreign key relationships for a specified table.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to get relationships for",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  // Transaction Tools
-  {
-    name: "begin_transaction",
+    required: ["table_name"],
+    },
+},
+// Transaction Tools
+{
+  name: "begin_transaction",
     description:
-      "Begins a new database transaction. Returns a transaction ID for subsequent operations.",
+  "Begins a new database transaction. Returns a transaction ID for subsequent operations.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        transactionId: {
-          type: "string",
+      transactionId: {
+        type: "string",
           description:
-            "Optional custom transaction ID. If not provided, one will be generated.",
+        "Optional custom transaction ID. If not provided, one will be generated.",
         },
-      },
     },
   },
-  {
-    name: "commit_transaction",
+},
+{
+  name: "commit_transaction",
     description: "Commits a transaction and makes all changes permanent.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        transactionId: {
-          type: "string",
+      transactionId: {
+        type: "string",
           description: "The transaction ID to commit",
         },
-      },
-      required: ["transactionId"],
     },
-  },
-  {
-    name: "rollback_transaction",
+    required: ["transactionId"],
+    },
+},
+{
+  name: "rollback_transaction",
     description:
-      "Rolls back a transaction and undoes all changes made within it.",
+  "Rolls back a transaction and undoes all changes made within it.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        transactionId: {
-          type: "string",
+      transactionId: {
+        type: "string",
           description: "The transaction ID to rollback",
         },
-      },
-      required: ["transactionId"],
     },
-  },
-  {
-    name: "get_transaction_status",
+    required: ["transactionId"],
+    },
+},
+{
+  name: "get_transaction_status",
     description: "Returns the status of all active transactions.",
-    inputSchema: {
-      type: "object",
-      properties: {},
-    },
+      inputSchema: {
+    type: "object",
+      properties: { },
   },
-  {
-    name: "execute_in_transaction",
+},
+{
+  name: "execute_in_transaction",
     description: "Executes a SQL query within an active transaction.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        transactionId: {
-          type: "string",
+      transactionId: {
+        type: "string",
           description: "The transaction ID to execute the query within",
         },
-        query: {
-          type: "string",
+      query: {
+        type: "string",
           description: "SQL query to execute within the transaction",
         },
-        params: {
-          type: "array",
+      params: {
+        type: "array",
           description: "Optional array of parameters for parameterized queries",
-          items: {},
-        },
+            items: { },
       },
-      required: ["transactionId", "query"],
     },
-  },
-  // Stored Procedure Tools
-  {
-    name: "list_stored_procedures",
+    required: ["transactionId", "query"],
+    },
+},
+// Stored Procedure Tools
+{
+  name: "list_stored_procedures",
     description: "Lists all stored procedures in the specified database.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description:
-            "Optional: specific database name to list procedures from",
+        "Optional: specific database name to list procedures from",
         },
-      },
     },
   },
-  {
-    name: "get_stored_procedure_info",
+},
+{
+  name: "get_stored_procedure_info",
     description:
-      "Gets detailed information about a specific stored procedure including parameters and metadata.",
+  "Gets detailed information about a specific stored procedure including parameters and metadata.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        procedure_name: {
-          type: "string",
+      procedure_name: {
+        type: "string",
           description: "Name of the stored procedure to get information for",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["procedure_name"],
     },
-  },
-  {
-    name: "execute_stored_procedure",
+    required: ["procedure_name"],
+    },
+},
+{
+  name: "execute_stored_procedure",
     description: "Executes a stored procedure with optional parameters.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        procedure_name: {
-          type: "string",
+      procedure_name: {
+        type: "string",
           description: "Name of the stored procedure to execute",
         },
-        parameters: {
-          type: "array",
+      parameters: {
+        type: "array",
           description:
-            "Optional array of parameters to pass to the stored procedure",
-          items: {},
-        },
-        database: {
-          type: "string",
+        "Optional array of parameters to pass to the stored procedure",
+          items: { },
+      },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["procedure_name"],
     },
-  },
-  {
-    name: "create_stored_procedure",
+    required: ["procedure_name"],
+    },
+},
+{
+  name: "create_stored_procedure",
     description:
-      "Creates a new stored procedure with the specified parameters and body.",
+  "Creates a new stored procedure with the specified parameters and body.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        procedure_name: {
-          type: "string",
+      procedure_name: {
+        type: "string",
           description: "Name of the stored procedure to create",
         },
-        parameters: {
-          type: "array",
+      parameters: {
+        type: "array",
           description: "Optional array of parameter definitions",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              name: { type: "string", description: "Parameter name" },
-              mode: {
-                type: "string",
+            name: { type: "string", description: "Parameter name" },
+            mode: {
+              type: "string",
                 enum: ["IN", "OUT", "INOUT"],
                 description: "Parameter mode",
               },
-              data_type: {
-                type: "string",
+            data_type: {
+              type: "string",
                 description: "MySQL data type (e.g., VARCHAR(255), INT)",
               },
-            },
-            required: ["name", "mode", "data_type"],
           },
-        },
-        body: {
-          type: "string",
+          required: ["name", "mode", "data_type"],
+          },
+      },
+      body: {
+        type: "string",
           description: "SQL body of the stored procedure",
         },
-        comment: {
-          type: "string",
+      comment: {
+        type: "string",
           description: "Optional comment for the stored procedure",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["procedure_name", "body"],
     },
-  },
-  {
-    name: "drop_stored_procedure",
+    required: ["procedure_name", "body"],
+    },
+},
+{
+  name: "drop_stored_procedure",
     description:
-      "Drops (deletes) a stored procedure. WARNING: This is irreversible!",
+  "Drops (deletes) a stored procedure. WARNING: This is irreversible!",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        procedure_name: {
-          type: "string",
+      procedure_name: {
+        type: "string",
           description: "Name of the stored procedure to drop",
         },
-        if_exists: {
-          type: "boolean",
+      if_exists: {
+        type: "boolean",
           description: "If true, will not error if procedure does not exist",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["procedure_name"],
     },
-  },
-  {
-    name: "show_create_procedure",
+    required: ["procedure_name"],
+    },
+},
+{
+  name: "show_create_procedure",
     description: "Shows the CREATE statement for a stored procedure.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        procedure_name: {
-          type: "string",
+      procedure_name: {
+        type: "string",
           description:
-            "Name of the stored procedure to show CREATE statement for",
+        "Name of the stored procedure to show CREATE statement for",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["procedure_name"],
     },
-  },
-  // Data Export Tools
-  {
-    name: "export_table_to_csv",
+    required: ["procedure_name"],
+    },
+},
+// Data Export Tools
+{
+  name: "export_table_to_csv",
     description:
-      "Export table data to CSV format with optional filtering, pagination, and sorting.",
+  "Export table data to CSV format with optional filtering, pagination, and sorting.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to export",
         },
-        filters: {
-          type: "array",
+      filters: {
+        type: "array",
           description: "Array of filter conditions",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              field: { type: "string" },
-              operator: {
-                type: "string",
+            field: { type: "string" },
+            operator: {
+              type: "string",
                 enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
               },
-              value: {
-                description:
-                  'Value to compare against (can be string, number, boolean, or array for "in" operator)',
+            value: {
+              description:
+              'Value to compare against (can be string, number, boolean, or array for "in" operator)',
               },
-            },
-            required: ["field", "operator", "value"],
           },
-        },
-        pagination: {
-          type: "object",
+          required: ["field", "operator", "value"],
+          },
+      },
+      pagination: {
+        type: "object",
           properties: {
-            page: {
-              type: "number",
+          page: {
+            type: "number",
               description: "Page number (starting from 1)",
             },
-            limit: {
-              type: "number",
+          limit: {
+            type: "number",
               description: "Number of records per page",
             },
-          },
-        },
-        sorting: {
-          type: "object",
-          properties: {
-            field: { type: "string", description: "Field name to sort by" },
-            direction: { type: "string", enum: ["asc", "desc"] },
-          },
-        },
-        include_headers: {
-          type: "boolean",
-          description: "Whether to include column headers in the CSV output",
         },
       },
-      required: ["table_name"],
+      sorting: {
+        type: "object",
+          properties: {
+          field: { type: "string", description: "Field name to sort by" },
+          direction: { type: "string", enum: ["asc", "desc"] },
+        },
+      },
+      include_headers: {
+        type: "boolean",
+          description: "Whether to include column headers in the CSV output",
+        },
     },
-  },
-  {
-    name: "export_query_to_csv",
+    required: ["table_name"],
+    },
+},
+{
+  name: "export_query_to_csv",
     description: "Export the results of a SELECT query to CSV format.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        query: {
-          type: "string",
+      query: {
+        type: "string",
           description: "SQL SELECT query to execute and export",
         },
-        params: {
-          type: "array",
+      params: {
+        type: "array",
           description: "Optional array of parameters for parameterized queries",
-          items: {},
-        },
-        include_headers: {
-          type: "boolean",
+            items: { },
+      },
+      include_headers: {
+        type: "boolean",
           description: "Whether to include column headers in the CSV output",
         },
-      },
-      required: ["query"],
     },
-  },
-  // Cache Management Tools
-  {
-    name: "get_cache_stats",
+    required: ["query"],
+    },
+},
+// Cache Management Tools
+{
+  name: "get_cache_stats",
     description:
-      "Get query cache statistics including hit rate, size, and configuration.",
+  "Get query cache statistics including hit rate, size, and configuration.",
     inputSchema: {
-      type: "object",
-      properties: {},
-    },
+    type: "object",
+      properties: { },
   },
-  {
-    name: "get_cache_config",
+},
+{
+  name: "get_cache_config",
     description: "Get current cache configuration settings.",
-    inputSchema: {
-      type: "object",
-      properties: {},
-    },
+      inputSchema: {
+    type: "object",
+      properties: { },
   },
-  {
-    name: "configure_cache",
+},
+{
+  name: "configure_cache",
     description:
-      "Configure cache settings including TTL, max size, and enable/disable.",
+  "Configure cache settings including TTL, max size, and enable/disable.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        enabled: {
-          type: "boolean",
+      enabled: {
+        type: "boolean",
           description: "Enable or disable the query cache",
         },
-        ttlMs: {
-          type: "number",
+      ttlMs: {
+        type: "number",
           description: "Cache time-to-live in milliseconds (default: 60000)",
         },
-        maxSize: {
-          type: "number",
+      maxSize: {
+        type: "number",
           description: "Maximum number of cached entries (default: 100)",
         },
-        maxMemoryMB: {
-          type: "number",
+      maxMemoryMB: {
+        type: "number",
           description: "Maximum memory usage in MB (default: 50)",
         },
-      },
     },
   },
-  {
-    name: "clear_cache",
+},
+{
+  name: "clear_cache",
     description: "Clear all entries from the query cache.",
-    inputSchema: {
-      type: "object",
-      properties: {},
-    },
+      inputSchema: {
+    type: "object",
+      properties: { },
   },
-  {
-    name: "invalidate_table_cache",
+},
+{
+  name: "invalidate_table_cache",
     description: "Invalidate all cached queries related to a specific table.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to invalidate cache for",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  // Query Optimization Tools
-  {
-    name: "analyze_query",
+    required: ["table_name"],
+    },
+},
+// Query Optimization Tools
+{
+  name: "analyze_query",
     description:
-      "Analyze a SQL query and get optimization suggestions including recommended indexes and hints.",
+  "Analyze a SQL query and get optimization suggestions including recommended indexes and hints.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        query: {
-          type: "string",
+      query: {
+        type: "string",
           description: "SQL query to analyze",
         },
-      },
-      required: ["query"],
     },
-  },
-  {
-    name: "get_optimization_hints",
+    required: ["query"],
+    },
+},
+{
+  name: "get_optimization_hints",
     description:
-      "Get suggested MySQL optimizer hints for a specific optimization goal (SPEED, MEMORY, or STABILITY).",
+  "Get suggested MySQL optimizer hints for a specific optimization goal (SPEED, MEMORY, or STABILITY).",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        goal: {
-          type: "string",
+      goal: {
+        type: "string",
           enum: ["SPEED", "MEMORY", "STABILITY"],
           description:
-            "Optimization goal: SPEED for faster queries, MEMORY for lower memory usage, STABILITY for consistent performance",
+        "Optimization goal: SPEED for faster queries, MEMORY for lower memory usage, STABILITY for consistent performance",
         },
-      },
-      required: ["goal"],
     },
-  },
-  // View Tools
-  {
-    name: "list_views",
+    required: ["goal"],
+    },
+},
+// View Tools
+{
+  name: "list_views",
     description: "Lists all views in the connected database.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "get_view_info",
+},
+{
+  name: "get_view_info",
     description:
-      "Gets detailed information about a specific view including columns and definition.",
+  "Gets detailed information about a specific view including columns and definition.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        view_name: { type: "string", description: "Name of the view" },
-        database: {
-          type: "string",
+      view_name: { type: "string", description: "Name of the view" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["view_name"],
     },
-  },
-  {
-    name: "create_view",
+    required: ["view_name"],
+    },
+},
+{
+  name: "create_view",
     description:
-      "Creates a new view with the specified SELECT definition. Requires 'ddl' permission.",
+  "Creates a new view with the specified SELECT definition. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        view_name: {
-          type: "string",
+      view_name: {
+        type: "string",
           description: "Name of the view to create",
         },
-        definition: {
-          type: "string",
+      definition: {
+        type: "string",
           description: "SELECT statement that defines the view",
         },
-        or_replace: {
-          type: "boolean",
+      or_replace: {
+        type: "boolean",
           description: "If true, replaces existing view",
         },
-        algorithm: {
-          type: "string",
+      algorithm: {
+        type: "string",
           enum: ["UNDEFINED", "MERGE", "TEMPTABLE"],
           description: "View algorithm",
         },
-        security: {
-          type: "string",
+      security: {
+        type: "string",
           enum: ["DEFINER", "INVOKER"],
           description: "Security context",
         },
-        check_option: {
-          type: "string",
+      check_option: {
+        type: "string",
           enum: ["CASCADED", "LOCAL"],
           description: "Check option for updatable views",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["view_name", "definition"],
     },
-  },
-  {
-    name: "alter_view",
+    required: ["view_name", "definition"],
+    },
+},
+{
+  name: "alter_view",
     description:
-      "Alters an existing view definition. Requires 'ddl' permission.",
+  "Alters an existing view definition. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        view_name: { type: "string", description: "Name of the view to alter" },
-        definition: {
-          type: "string",
+      view_name: { type: "string", description: "Name of the view to alter" },
+      definition: {
+        type: "string",
           description: "New SELECT statement that defines the view",
         },
-        algorithm: {
-          type: "string",
+      algorithm: {
+        type: "string",
           enum: ["UNDEFINED", "MERGE", "TEMPTABLE"],
           description: "View algorithm",
         },
-        security: {
-          type: "string",
+      security: {
+        type: "string",
           enum: ["DEFINER", "INVOKER"],
           description: "Security context",
         },
-        check_option: {
-          type: "string",
+      check_option: {
+        type: "string",
           enum: ["CASCADED", "LOCAL"],
           description: "Check option",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["view_name", "definition"],
     },
-  },
-  {
-    name: "drop_view",
+    required: ["view_name", "definition"],
+    },
+},
+{
+  name: "drop_view",
     description:
-      "Drops a view. Requires 'ddl' permission. WARNING: This is irreversible!",
+  "Drops a view. Requires 'ddl' permission. WARNING: This is irreversible!",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        view_name: { type: "string", description: "Name of the view to drop" },
-        if_exists: {
-          type: "boolean",
+      view_name: { type: "string", description: "Name of the view to drop" },
+      if_exists: {
+        type: "boolean",
           description: "If true, will not error if view does not exist",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["view_name"],
     },
-  },
-  {
-    name: "show_create_view",
+    required: ["view_name"],
+    },
+},
+{
+  name: "show_create_view",
     description: "Shows the CREATE statement for a view.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        view_name: { type: "string", description: "Name of the view" },
-        database: {
-          type: "string",
+      view_name: { type: "string", description: "Name of the view" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["view_name"],
     },
-  },
-  // Trigger Tools
-  {
-    name: "list_triggers",
+    required: ["view_name"],
+    },
+},
+// Trigger Tools
+{
+  name: "list_triggers",
     description:
-      "Lists all triggers in the database, optionally filtered by table.",
+  "Lists all triggers in the database, optionally filtered by table.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Optional: filter triggers for specific table",
         },
-      },
     },
   },
-  {
-    name: "get_trigger_info",
+},
+{
+  name: "get_trigger_info",
     description: "Gets detailed information about a specific trigger.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        trigger_name: { type: "string", description: "Name of the trigger" },
-        database: {
-          type: "string",
+      trigger_name: { type: "string", description: "Name of the trigger" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["trigger_name"],
     },
-  },
-  {
-    name: "create_trigger",
+    required: ["trigger_name"],
+    },
+},
+{
+  name: "create_trigger",
     description: "Creates a new trigger on a table. Requires 'ddl' permission.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        trigger_name: { type: "string", description: "Name of the trigger" },
-        table_name: {
-          type: "string",
+      trigger_name: { type: "string", description: "Name of the trigger" },
+      table_name: {
+        type: "string",
           description: "Table the trigger is associated with",
         },
-        timing: {
-          type: "string",
+      timing: {
+        type: "string",
           enum: ["BEFORE", "AFTER"],
           description: "When the trigger fires",
         },
-        event: {
-          type: "string",
+      event: {
+        type: "string",
           enum: ["INSERT", "UPDATE", "DELETE"],
           description: "Event that fires the trigger",
         },
-        body: { type: "string", description: "SQL statements to execute" },
-        definer: {
-          type: "string",
+      body: { type: "string", description: "SQL statements to execute" },
+      definer: {
+        type: "string",
           description: "Optional: user who owns the trigger",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["trigger_name", "table_name", "timing", "event", "body"],
     },
-  },
-  {
-    name: "drop_trigger",
+    required: ["trigger_name", "table_name", "timing", "event", "body"],
+    },
+},
+{
+  name: "drop_trigger",
     description:
-      "Drops a trigger. Requires 'ddl' permission. WARNING: This is irreversible!",
+  "Drops a trigger. Requires 'ddl' permission. WARNING: This is irreversible!",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        trigger_name: {
-          type: "string",
+      trigger_name: {
+        type: "string",
           description: "Name of the trigger to drop",
         },
-        if_exists: {
-          type: "boolean",
+      if_exists: {
+        type: "boolean",
           description: "If true, will not error if trigger does not exist",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["trigger_name"],
     },
-  },
-  {
-    name: "show_create_trigger",
+    required: ["trigger_name"],
+    },
+},
+{
+  name: "show_create_trigger",
     description: "Shows the CREATE statement for a trigger.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        trigger_name: { type: "string", description: "Name of the trigger" },
-        database: {
-          type: "string",
+      trigger_name: { type: "string", description: "Name of the trigger" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["trigger_name"],
     },
-  },
-  // Function Tools
-  {
-    name: "list_functions",
+    required: ["trigger_name"],
+    },
+},
+// Function Tools
+{
+  name: "list_functions",
     description: "Lists all user-defined functions in the database.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "get_function_info",
+},
+{
+  name: "get_function_info",
     description:
-      "Gets detailed information about a specific function including parameters.",
+  "Gets detailed information about a specific function including parameters.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        function_name: { type: "string", description: "Name of the function" },
-        database: {
-          type: "string",
+      function_name: { type: "string", description: "Name of the function" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["function_name"],
     },
-  },
-  {
-    name: "create_function",
+    required: ["function_name"],
+    },
+},
+{
+  name: "create_function",
     description:
-      "Creates a new user-defined function. Requires 'ddl' permission.",
+  "Creates a new user-defined function. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        function_name: { type: "string", description: "Name of the function" },
-        parameters: {
-          type: "array",
+      function_name: { type: "string", description: "Name of the function" },
+      parameters: {
+        type: "array",
           description: "Array of parameter definitions",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              name: { type: "string" },
-              data_type: { type: "string" },
-            },
-            required: ["name", "data_type"],
+            name: { type: "string" },
+            data_type: { type: "string" },
           },
-        },
-        returns: { type: "string", description: "Return data type" },
-        body: { type: "string", description: "Function body (SQL statements)" },
-        deterministic: {
-          type: "boolean",
+          required: ["name", "data_type"],
+          },
+      },
+      returns: { type: "string", description: "Return data type" },
+      body: { type: "string", description: "Function body (SQL statements)" },
+      deterministic: {
+        type: "boolean",
           description:
-            "Whether function always returns same result for same input",
+        "Whether function always returns same result for same input",
         },
-        data_access: {
-          type: "string",
+      data_access: {
+        type: "string",
           enum: [
-            "CONTAINS SQL",
-            "NO SQL",
-            "READS SQL DATA",
-            "MODIFIES SQL DATA",
-          ],
+          "CONTAINS SQL",
+          "NO SQL",
+          "READS SQL DATA",
+          "MODIFIES SQL DATA",
+        ],
         },
-        security: { type: "string", enum: ["DEFINER", "INVOKER"] },
-        comment: { type: "string", description: "Optional comment" },
-        database: {
-          type: "string",
+      security: { type: "string", enum: ["DEFINER", "INVOKER"] },
+      comment: { type: "string", description: "Optional comment" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["function_name", "returns", "body"],
     },
-  },
-  {
-    name: "drop_function",
+    required: ["function_name", "returns", "body"],
+    },
+},
+{
+  name: "drop_function",
     description: "Drops a user-defined function. Requires 'ddl' permission.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        function_name: {
-          type: "string",
+      function_name: {
+        type: "string",
           description: "Name of the function to drop",
         },
-        if_exists: {
-          type: "boolean",
+      if_exists: {
+        type: "boolean",
           description: "If true, will not error if function does not exist",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["function_name"],
     },
-  },
-  {
-    name: "show_create_function",
+    required: ["function_name"],
+    },
+},
+{
+  name: "show_create_function",
     description: "Shows the CREATE statement for a function.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        function_name: { type: "string", description: "Name of the function" },
-        database: {
-          type: "string",
+      function_name: { type: "string", description: "Name of the function" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["function_name"],
     },
-  },
-  {
-    name: "execute_function",
+    required: ["function_name"],
+    },
+},
+{
+  name: "execute_function",
     description: "Executes a user-defined function and returns its result.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        function_name: {
-          type: "string",
+      function_name: {
+        type: "string",
           description: "Name of the function to execute",
         },
-        parameters: {
-          type: "array",
+      parameters: {
+        type: "array",
           description: "Array of parameter values",
-          items: {},
-        },
-        database: {
-          type: "string",
+            items: { },
+      },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["function_name"],
     },
-  },
-  // Index Tools
-  {
-    name: "list_indexes",
+    required: ["function_name"],
+    },
+},
+// Index Tools
+{
+  name: "list_indexes",
     description: "Lists all indexes for a specific table.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        database: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "get_index_info",
+    required: ["table_name"],
+    },
+},
+{
+  name: "get_index_info",
     description: "Gets detailed information about a specific index.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        index_name: { type: "string", description: "Name of the index" },
-        database: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      index_name: { type: "string", description: "Name of the index" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "index_name"],
     },
-  },
-  {
-    name: "create_index",
+    required: ["table_name", "index_name"],
+    },
+},
+{
+  name: "create_index",
     description: "Creates a new index on a table. Requires 'ddl' permission.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        index_name: { type: "string", description: "Name of the index" },
-        columns: {
-          type: "array",
+      table_name: { type: "string", description: "Name of the table" },
+      index_name: { type: "string", description: "Name of the index" },
+      columns: {
+        type: "array",
           description:
-            "Columns to index (string or object with column, length, order)",
-          items: {},
-        },
-        unique: { type: "boolean", description: "Whether index is unique" },
-        index_type: {
-          type: "string",
+        "Columns to index (string or object with column, length, order)",
+          items: { },
+      },
+      unique: { type: "boolean", description: "Whether index is unique" },
+      index_type: {
+        type: "string",
           enum: ["BTREE", "HASH", "FULLTEXT", "SPATIAL"],
           description: "Index type",
         },
-        comment: { type: "string", description: "Optional comment" },
-        database: {
-          type: "string",
+      comment: { type: "string", description: "Optional comment" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "index_name", "columns"],
     },
-  },
-  {
-    name: "drop_index",
+    required: ["table_name", "index_name", "columns"],
+    },
+},
+{
+  name: "drop_index",
     description: "Drops an index from a table. Requires 'ddl' permission.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        index_name: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      index_name: {
+        type: "string",
           description: "Name of the index to drop",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "index_name"],
     },
-  },
-  {
-    name: "analyze_index",
+    required: ["table_name", "index_name"],
+    },
+},
+{
+  name: "analyze_index",
     description: "Analyzes a table to update index statistics.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to analyze",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  // Constraint Tools
-  {
-    name: "list_foreign_keys",
+    required: ["table_name"],
+    },
+},
+// Constraint Tools
+{
+  name: "list_foreign_keys",
     description: "Lists all foreign key constraints for a table.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        database: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "list_constraints",
+    required: ["table_name"],
+    },
+},
+{
+  name: "list_constraints",
     description:
-      "Lists all constraints (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK) for a table.",
+  "Lists all constraints (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK) for a table.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        database: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "add_foreign_key",
+    required: ["table_name"],
+    },
+},
+{
+  name: "add_foreign_key",
     description:
-      "Adds a foreign key constraint to a table. Requires 'ddl' permission.",
+  "Adds a foreign key constraint to a table. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        constraint_name: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      constraint_name: {
+        type: "string",
           description: "Name of the constraint",
         },
-        columns: {
-          type: "array",
+      columns: {
+        type: "array",
           items: { type: "string" },
-          description: "Columns in the foreign key",
+        description: "Columns in the foreign key",
         },
-        referenced_table: {
-          type: "string",
+      referenced_table: {
+        type: "string",
           description: "Referenced table name",
         },
-        referenced_columns: {
-          type: "array",
+      referenced_columns: {
+        type: "array",
           items: { type: "string" },
-          description: "Referenced columns",
+        description: "Referenced columns",
         },
-        on_delete: {
-          type: "string",
+      on_delete: {
+        type: "string",
           enum: ["CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT"],
         },
-        on_update: {
-          type: "string",
+      on_update: {
+        type: "string",
           enum: ["CASCADE", "SET NULL", "RESTRICT", "NO ACTION", "SET DEFAULT"],
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: [
-        "table_name",
-        "constraint_name",
-        "columns",
-        "referenced_table",
-        "referenced_columns",
-      ],
     },
-  },
-  {
-    name: "drop_foreign_key",
+    required: [
+      "table_name",
+      "constraint_name",
+      "columns",
+      "referenced_table",
+      "referenced_columns",
+    ],
+    },
+},
+{
+  name: "drop_foreign_key",
     description: "Drops a foreign key constraint. Requires 'ddl' permission.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        constraint_name: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      constraint_name: {
+        type: "string",
           description: "Name of the constraint to drop",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "constraint_name"],
     },
-  },
-  {
-    name: "add_unique_constraint",
+    required: ["table_name", "constraint_name"],
+    },
+},
+{
+  name: "add_unique_constraint",
     description:
-      "Adds a unique constraint to a table. Requires 'ddl' permission.",
+  "Adds a unique constraint to a table. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        constraint_name: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      constraint_name: {
+        type: "string",
           description: "Name of the constraint",
         },
-        columns: {
-          type: "array",
+      columns: {
+        type: "array",
           items: { type: "string" },
-          description: "Columns in the unique constraint",
+        description: "Columns in the unique constraint",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "constraint_name", "columns"],
     },
-  },
-  {
-    name: "drop_constraint",
+    required: ["table_name", "constraint_name", "columns"],
+    },
+},
+{
+  name: "drop_constraint",
     description:
-      "Drops a UNIQUE or CHECK constraint. Requires 'ddl' permission.",
+  "Drops a UNIQUE or CHECK constraint. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        constraint_name: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      constraint_name: {
+        type: "string",
           description: "Name of the constraint",
         },
-        constraint_type: {
-          type: "string",
+      constraint_type: {
+        type: "string",
           enum: ["UNIQUE", "CHECK"],
           description: "Type of constraint",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "constraint_name", "constraint_type"],
     },
-  },
-  {
-    name: "add_check_constraint",
+    required: ["table_name", "constraint_name", "constraint_type"],
+    },
+},
+{
+  name: "add_check_constraint",
     description:
-      "Adds a CHECK constraint to a table (MySQL 8.0.16+). Requires 'ddl' permission.",
+  "Adds a CHECK constraint to a table (MySQL 8.0.16+). Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: { type: "string", description: "Name of the table" },
-        constraint_name: {
-          type: "string",
+      table_name: { type: "string", description: "Name of the table" },
+      constraint_name: {
+        type: "string",
           description: "Name of the constraint",
         },
-        expression: {
-          type: "string",
+      expression: {
+        type: "string",
           description: "Check expression (e.g., 'age >= 18')",
         },
-        enforced: {
-          type: "boolean",
+      enforced: {
+        type: "boolean",
           description: "Whether constraint is enforced (default: true)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "constraint_name", "expression"],
     },
-  },
-  // Table Maintenance Tools
-  {
-    name: "analyze_table",
+    required: ["table_name", "constraint_name", "expression"],
+    },
+},
+// Table Maintenance Tools
+{
+  name: "analyze_table",
     description:
-      "Analyzes a table to update index statistics for the query optimizer.",
+  "Analyzes a table to update index statistics for the query optimizer.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to analyze",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "optimize_table",
+    required: ["table_name"],
+    },
+},
+{
+  name: "optimize_table",
     description:
-      "Optimizes a table to reclaim unused space and defragment data.",
+  "Optimizes a table to reclaim unused space and defragment data.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to optimize",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "check_table",
+    required: ["table_name"],
+    },
+},
+{
+  name: "check_table",
     description: "Checks a table for errors.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to check",
         },
-        check_type: {
-          type: "string",
+      check_type: {
+        type: "string",
           enum: ["QUICK", "FAST", "MEDIUM", "EXTENDED", "CHANGED"],
           description: "Type of check",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "repair_table",
+    required: ["table_name"],
+    },
+},
+{
+  name: "repair_table",
     description: "Repairs a corrupted table (MyISAM, ARCHIVE, CSV only).",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to repair",
         },
-        quick: { type: "boolean", description: "Quick repair" },
-        extended: { type: "boolean", description: "Extended repair" },
-        use_frm: { type: "boolean", description: "Use .frm file to repair" },
-        database: {
-          type: "string",
+      quick: { type: "boolean", description: "Quick repair" },
+      extended: { type: "boolean", description: "Extended repair" },
+      use_frm: { type: "boolean", description: "Use .frm file to repair" },
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "truncate_table",
+    required: ["table_name"],
+    },
+},
+{
+  name: "truncate_table",
     description:
-      "Truncates a table (removes all rows quickly). Requires 'ddl' permission. WARNING: This is irreversible!",
+  "Truncates a table (removes all rows quickly). Requires 'ddl' permission. WARNING: This is irreversible!",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to truncate",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "get_table_status",
+    required: ["table_name"],
+    },
+},
+{
+  name: "get_table_status",
     description: "Gets detailed status and statistics for one or all tables.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Optional: specific table name (omit for all tables)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "flush_table",
+},
+{
+  name: "flush_table",
     description: "Flushes table(s) - closes and reopens them.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Optional: specific table (omit for all tables)",
         },
-        with_read_lock: {
-          type: "boolean",
+      with_read_lock: {
+        type: "boolean",
           description: "Acquire read lock after flushing",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "get_table_size",
+},
+{
+  name: "get_table_size",
     description:
-      "Gets size information for one or all tables including data and index sizes.",
+  "Gets size information for one or all tables including data and index sizes.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Optional: specific table name (omit for all tables)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  // Process Management Tools
-  {
-    name: "show_process_list",
+},
+// Process Management Tools
+{
+  name: "show_process_list",
     description: "Shows all running MySQL processes/connections.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        full: { type: "boolean", description: "Show full query text" },
-      },
+      full: { type: "boolean", description: "Show full query text" },
     },
   },
-  {
-    name: "kill_process",
+},
+{
+  name: "kill_process",
     description: "Kills a MySQL process/connection by ID.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        process_id: { type: "number", description: "Process ID to kill" },
-        type: {
-          type: "string",
+      process_id: { type: "number", description: "Process ID to kill" },
+      type: {
+        type: "string",
           enum: ["CONNECTION", "QUERY"],
           description: "Kill connection or just query",
         },
-      },
-      required: ["process_id"],
     },
-  },
-  {
-    name: "show_status",
+    required: ["process_id"],
+    },
+},
+{
+  name: "show_status",
     description: "Shows MySQL server status variables.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        like: {
-          type: "string",
+      like: {
+        type: "string",
           description: "Optional: filter pattern (e.g., 'Thread%')",
         },
-        global: {
-          type: "boolean",
+      global: {
+        type: "boolean",
           description: "Show global status instead of session",
         },
-      },
     },
   },
-  {
-    name: "show_variables",
+},
+{
+  name: "show_variables",
     description: "Shows MySQL server configuration variables.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        like: {
-          type: "string",
+      like: {
+        type: "string",
           description: "Optional: filter pattern (e.g., 'max_%')",
         },
-        global: {
-          type: "boolean",
+      global: {
+        type: "boolean",
           description: "Show global variables instead of session",
         },
-      },
     },
   },
-  {
-    name: "explain_query",
+},
+{
+  name: "explain_query",
     description: "Shows the execution plan for a query (EXPLAIN).",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        query: { type: "string", description: "SQL query to explain" },
-        format: {
-          type: "string",
+      query: { type: "string", description: "SQL query to explain" },
+      format: {
+        type: "string",
           enum: ["TRADITIONAL", "JSON", "TREE"],
           description: "Output format",
         },
-        analyze: {
-          type: "boolean",
+      analyze: {
+        type: "boolean",
           description: "Actually execute the query and show real statistics",
         },
-      },
-      required: ["query"],
     },
-  },
-  {
-    name: "show_engine_status",
+    required: ["query"],
+    },
+},
+{
+  name: "show_engine_status",
     description: "Shows storage engine status (InnoDB by default).",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        engine: {
-          type: "string",
+      engine: {
+        type: "string",
           description: "Engine name (INNODB, PERFORMANCE_SCHEMA, etc.)",
         },
-      },
     },
   },
-  {
-    name: "get_server_info",
+},
+{
+  name: "get_server_info",
     description:
-      "Gets comprehensive MySQL server information including version, uptime, and statistics.",
+  "Gets comprehensive MySQL server information including version, uptime, and statistics.",
     inputSchema: {
-      type: "object",
-      properties: {},
-    },
+    type: "object",
+      properties: { },
   },
-  {
-    name: "show_binary_logs",
+},
+{
+  name: "show_binary_logs",
     description: "Shows binary log files on the server.",
-    inputSchema: {
-      type: "object",
-      properties: {},
-    },
+      inputSchema: {
+    type: "object",
+      properties: { },
   },
-  {
-    name: "show_replication_status",
+},
+{
+  name: "show_replication_status",
     description: "Shows replication status (master or replica).",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        type: {
-          type: "string",
+      type: {
+        type: "string",
           enum: ["MASTER", "REPLICA", "SLAVE"],
           description: "Which status to show",
         },
-      },
     },
   },
-  // Backup and Restore Tools
-  {
-    name: "backup_table",
+},
+// Backup and Restore Tools
+{
+  name: "backup_table",
     description:
-      "Backup a single table to SQL dump format including structure and optionally data.",
+  "Backup a single table to SQL dump format including structure and optionally data.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to backup",
         },
-        include_data: {
-          type: "boolean",
+      include_data: {
+        type: "boolean",
           description: "Include table data in the backup (default: true)",
         },
-        include_drop: {
-          type: "boolean",
+      include_drop: {
+        type: "boolean",
           description: "Include DROP TABLE IF EXISTS statement (default: true)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "backup_database",
+    required: ["table_name"],
+    },
+},
+{
+  name: "backup_database",
     description:
-      "Backup entire database or selected tables to SQL dump format.",
+  "Backup entire database or selected tables to SQL dump format.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        include_data: {
-          type: "boolean",
+      include_data: {
+        type: "boolean",
           description: "Include table data in the backup (default: true)",
         },
-        include_drop: {
-          type: "boolean",
+      include_drop: {
+        type: "boolean",
           description:
-            "Include DROP TABLE IF EXISTS statements (default: true)",
+        "Include DROP TABLE IF EXISTS statements (default: true)",
         },
-        tables: {
-          type: "array",
+      tables: {
+        type: "array",
           items: { type: "string" },
-          description:
-            "Optional: specific tables to backup (default: all tables)",
+        description:
+        "Optional: specific tables to backup (default: all tables)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "restore_from_sql",
+},
+{
+  name: "restore_from_sql",
     description:
-      "Restore database from SQL dump content. Executes SQL statements from the provided dump. Requires 'ddl' permission.",
+  "Restore database from SQL dump content. Executes SQL statements from the provided dump. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        sql_dump: {
-          type: "string",
+      sql_dump: {
+        type: "string",
           description: "SQL dump content to restore",
         },
-        stop_on_error: {
-          type: "boolean",
+      stop_on_error: {
+        type: "boolean",
           description: "Stop execution on first error (default: true)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["sql_dump"],
     },
-  },
-  {
-    name: "get_create_table_statement",
+    required: ["sql_dump"],
+    },
+},
+{
+  name: "get_create_table_statement",
     description: "Get the CREATE TABLE statement for a specific table.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  {
-    name: "get_database_schema",
+    required: ["table_name"],
+    },
+},
+{
+  name: "get_database_schema",
     description:
-      "Get complete database schema including tables, views, procedures, functions, and triggers.",
+  "Get complete database schema including tables, views, procedures, functions, and triggers.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-        include_views: {
-          type: "boolean",
+      include_views: {
+        type: "boolean",
           description: "Include views in schema (default: true)",
         },
-        include_procedures: {
-          type: "boolean",
+      include_procedures: {
+        type: "boolean",
           description: "Include stored procedures in schema (default: true)",
         },
-        include_functions: {
-          type: "boolean",
+      include_functions: {
+        type: "boolean",
           description: "Include functions in schema (default: true)",
         },
-        include_triggers: {
-          type: "boolean",
+      include_triggers: {
+        type: "boolean",
           description: "Include triggers in schema (default: true)",
         },
-      },
     },
   },
-  // Extended Data Export Tools (JSON, SQL)
-  {
-    name: "export_table_to_json",
+},
+// Extended Data Export Tools (JSON, SQL)
+{
+  name: "export_table_to_json",
     description:
-      "Export table data to JSON format with optional filtering, pagination, and sorting.",
+  "Export table data to JSON format with optional filtering, pagination, and sorting.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to export",
         },
-        filters: {
-          type: "array",
+      filters: {
+        type: "array",
           description: "Array of filter conditions",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              field: { type: "string" },
-              operator: {
-                type: "string",
+            field: { type: "string" },
+            operator: {
+              type: "string",
                 enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
               },
-              value: {},
-            },
-            required: ["field", "operator", "value"],
+            value: { },
           },
-        },
-        pagination: {
-          type: "object",
+          required: ["field", "operator", "value"],
+          },
+      },
+      pagination: {
+        type: "object",
           properties: {
-            page: { type: "number" },
-            limit: { type: "number" },
-          },
-        },
-        sorting: {
-          type: "object",
-          properties: {
-            field: { type: "string" },
-            direction: { type: "string", enum: ["asc", "desc"] },
-          },
-        },
-        pretty: {
-          type: "boolean",
-          description: "Pretty print JSON output (default: true)",
-        },
-        database: {
-          type: "string",
-          description: "Optional: specific database name",
+          page: { type: "number" },
+          limit: { type: "number" },
         },
       },
-      required: ["table_name"],
+      sorting: {
+        type: "object",
+          properties: {
+          field: { type: "string" },
+          direction: { type: "string", enum: ["asc", "desc"] },
+        },
+      },
+      pretty: {
+        type: "boolean",
+          description: "Pretty print JSON output (default: true)",
+        },
+      database: {
+        type: "string",
+          description: "Optional: specific database name",
+        },
     },
-  },
-  {
-    name: "export_query_to_json",
+    required: ["table_name"],
+    },
+},
+{
+  name: "export_query_to_json",
     description: "Export the results of a SELECT query to JSON format.",
-    inputSchema: {
-      type: "object",
+      inputSchema: {
+    type: "object",
       properties: {
-        query: {
-          type: "string",
+      query: {
+        type: "string",
           description: "SQL SELECT query to execute and export",
         },
-        params: {
-          type: "array",
+      params: {
+        type: "array",
           description: "Optional array of parameters for parameterized queries",
-          items: {},
-        },
-        pretty: {
-          type: "boolean",
+            items: { },
+      },
+      pretty: {
+        type: "boolean",
           description: "Pretty print JSON output (default: true)",
         },
-      },
-      required: ["query"],
     },
-  },
-  {
-    name: "export_table_to_sql",
+    required: ["query"],
+    },
+},
+{
+  name: "export_table_to_sql",
     description:
-      "Export table data to SQL INSERT statements with optional CREATE TABLE.",
+  "Export table data to SQL INSERT statements with optional CREATE TABLE.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to export",
         },
-        filters: {
-          type: "array",
+      filters: {
+        type: "array",
           description: "Array of filter conditions",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              field: { type: "string" },
-              operator: {
-                type: "string",
+            field: { type: "string" },
+            operator: {
+              type: "string",
                 enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
               },
-              value: {},
-            },
-            required: ["field", "operator", "value"],
+            value: { },
           },
-        },
-        include_create_table: {
-          type: "boolean",
+          required: ["field", "operator", "value"],
+          },
+      },
+      include_create_table: {
+        type: "boolean",
           description: "Include CREATE TABLE statement (default: false)",
         },
-        batch_size: {
-          type: "number",
+      batch_size: {
+        type: "number",
           description: "Number of rows per INSERT statement (default: 100)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name"],
     },
-  },
-  // Data Import Tools
-  {
-    name: "import_from_csv",
+    required: ["table_name"],
+    },
+},
+// Data Import Tools
+{
+  name: "import_from_csv",
     description:
-      "Import data from CSV string into a table. Requires 'create' permission.",
+  "Import data from CSV string into a table. Requires 'create' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to import into",
         },
-        csv_data: {
-          type: "string",
+      csv_data: {
+        type: "string",
           description: "CSV data as a string",
         },
-        has_headers: {
-          type: "boolean",
+      has_headers: {
+        type: "boolean",
           description: "CSV has header row (default: true)",
         },
-        column_mapping: {
-          type: "object",
+      column_mapping: {
+        type: "object",
           description:
-            "Optional: map CSV columns to table columns {csv_col: table_col}",
+        "Optional: map CSV columns to table columns {csv_col: table_col}",
           additionalProperties: { type: "string" },
-        },
-        skip_errors: {
-          type: "boolean",
+      },
+      skip_errors: {
+        type: "boolean",
           description: "Continue on row errors (default: false)",
         },
-        batch_size: {
-          type: "number",
+      batch_size: {
+        type: "number",
           description: "Number of rows per batch insert (default: 100)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "csv_data"],
     },
-  },
-  {
-    name: "import_from_json",
+    required: ["table_name", "csv_data"],
+    },
+},
+{
+  name: "import_from_json",
     description:
-      "Import data from JSON array string into a table. Requires 'create' permission.",
+  "Import data from JSON array string into a table. Requires 'create' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_name: {
-          type: "string",
+      table_name: {
+        type: "string",
           description: "Name of the table to import into",
         },
-        json_data: {
-          type: "string",
+      json_data: {
+        type: "string",
           description: "JSON array of objects as a string",
         },
-        column_mapping: {
-          type: "object",
+      column_mapping: {
+        type: "object",
           description:
-            "Optional: map JSON keys to table columns {json_key: table_col}",
+        "Optional: map JSON keys to table columns {json_key: table_col}",
           additionalProperties: { type: "string" },
-        },
-        skip_errors: {
-          type: "boolean",
+      },
+      skip_errors: {
+        type: "boolean",
           description: "Continue on row errors (default: false)",
         },
-        batch_size: {
-          type: "number",
+      batch_size: {
+        type: "number",
           description: "Number of rows per batch insert (default: 100)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table_name", "json_data"],
     },
-  },
-  // Data Migration Tools
-  {
-    name: "copy_table_data",
+    required: ["table_name", "json_data"],
+    },
+},
+// Data Migration Tools
+{
+  name: "copy_table_data",
     description:
-      "Copy data from one table to another with optional column mapping and filtering. Requires 'create' permission.",
+  "Copy data from one table to another with optional column mapping and filtering. Requires 'create' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        source_table: {
-          type: "string",
+      source_table: {
+        type: "string",
           description: "Name of the source table to copy from",
         },
-        target_table: {
-          type: "string",
+      target_table: {
+        type: "string",
           description: "Name of the target table to copy to",
         },
-        column_mapping: {
-          type: "object",
+      column_mapping: {
+        type: "object",
           description:
-            "Optional: map source columns to target columns {source_col: target_col}",
+        "Optional: map source columns to target columns {source_col: target_col}",
           additionalProperties: { type: "string" },
-        },
-        filters: {
-          type: "array",
+      },
+      filters: {
+        type: "array",
           description: "Optional: array of filter conditions for source data",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              field: { type: "string" },
-              operator: {
-                type: "string",
+            field: { type: "string" },
+            operator: {
+              type: "string",
                 enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
               },
-              value: {},
-            },
-            required: ["field", "operator", "value"],
+            value: { },
           },
-        },
-        batch_size: {
-          type: "number",
+          required: ["field", "operator", "value"],
+          },
+      },
+      batch_size: {
+        type: "number",
           description: "Number of rows per batch insert (default: 1000)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["source_table", "target_table"],
     },
-  },
-  {
-    name: "move_table_data",
+    required: ["source_table", "target_table"],
+    },
+},
+{
+  name: "move_table_data",
     description:
-      "Move data from one table to another (copy then delete from source). Requires 'create' and 'delete' permissions.",
+  "Move data from one table to another (copy then delete from source). Requires 'create' and 'delete' permissions.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        source_table: {
-          type: "string",
+      source_table: {
+        type: "string",
           description: "Name of the source table to move from",
         },
-        target_table: {
-          type: "string",
+      target_table: {
+        type: "string",
           description: "Name of the target table to move to",
         },
-        column_mapping: {
-          type: "object",
+      column_mapping: {
+        type: "object",
           description:
-            "Optional: map source columns to target columns {source_col: target_col}",
+        "Optional: map source columns to target columns {source_col: target_col}",
           additionalProperties: { type: "string" },
-        },
-        filters: {
-          type: "array",
+      },
+      filters: {
+        type: "array",
           description: "Optional: array of filter conditions for source data",
-          items: {
-            type: "object",
+            items: {
+          type: "object",
             properties: {
-              field: { type: "string" },
-              operator: {
-                type: "string",
+            field: { type: "string" },
+            operator: {
+              type: "string",
                 enum: ["eq", "neq", "gt", "gte", "lt", "lte", "like", "in"],
               },
-              value: {},
-            },
-            required: ["field", "operator", "value"],
+            value: { },
           },
-        },
-        batch_size: {
-          type: "number",
+          required: ["field", "operator", "value"],
+          },
+      },
+      batch_size: {
+        type: "number",
           description: "Number of rows per batch (default: 1000)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["source_table", "target_table"],
     },
-  },
-  {
-    name: "clone_table",
+    required: ["source_table", "target_table"],
+    },
+},
+{
+  name: "clone_table",
     description:
-      "Clone a table structure with optional data. Requires 'ddl' permission.",
+  "Clone a table structure with optional data. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        source_table: {
-          type: "string",
+      source_table: {
+        type: "string",
           description: "Name of the source table to clone",
         },
-        new_table_name: {
-          type: "string",
+      new_table_name: {
+        type: "string",
           description: "Name of the new table to create",
         },
-        include_data: {
-          type: "boolean",
+      include_data: {
+        type: "boolean",
           description: "Include table data in the clone (default: false)",
         },
-        include_indexes: {
-          type: "boolean",
+      include_indexes: {
+        type: "boolean",
           description: "Include indexes in the clone (default: true)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["source_table", "new_table_name"],
     },
-  },
-  {
-    name: "compare_table_structure",
+    required: ["source_table", "new_table_name"],
+    },
+},
+{
+  name: "compare_table_structure",
     description:
-      "Compare the structure of two tables and identify differences in columns, types, and indexes.",
+  "Compare the structure of two tables and identify differences in columns, types, and indexes.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table1: {
-          type: "string",
+      table1: {
+        type: "string",
           description: "Name of the first table",
         },
-        table2: {
-          type: "string",
+      table2: {
+        type: "string",
           description: "Name of the second table",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table1", "table2"],
     },
-  },
-  {
-    name: "sync_table_data",
+    required: ["table1", "table2"],
+    },
+},
+{
+  name: "sync_table_data",
     description:
-      "Synchronize data between two tables based on a key column. Supports insert-only, update-only, or upsert modes.",
+  "Synchronize data between two tables based on a key column. Supports insert-only, update-only, or upsert modes.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        source_table: {
-          type: "string",
+      source_table: {
+        type: "string",
           description: "Name of the source table",
         },
-        target_table: {
-          type: "string",
+      target_table: {
+        type: "string",
           description: "Name of the target table",
         },
-        key_column: {
-          type: "string",
+      key_column: {
+        type: "string",
           description: "Primary key or unique column to match records",
         },
-        columns_to_sync: {
-          type: "array",
+      columns_to_sync: {
+        type: "array",
           items: { type: "string" },
-          description:
-            "Optional: specific columns to sync (default: all columns)",
+        description:
+        "Optional: specific columns to sync (default: all columns)",
         },
-        sync_mode: {
-          type: "string",
+      sync_mode: {
+        type: "string",
           enum: ["insert_only", "update_only", "upsert"],
           description:
-            "Sync mode: insert_only (new records), update_only (existing), upsert (both). Default: upsert",
+        "Sync mode: insert_only (new records), update_only (existing), upsert (both). Default: upsert",
         },
-        batch_size: {
-          type: "number",
+      batch_size: {
+        type: "number",
           description: "Number of rows per batch (default: 1000)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["source_table", "target_table", "key_column"],
     },
-  },
-  // Schema Versioning and Migrations Tools
-  {
-    name: "init_migrations_table",
+    required: ["source_table", "target_table", "key_column"],
+    },
+},
+// Schema Versioning and Migrations Tools
+{
+  name: "init_migrations_table",
     description:
-      "Initialize the migrations tracking table (_schema_migrations) for schema versioning. Creates the table if it doesn't exist.",
+  "Initialize the migrations tracking table (_schema_migrations) for schema versioning. Creates the table if it doesn't exist.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "create_migration",
+},
+{
+  name: "create_migration",
     description:
-      "Create a new migration entry with up and down SQL. The migration will be stored as pending until applied. Requires 'ddl' permission.",
+  "Create a new migration entry with up and down SQL. The migration will be stored as pending until applied. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        name: {
-          type: "string",
+      name: {
+        type: "string",
           description:
-            "Name of the migration (e.g., 'add_users_table', 'add_email_column')",
+        "Name of the migration (e.g., 'add_users_table', 'add_email_column')",
         },
-        up_sql: {
-          type: "string",
+      up_sql: {
+        type: "string",
           description:
-            "SQL statements to apply the migration (can contain multiple statements separated by semicolons)",
+        "SQL statements to apply the migration (can contain multiple statements separated by semicolons)",
         },
-        down_sql: {
-          type: "string",
+      down_sql: {
+        type: "string",
           description:
-            "SQL statements to rollback the migration (optional but recommended)",
+        "SQL statements to rollback the migration (optional but recommended)",
         },
-        description: {
-          type: "string",
+      description: {
+        type: "string",
           description: "Optional description of what this migration does",
         },
-        version: {
-          type: "string",
+      version: {
+        type: "string",
           description:
-            "Optional: custom version string (14 chars, e.g., '20240115120000'). Auto-generated if not provided.",
+        "Optional: custom version string (14 chars, e.g., '20240115120000'). Auto-generated if not provided.",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["name", "up_sql"],
     },
-  },
-  {
-    name: "apply_migrations",
+    required: ["name", "up_sql"],
+    },
+},
+{
+  name: "apply_migrations",
     description:
-      "Apply all pending migrations or up to a specific version. Executes migrations in version order. Requires 'ddl' permission.",
+  "Apply all pending migrations or up to a specific version. Executes migrations in version order. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        target_version: {
-          type: "string",
+      target_version: {
+        type: "string",
           description:
-            "Optional: apply migrations up to this version (inclusive)",
+        "Optional: apply migrations up to this version (inclusive)",
         },
-        dry_run: {
-          type: "boolean",
+      dry_run: {
+        type: "boolean",
           description:
-            "If true, show what would be applied without executing (default: false)",
+        "If true, show what would be applied without executing (default: false)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "rollback_migration",
+},
+{
+  name: "rollback_migration",
     description:
-      "Rollback applied migrations. Can rollback by steps or to a specific version. Requires 'ddl' permission.",
+  "Rollback applied migrations. Can rollback by steps or to a specific version. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        target_version: {
-          type: "string",
+      target_version: {
+        type: "string",
           description:
-            "Optional: rollback to this version (exclusive - this version will remain applied)",
+        "Optional: rollback to this version (exclusive - this version will remain applied)",
         },
-        steps: {
-          type: "number",
+      steps: {
+        type: "number",
           description:
-            "Number of migrations to rollback (default: 1). Ignored if target_version is specified.",
+        "Number of migrations to rollback (default: 1). Ignored if target_version is specified.",
         },
-        dry_run: {
-          type: "boolean",
+      dry_run: {
+        type: "boolean",
           description:
-            "If true, show what would be rolled back without executing (default: false)",
+        "If true, show what would be rolled back without executing (default: false)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "get_migration_status",
+},
+{
+  name: "get_migration_status",
     description:
-      "Get migration history and status. Shows all migrations with their current status, execution times, and any errors.",
+  "Get migration history and status. Shows all migrations with their current status, execution times, and any errors.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        version: {
-          type: "string",
+      version: {
+        type: "string",
           description: "Optional: get status of a specific version",
         },
-        status: {
-          type: "string",
+      status: {
+        type: "string",
           enum: ["pending", "applied", "failed", "rolled_back"],
           description: "Optional: filter by status",
         },
-        limit: {
-          type: "number",
+      limit: {
+        type: "number",
           description: "Maximum number of migrations to return (default: 50)",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "get_schema_version",
+},
+{
+  name: "get_schema_version",
     description:
-      "Get the current schema version (the last successfully applied migration).",
+  "Get the current schema version (the last successfully applied migration).",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "validate_migrations",
+},
+{
+  name: "validate_migrations",
     description:
-      "Validate all migrations for issues such as duplicate versions, missing down_sql, checksum mismatches, or blocked migrations.",
+  "Validate all migrations for issues such as duplicate versions, missing down_sql, checksum mismatches, or blocked migrations.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
     },
   },
-  {
-    name: "reset_failed_migration",
+},
+{
+  name: "reset_failed_migration",
     description:
-      "Reset a failed migration back to pending status so it can be retried. Only works for migrations in 'failed' status.",
+  "Reset a failed migration back to pending status so it can be retried. Only works for migrations in 'failed' status.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        version: {
-          type: "string",
+      version: {
+        type: "string",
           description: "Version of the failed migration to reset",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["version"],
     },
-  },
-  {
-    name: "generate_migration_from_diff",
+    required: ["version"],
+    },
+},
+{
+  name: "generate_migration_from_diff",
     description:
-      "Generate a migration by comparing two table structures. Creates up_sql to transform table2 to match table1, and down_sql to revert. Requires 'ddl' permission.",
+  "Generate a migration by comparing two table structures. Creates up_sql to transform table2 to match table1, and down_sql to revert. Requires 'ddl' permission.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table1: {
-          type: "string",
+      table1: {
+        type: "string",
           description: "Source table (the structure to match)",
         },
-        table2: {
-          type: "string",
+      table2: {
+        type: "string",
           description: "Target table (the table to be modified)",
         },
-        migration_name: {
-          type: "string",
+      migration_name: {
+        type: "string",
           description: "Name for the generated migration",
         },
-        database: {
-          type: "string",
+      database: {
+        type: "string",
           description: "Optional: specific database name",
         },
-      },
-      required: ["table1", "table2", "migration_name"],
     },
-  },
-  // Performance Monitoring Tools
-  {
-    name: "get_performance_metrics",
-    description:
-      "Get comprehensive performance metrics including query performance, connection stats, buffer pool metrics, and InnoDB statistics.",
-    inputSchema: {
-      type: "object",
-      properties: {},
+    required: ["table1", "table2", "migration_name"],
     },
-  },
-  {
-    name: "get_top_queries_by_time",
+},
+// Performance Monitoring Tools
+{
+  name: "get_performance_metrics",
     description:
-      "Get the top queries ordered by total execution time. Useful for identifying slow queries.",
+  "Get comprehensive MySQL performance metrics including query performance, connection stats, buffer pool metrics, and InnoDB statistics.",
     inputSchema: {
-      type: "object",
+    type: "object",
+      properties: { },
+  },
+},
+{
+  name: "get_top_queries_by_time",
+    description:
+  "Get the top queries ordered by total execution time. Useful for identifying slow queries.",
+    inputSchema: {
+    type: "object",
       properties: {
-        limit: {
-          type: "number",
+      limit: {
+        type: "number",
           description:
-            "Maximum number of queries to return (default: 10, max: 100)",
+        "Maximum number of queries to return (default: 10, max: 100)",
         },
-      },
     },
   },
-  {
-    name: "get_top_queries_by_count",
+},
+{
+  name: "get_top_queries_by_count",
     description:
-      "Get the top queries ordered by execution count. Useful for identifying frequently executed queries.",
+  "Get the top queries ordered by execution count. Useful for identifying frequently executed queries.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        limit: {
-          type: "number",
+      limit: {
+        type: "number",
           description:
-            "Maximum number of queries to return (default: 10, max: 100)",
+        "Maximum number of queries to return (default: 10, max: 100)",
         },
-      },
     },
   },
-  {
-    name: "get_slow_queries",
+},
+{
+  name: "get_slow_queries",
     description:
-      "Get queries that exceed a specified execution time threshold.",
+  "Get queries that exceed a specified execution time threshold.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        limit: {
-          type: "number",
+      limit: {
+        type: "number",
           description:
-            "Maximum number of queries to return (default: 10, max: 100)",
+        "Maximum number of queries to return (default: 10, max: 100)",
         },
-        threshold_seconds: {
-          type: "number",
+      threshold_seconds: {
+        type: "number",
           description: "Execution time threshold in seconds (default: 1)",
         },
-      },
     },
   },
-  {
-    name: "get_table_io_stats",
+},
+{
+  name: "get_table_io_stats",
     description:
-      "Get I/O statistics for tables including read/write operations and timings.",
+  "Get I/O statistics for tables including read/write operations and timings.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        limit: {
-          type: "number",
+      limit: {
+        type: "number",
           description:
-            "Maximum number of tables to return (default: 20, max: 100)",
+        "Maximum number of tables to return (default: 20, max: 100)",
         },
-        table_schema: {
-          type: "string",
+      table_schema: {
+        type: "string",
           description: "Filter by specific database schema",
         },
-      },
     },
   },
-  {
-    name: "get_index_usage_stats",
+},
+{
+  name: "get_index_usage_stats",
     description:
-      "Get index usage statistics showing how often each index is used.",
+  "Get index usage statistics showing how often each index is used.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        limit: {
-          type: "number",
+      limit: {
+        type: "number",
           description:
-            "Maximum number of indexes to return (default: 20, max: 100)",
+        "Maximum number of indexes to return (default: 20, max: 100)",
         },
-        table_schema: {
-          type: "string",
+      table_schema: {
+        type: "string",
           description: "Filter by specific database schema",
         },
-      },
     },
   },
-  {
-    name: "get_unused_indexes",
+},
+{
+  name: "get_unused_indexes",
     description:
-      "Identify indexes that are not being used by queries. These may be candidates for removal to improve write performance.",
+  "Identify indexes that are not being used by queries. These may be candidates for removal to improve write performance.",
     inputSchema: {
-      type: "object",
+    type: "object",
       properties: {
-        table_schema: {
-          type: "string",
+      table_schema: {
+        type: "string",
           description: "Filter by specific database schema",
         },
-      },
     },
   },
-  {
-    name: "get_connection_pool_stats",
+},
+{
+  name: "get_connection_pool_stats",
     description:
-      "Get connection pool statistics including current connections, max usage, configuration, and health indicators.",
+  "Get connection pool statistics including current connections, max usage, configuration, and health indicators.",
     inputSchema: {
-      type: "object",
-      properties: {},
-    },
+    type: "object",
+      properties: { },
   },
-  {
-    name: "get_database_health_check",
+},
+{
+  name: "get_database_health_check",
     description:
-      "Perform a comprehensive health check of the database including connection usage, buffer pool efficiency, aborted connections, and slow queries.",
+  "Perform a comprehensive health check of the database including connection usage, buffer pool efficiency, aborted connections, and slow queries.",
     inputSchema: {
-      type: "object",
-      properties: {},
-    },
+    type: "object",
+      properties: { },
   },
-  {
-    name: "reset_performance_stats",
+},
+{
+  name: "reset_performance_stats",
     description:
-      "Reset performance schema statistics. This clears query digest statistics, table I/O stats, and index usage stats. Requires 'utility' permission.",
+  "Reset performance schema statistics. This clears query digest statistics, table I/O stats, and index usage stats. Requires 'utility' permission.",
     inputSchema: {
-      type: "object",
-      properties: {},
-    },
+    type: "object",
+      properties: { },
   },
+},
 ];
 
 // Create the MCP server
@@ -2981,52 +2999,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         result = await mysqlMCP.readTableSchema(
           (args || {}) as { table_name: string },
         );
-        break;
-
-      case "create_record":
-        result = await mysqlMCP.createRecord(
-          (args || {}) as { table_name: string; data: Record<string, any> },
-        );
-        break;
-
-      case "read_records":
-        result = await mysqlMCP.readRecords((args || {}) as any);
-        break;
-
-      case "update_record":
-        result = await mysqlMCP.updateRecord((args || {}) as any);
-        break;
-
-      case "delete_record":
-        result = await mysqlMCP.deleteRecord((args || {}) as any);
-        break;
-
-      case "bulk_insert":
-        result = await mysqlMCP.bulkInsert((args || {}) as any);
-        break;
-
-      case "bulk_update":
-        result = await mysqlMCP.bulkUpdate((args || {}) as any);
-        break;
-
-      case "bulk_delete":
-        result = await mysqlMCP.bulkDelete((args || {}) as any);
-        break;
-
-      case "run_query":
-        result = await mysqlMCP.runQuery(
-          (args || {}) as { query: string; params?: any[] },
-        );
-        break;
-
-      case "execute_sql":
-        result = await mysqlMCP.executeSql(
-          (args || {}) as { query: string; params?: any[] },
-        );
-        break;
-
-      case "create_table":
-        result = await mysqlMCP.createTable(args || {});
         break;
 
       case "alter_table":
@@ -3451,6 +3423,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
       case "reset_performance_stats":
         result = await mysqlMCP.resetPerformanceStats();
+        break;
+
+      case "repair_query":
+        result = await mysqlMCP.repairQuery(
+          (args || {}) as { query: string; error_message?: string },
+        );
         break;
 
       default:
