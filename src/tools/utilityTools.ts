@@ -1,6 +1,8 @@
 import DatabaseConnection from "../db/connection";
 import { dbConfig } from "../config/config";
 import { validateGetTableRelationships } from "../validation/schemas";
+import fs from "fs";
+import path from "path";
 
 export class UtilityTools {
   private db: DatabaseConnection;
@@ -224,6 +226,87 @@ export class UtilityTools {
       return {
         status: "error",
         error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Reads the CHANGELOG.md file from the project root
+   */
+  async readChangelog(params?: { version?: string; limit?: number }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
+    try {
+      // Resolve path relative to the built file (dist/tools/utilityTools.js -> ../../CHANGELOG.md)
+      // or source file (src/tools/utilityTools.ts -> ../../CHANGELOG.md)
+      const changelogPath = path.resolve(__dirname, "..", "..", "CHANGELOG.md");
+
+      if (!fs.existsSync(changelogPath)) {
+        return {
+          status: "error",
+          error: "CHANGELOG.md not found in the project root.",
+        };
+      }
+
+      const content = fs.readFileSync(changelogPath, "utf-8");
+
+      // If version specified, try to parse and find it
+      if (params?.version) {
+        // Simple parsing - look for headers like "## [1.2.3]"
+        const versionHeader = `## [${params.version}]`;
+        const lines = content.split("\n");
+        let found = false;
+        let versionContent = "";
+
+        for (const line of lines) {
+          if (line.startsWith(versionHeader)) {
+            found = true;
+            versionContent += line + "\n";
+            continue;
+          }
+          if (found) {
+            if (line.startsWith("## [")) break; // Next version starts
+            versionContent += line + "\n";
+          }
+        }
+
+        if (!found) {
+          return {
+            status: "error",
+            error: `Version ${params.version} not found in CHANGELOG.md`,
+          };
+        }
+
+        return {
+          status: "success",
+          data: {
+            version: params.version,
+            content: versionContent.trim(),
+          },
+        };
+      }
+
+      // If no version, return the whole file or top N characters/lines?
+      // For now, let's return the most recent versions.
+      // Limit default to 3000 chars to avoid overflowing context
+      const maxLength = params?.limit || 5000;
+      const truncated = content.length > maxLength
+        ? content.substring(0, maxLength) + "\n... (truncated)"
+        : content;
+
+      return {
+        status: "success",
+        data: {
+          content: truncated,
+        },
+      };
+
+    } catch (error: any) {
+      return {
+        status: "error",
+        error: `Failed to read changelog: ${error.message}`,
       };
     }
   }

@@ -697,6 +697,24 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: "read_changelog",
+    description:
+      "Reads the changelog to see what features are new or changed.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        version: {
+          type: "string",
+          description: "Optional: specific version to read (e.g., '1.0.0')",
+        },
+        limit: {
+          type: "number",
+          description: "Optional: limit character count (default: 5000)",
+        },
+      },
+    },
+  },
+  {
     name: "test_connection",
     description:
       "Tests the database connection and returns latency information.",
@@ -3048,6 +3066,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
       case "test_connection":
         result = await mysqlMCP.testConnection();
+        break;
+
+      case "read_changelog":
+        result = await mysqlMCP.readChangelog(
+          (args || {}) as { version?: string; limit?: number },
+        );
         break;
 
       case "get_table_relationships":

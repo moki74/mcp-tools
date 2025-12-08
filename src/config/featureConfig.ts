@@ -57,6 +57,8 @@ export interface PermissionPreset {
   description: string;
   permissions: ToolCategory[];
   categories: DocCategory[];
+  allowedTools?: string[];
+  deniedTools?: string[];
 }
 
 const normalizePresetName = (value?: string): string =>
@@ -126,6 +128,58 @@ const permissionPresets: Record<string, PermissionPreset> = {
       DocCategory.STORED_PROCEDURES,
     ],
   },
+  dev: {
+    name: "dev",
+    description: "Development profile with full access to all tools",
+    permissions: Object.values(ToolCategory),
+    categories: Object.values(DocCategory),
+    deniedTools: [], // Explicitly allow everything
+  },
+  stage: {
+    name: "stage",
+    description: "Staging profile with data modification but no destructive DDL",
+    permissions: [
+      ToolCategory.LIST,
+      ToolCategory.READ,
+      ToolCategory.CREATE,
+      ToolCategory.UPDATE,
+      ToolCategory.DELETE,
+      ToolCategory.UTILITY,
+      ToolCategory.TRANSACTION,
+    ],
+    categories: [
+      DocCategory.DATABASE_DISCOVERY,
+      DocCategory.CRUD_OPERATIONS,
+      DocCategory.BULK_OPERATIONS,
+      DocCategory.CUSTOM_QUERIES,
+      DocCategory.UTILITIES,
+      DocCategory.TRANSACTION_MANAGEMENT,
+      DocCategory.IMPORT_EXPORT,
+      DocCategory.DATA_MIGRATION,
+      DocCategory.PERFORMANCE_MONITORING,
+      DocCategory.ANALYSIS,
+    ],
+    deniedTools: ["drop_table", "truncate_table", "drop_database"],
+  },
+  prod: {
+    name: "prod",
+    description: "Production profile with strict read-only access and safety checks",
+    permissions: [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY],
+    categories: [
+      DocCategory.DATABASE_DISCOVERY,
+      DocCategory.CRUD_OPERATIONS, // Read only via permissions
+      DocCategory.CUSTOM_QUERIES,
+      DocCategory.UTILITIES,
+      DocCategory.PERFORMANCE_MONITORING,
+      DocCategory.ANALYSIS,
+    ],
+    deniedTools: [
+      "create_table", "alter_table", "drop_table", "truncate_table",
+      "create_record", "update_record", "delete_record",
+      "bulk_insert", "bulk_update", "bulk_delete",
+      "execute_sql", "execute_ddl"
+    ],
+  },
 };
 
 /**
@@ -170,6 +224,8 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   getTableRelationships: ToolCategory.UTILITY,
   exportTableToCSV: ToolCategory.UTILITY,
   exportQueryToCSV: ToolCategory.UTILITY,
+  safe_export_table: ToolCategory.UTILITY,
+  read_changelog: ToolCategory.UTILITY,
 
   // Transaction tools
   beginTransaction: ToolCategory.TRANSACTION,
@@ -326,6 +382,7 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   describeConnection: DocCategory.UTILITIES,
   exportTableToCSV: DocCategory.UTILITIES,
   exportQueryToCSV: DocCategory.UTILITIES,
+  read_changelog: DocCategory.UTILITIES,
 
   // Transaction Management
   beginTransaction: DocCategory.TRANSACTION_MANAGEMENT,
@@ -534,6 +591,11 @@ const legacyToDocCategoryMap: Record<string, DocCategory[]> = {
 export class FeatureConfig {
   private enabledLegacyCategories: Set<ToolCategory>;
   private enabledDocCategories: Set<DocCategory>;
+
+  // New Allow/Deny Lists
+  private allowedTools: Set<string>;
+  private deniedTools: Set<string>;
+
   private originalPermissionsString: string;
   private originalCategoriesString: string;
   private useDualLayer: boolean; // Flag to determine if using dual-layer filtering
@@ -604,6 +666,10 @@ export class FeatureConfig {
     const parsed = this.parseConfig(mergedPermissions, mergedCategories);
     this.enabledLegacyCategories = parsed.legacy;
     this.enabledDocCategories = parsed.doc;
+
+    // Initialize Allow/Deny Lists
+    this.allowedTools = new Set(this.activePreset?.allowedTools || []);
+    this.deniedTools = new Set(this.activePreset?.deniedTools || []);
   }
 
   /**
@@ -675,6 +741,10 @@ export class FeatureConfig {
         docCats.forEach((dc) => docSet.add(dc));
       });
     }
+
+    // Re-initialize Allow/Deny Lists if preset changed
+    this.allowedTools = new Set(this.activePreset?.allowedTools || []);
+    this.deniedTools = new Set(this.activePreset?.deniedTools || []);
 
     return {
       legacy: legacySet,
@@ -754,6 +824,16 @@ export class FeatureConfig {
       return false;
     }
 
+    // Layer 0: Check explicit Deny/Allow lists
+    // Deny takes precedence
+    if (this.deniedTools.has(toolName)) {
+      return false;
+    }
+    // Allow overrides other checks
+    if (this.allowedTools.has(toolName)) {
+      return true;
+    }
+
     // Layer 1: Check permission (legacy category)
     const hasPermission = legacyCategory
       ? this.enabledLegacyCategories.has(legacyCategory)
@@ -784,6 +864,10 @@ export class FeatureConfig {
 
     if (!docCategory && !legacyCategory) {
       return `Unknown tool '${toolName}'. This tool is not recognized by the MCP server.`;
+    }
+
+    if (this.deniedTools.has(toolName)) {
+      return `Permission denied: Tool '${toolName}' is explicitly denied by the current profile ('${this.presetName}').`;
     }
 
     const isAllEnabled =

@@ -308,6 +308,14 @@ export class MySQLMCP {
     return await this.utilityTools.getTableRelationships(params);
   }
 
+  async readChangelog(params?: { version?: string; limit?: number }) {
+    const check = this.checkToolEnabled("read_changelog");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.utilityTools.readChangelog(params);
+  }
+
   // Transaction Tools
   async beginTransaction(params?: { transactionId?: string }) {
     const check = this.checkToolEnabled("beginTransaction");

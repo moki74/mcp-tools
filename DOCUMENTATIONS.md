@@ -192,6 +192,16 @@ Preset bundles provide safe starting points and **merge** with any explicit perm
 | `readonly` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis` | Safe read-only access, exports, and diagnostics |
 | `analyst` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis,query_optimization,cache_management,server_management` | Exploration with EXPLAIN, cache, and performance visibility |
 | `dba-lite` | `list,read,utility,ddl,transaction,procedure` | `database_discovery,custom_queries,utilities,server_management,schema_management,table_maintenance,index_management,constraint_management,backup_restore,schema_migrations,performance_monitoring,views_management,triggers_management,functions_management,stored_procedures` | Admin-lite schema care, maintenance, and migrations |
+| `dev` | ALL | ALL | Full access to all tools (Development environment) |
+| `stage` | `list,read,create,update,delete,utility,transaction` | Most categories (except schema_management) | Data modification allowed, but destructive DDL (drop_table, truncate_table) is **explicitly denied** |
+| `prod` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,performance_monitoring,analysis` | Strict read-only. Data modification and DDL are **strictly denied** (even if permissions suggest otherwise) |
+
+### Connection Profiles (Allow/Deny Lists)
+
+The new mechanism introduces "Connection Profiles" which can enforce strict `allow` and `deny` lists for tools, providing security beyond standard permissions.
+
+- **Explicit Deny**: Tools in the `deniedTools` list are blocked *regardless* of their permissions. E.g., `prod` profile denies `create_record` even if `create` permission is somehow granted.
+- **Explicit Allow**: Tools in the `allowedTools` list are enabled even if their category is not listed (unless denied).
 
 **Usage**
 
@@ -324,6 +334,7 @@ This section provides a comprehensive reference of all 120 available tools organ
 |------|-------------|
 | `test_connection` | Test database connectivity and measure latency |
 | `describe_connection` | Get current connection information |
+| `read_changelog` | Read the changelog to see new features/changes |
 | `export_table_to_csv` | Export table data to CSV format |
 | `export_query_to_csv` | Export query results to CSV format |
 
@@ -519,6 +530,11 @@ This section provides a comprehensive reference of all 120 available tools organ
 - Tunable size: `max_tables` (default 50, max 200) and `max_columns` (default 12) to control output length; set `include_relationships` to `false` to omit FK lines.
 - Safety: respects the connected database only—cannot introspect other schemas—and notes when tables/columns are truncated.
 - Output includes per-table PKs, FK targets, nullable flags, and approximate row counts from `INFORMATION_SCHEMA.TABLES` (InnoDB estimates).
+
+#### Agent-Facing Changelog Feed
+- **`read_changelog`**: Allows AI agents to read the project's CHANGELOG.md directly.
+- **Purpose**: Enables the agent to understand new features, changes, and deprecations in the version it is running.
+- **Usage**: Call `read_changelog()` to get the latest changes, or `read_changelog(version='1.15.0')` for specific version details.
 
 ---
 
@@ -3824,6 +3840,61 @@ Each bulk operation returns performance metrics:
  
  ---
  
+
+ ---
+ 
+ ## ⚡ Workflow Macros
+
+ Workflow macros are high-level tools that combine multiple operations into a single, safe, and efficient workflow. They are designed to simplify complex tasks and ensure best practices (like data masking) are automatically applied.
+
+ ### Safe Export Table
+
+ The `safe_export_table` tool allows you to export table data to CSV while strictly enforcing data masking rules. This ensures that sensitive information (PII) is never leaked during exports, even if the agent forgets to apply masking manually.
+
+ #### Features
+
+ - **Forced Masking**: Applies a masking profile (default: `strict`) to all exported data.
+ - **Hard Limit**: Enforces a maximum row limit (10,000) to prevent Out-Of-Memory errors during large exports.
+ - **CSV Formatting**: Automatically handles special characters, quotes, and newlines.
+ - **Header Control**: Option to include or exclude CSV headers.
+
+ #### Usage
+
+ ```json
+ {
+   "tool": "safe_export_table",
+   "arguments": {
+     "table_name": "users",
+     "masking_profile": "partial",
+     "limit": 1000
+   }
+ }
+ ```
+
+ #### Parameters
+
+ | Parameter | Type | Required | Description | Default |
+ |-----------|------|----------|-------------|---------|
+ | `table_name` | string | Yes | Name of the table to export | - |
+ | `masking_profile` | string | No | Masking profile to apply (`strict`, `partial`, `soft`) | `strict` |
+ | `limit` | number | No | Number of rows to export (max 10,000) | 1000 |
+ | `include_headers` | boolean | No | Whether to include CSV headers | `true` |
+
+ #### Response
+
+ ```json
+ {
+   "status": "success",
+   "data": {
+     "csv": "id,name,email\n1,John Doe,j***@example.com...",
+     "row_count": 50,
+     "applied_profile": "partial"
+   }
+ }
+ ```
+
+ ---
+
  ## 🤖 OpenAI Codex Integration
 
 OpenAI Codex CLI and VS Code Extension support MCP servers through a shared TOML configuration file. This section provides detailed setup instructions for integrating the MySQL MCP Server with Codex.
@@ -4210,9 +4281,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Safety Sandbox Mode (runQuery dry-run/EXPLAIN-only) | Medium | Low | 5 | ✅ Completed |
 | Anomaly & Slow-Query Watcher | Medium | Medium | 6 | ✅ Completed |
 | Data Masking Profiles for Responses | Medium | Medium | 7 | ✅ Completed |
-| Workflow Macros (e.g., safe_export_table) | Medium | Low | 8 | Planned |
-| Agent-Facing Changelog Feed | Medium | Low | 9 | Planned |
-| Connection Profiles (dev/stage/prod with allow/deny) | High | Low | 10 | Planned |
+| Workflow Macros (e.g., safe_export_table) | Medium | Low | 8 | ✅ Completed |
+| Agent-Facing Changelog Feed | Medium | Low | 9 | ✅ Completed |
+| Connection Profiles (dev/stage/prod with allow/deny) | High | Low | 10 | ✅ Completed |
 
 ---
 

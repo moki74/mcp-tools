@@ -50,7 +50,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
   - [Environment Variables](#environment-variables-configuration)
   - [Local Development](#local-path-configuration)
 - [Permission System](#-permission-system)
-- [Available Tools (124 total)](#-available-tools)
+- [Available Tools (126 total)](#-available-tools)
 - [Documentation](#-detailed-documentation)
 - [Comparison: MCP vs Manual Access](#-mysql-mcp-vs-manual-database-access)
 - [License](#-license)
@@ -388,6 +388,12 @@ Alternative approach using environment variables instead of connection string:
 
 Add `MCP_PRESET` for the base bundle and optionally layer on `MCP_PERMISSIONS` / `MCP_CATEGORIES` for project-specific overrides.
 
+#### Connection Profiles (dev/stage/prod)
+New presets are available for environment-specific control:
+- `dev`: Full access to all tools (explicitly allows everything).
+- `stage`: Allows data modification but blocks destructive DDL (drop/truncate).
+- `prod`: Strict read-only mode, explicitly denying keys modification keys.
+
 ---
 
 ### Local Path Configuration
@@ -641,11 +647,11 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 
 ## Available Tools
 
-The MCP server provides **124 powerful tools** organized into categories:
+The MCP server provides **126 powerful tools** organized into 22 categories:
 
 ### Quick Reference
 
-**124 Tools Available** - Organized into 22 categories
+**126 Tools Available** - Organized into 22 categories
 
 | Category | Count | Key Tools |
 |----------|-------|-----------|
@@ -667,7 +673,7 @@ The MCP server provides **124 powerful tools** organized into categories:
 | Cache | 5 | `get_cache_stats`, `clear_cache` |
 | Query Optimization | 3 | `analyze_query`, `get_optimization_hints`, `repair_query` |
 | Backup & Restore | 5 | `backup_database`, `restore_from_sql` |
-| Import/Export | 5 | `export_table_to_json`, `import_from_csv` |
+| Import/Export | 6 | `safe_export_table`, `export_table_to_json`, `import_from_csv` |
 | Data Migration | 5 | `copy_table_data`, `sync_table_data` |
 | Schema Migrations | 9 | `create_migration`, `apply_migrations` |
 | Utilities | 4 | `test_connection`, `export_table_to_csv` |

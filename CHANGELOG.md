@@ -5,6 +5,17 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2025-12-08
+
+### Added
+- **Connection Profiles** - New `dev`, `stage`, and `prod` presets.
+  - `dev`: Full access to all tools.
+  - `stage`: Allows CRUD but blocks destructive DDL (drop, truncate).
+  - `prod`: Strict read-only with explicit denials for modification tools.
+  - Implements allowed/denied tools logic for robust security enforcement.
+- **Agent-Facing Changelog Feed** - New `read_changelog` tool.
+  - Allows AI agents to read the CHANGELOG.md directly to understand new features and changes.
+
 ## [1.14.1] - 2025-12-08
 
 ### Added
