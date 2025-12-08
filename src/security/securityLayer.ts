@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import { FeatureConfig, ToolCategory } from "../config/featureConfig.js";
+import { MaskingLayer } from "./maskingLayer.js";
 
 export class SecurityLayer {
   private ajv: InstanceType<typeof Ajv>;
@@ -7,10 +8,15 @@ export class SecurityLayer {
   private readonly allowedOperations: string[];
   private readonly ddlOperations: string[];
   private featureConfig: FeatureConfig;
+  public masking: MaskingLayer;
 
   constructor(featureConfig?: FeatureConfig) {
     this.ajv = new Ajv();
     this.featureConfig = featureConfig || new FeatureConfig();
+
+    // Initialize masking layer from environment variable
+    const maskingProfile = process.env.MCP_MASKING_PROFILE || "none";
+    this.masking = new MaskingLayer(maskingProfile);
 
     // Define dangerous SQL keywords that should ALWAYS be blocked (critical security threats)
     // These are blocked even with 'execute' permission

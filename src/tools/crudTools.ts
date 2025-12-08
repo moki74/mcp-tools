@@ -254,7 +254,7 @@ export class CrudTools {
 
         return {
           status: "success",
-          data: results,
+          data: this.security.masking.processResults(results),
           total,
         };
       } else {
@@ -267,7 +267,7 @@ export class CrudTools {
 
         return {
           status: "success",
-          data: results,
+          data: this.security.masking.processResults(results),
           total: results.length,
         };
       }

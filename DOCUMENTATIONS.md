@@ -3759,7 +3759,44 @@ Each bulk operation returns performance metrics:
 
 ---
 
-## 🤖 OpenAI Codex Integration
+## 🎭 Data Masking
+ 
+ The MySQL MCP server includes a robust data masking layer to protect sensitive information (PII, credentials) in query results. This is useful when sharing database access with AI agents or third parties.
+ 
+ ### Features
+ 
+ - **Profile-Based Masking**: Easy configuration profiles (`none`, `soft`, `partial`, `strict`)
+ - **Automatic Detection**: Automatically identifies sensitive columns by name (e.g., `email`, `password`, `ssn`)
+ - **Multiple Strategies**:
+   - **REDACT**: Replaces value with `[REDACTED]`
+   - **PARTIAL**: Partially masks email (`j***@d.com`) and phone/CC (`***1234`)
+   - **HASH**: (Internal placeholder)
+ 
+ ### Configuration
+ 
+ Configure the masking profile via the `MCP_MASKING_PROFILE` environment variable:
+ 
+ ```bash
+ MCP_MASKING_PROFILE=partial
+ ```
+ 
+ ### Profiles Reference
+ 
+ | Profile | Description | Credentials (password, key) | PII (email, phone, ssn) |
+ |---------|-------------|-----------------------------|-------------------------|
+ | `none` | No masking (default) | Show | Show |
+ | `soft` | Protect secrets only | **REDACT** | Show |
+ | `partial` | Balanced security | **REDACT** | **PARTIAL** (j***@...) |
+ | `strict` | Maximum security | **REDACT** | **REDACT** |
+ 
+ ### Behavior
+ 
+ - Masking applies automatically to `run_query` and `read_records` results.
+ - It filters output **after** the query is run, so WHERE clauses still work on the real data (e.g., you can search by email, but the result will be masked).
+ 
+ ---
+ 
+ ## 🤖 OpenAI Codex Integration
 
 OpenAI Codex CLI and VS Code Extension support MCP servers through a shared TOML configuration file. This section provides detailed setup instructions for integrating the MySQL MCP Server with Codex.
 
@@ -4144,7 +4181,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | Drift & Migration Assistant (Schema diff + risk summary) | High | High | 4 | ✅ Completed |
 | Safety Sandbox Mode (runQuery dry-run/EXPLAIN-only) | Medium | Low | 5 | ✅ Completed |
 | Anomaly & Slow-Query Watcher | Medium | Medium | 6 | ✅ Completed |
-| Data Masking Profiles for Responses | Medium | Medium | 7 | Planned |
+| Data Masking Profiles for Responses | Medium | Medium | 7 | ✅ Completed |
 | Workflow Macros (e.g., safe_export_table) | Medium | Low | 8 | Planned |
 | Agent-Facing Changelog Feed | Medium | Low | 9 | Planned |
 | Connection Profiles (dev/stage/prod with allow/deny) | High | Low | 10 | Planned |

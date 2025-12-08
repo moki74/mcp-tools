@@ -70,6 +70,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 | **Transaction Support** | Full ACID transaction management (BEGIN, COMMIT, ROLLBACK) |
 | **Schema Migrations** | Version control for database schema with up/down migrations |
 | **Dual Mode** | Run as MCP server OR as REST API |
+| **Data Masking** | Protect PII/Secrets in responses with configurable profiles (soft/partial/strict) |
 | **TypeScript** | Fully typed with TypeScript definitions |
 
 ---
@@ -106,6 +107,7 @@ DB_USER=root
 DB_PASSWORD=yourpassword
 DB_NAME=yourdatabase
 MCP_CONFIG=list,read,utility
+MCP_MASKING_PROFILE=partial
 ```
 
 ### 2. Build Project (If Cloned Locally)
@@ -367,7 +369,8 @@ Alternative approach using environment variables instead of connection string:
         "DB_PASSWORD": "your_password",
         "DB_NAME": "your_database",
         "MCP_PERMISSIONS": "list,read,utility",
-        "MCP_CATEGORIES": "database_discovery,performance_monitoring"
+        "MCP_CATEGORIES": "database_discovery,performance_monitoring",
+        "MCP_MASKING_PROFILE": "partial"
       }
     }
   }

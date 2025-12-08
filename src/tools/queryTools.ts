@@ -99,18 +99,18 @@ export class QueryTools {
           explainQuery,
           paramValidation.sanitizedParams!,
         );
-        
+
         // Try to get cost from JSON format
         let estimatedCost = "Unknown";
         let executionPlan = explainResult;
 
         if (explainResult[0] && explainResult[0].EXPLAIN) {
           try {
-             const explainJson = JSON.parse(explainResult[0].EXPLAIN);
-             estimatedCost = explainJson.query_block?.cost_info?.query_cost || "Unknown";
-             executionPlan = explainJson;
+            const explainJson = JSON.parse(explainResult[0].EXPLAIN);
+            estimatedCost = explainJson.query_block?.cost_info?.query_cost || "Unknown";
+            executionPlan = explainJson;
           } catch (e) {
-             // Ignore parsing error
+            // Ignore parsing error
           }
         }
 
@@ -132,9 +132,11 @@ export class QueryTools {
         useCache,
       );
 
+      const maskedResults = this.security.masking.processResults(results);
+
       return {
         status: "success",
-        data: results,
+        data: maskedResults,
         optimizedQuery,
       };
     } catch (error: any) {
