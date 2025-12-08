@@ -56,20 +56,6 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 - [License](#-license)
 
 ---
-
-## Features
-
-| Category | Description |
-|----------|-------------|
-| **Full MCP Support** | Works with Claude Code, Cursor, Windsurf, Zed, Cline, Kilo Code, Roo Code, Gemini CLI, OpenAI Codex, and any MCP-compatible AI agent |
-| **Security First** | Parameterized queries, SQL injection protection, permission-based access control |
-| **124 Powerful Tools** | Complete database operations including CRUD, DDL, transactions, stored procedures, backup/restore, migrations |
-| **Adaptive Presets** | Built-in ReadOnly/Analyst/DBA Lite permission bundles with override merging |
-| **Schema-Aware RAG Pack** | Compact schema snapshots (tables, PK/FK, row estimates) tailored for embeddings-friendly prompts |
-| **Category Filtering** | 22 documentation categories for intuitive, fine-grained access control (backward compatible with 10 legacy categories) |
-| **Transaction Support** | Full ACID transaction management (BEGIN, COMMIT, ROLLBACK) |
-| **Schema Migrations** | Version control for database schema with up/down migrations |
-| **Dual Mode** | Run as MCP server OR as REST API |
 | **Data Masking** | Protect PII/Secrets in responses with configurable profiles (soft/partial/strict) |
 | **TypeScript** | Fully typed with TypeScript definitions |
 

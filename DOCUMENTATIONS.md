@@ -26,19 +26,6 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 18. [Performance Monitoring](#📈-performance-monitoring)
 19. [Usage Examples](#📋-usage-examples)
 20. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
-21. [Security Features](#🔒-security-features)
-22. [Query Result Caching](#💾-query-result-caching)
-23. [Query Optimization Hints](#🎯-query-optimization-hints)
-24. [Guided Query Builder/Fixer](#🤖-guided-query-builderfixer)
-25. [Bulk Operations](#🚀-bulk-operations)
-26. [OpenAI Codex Integration](#🤖-openai-codex-integration)
-27. [Troubleshooting](#🛠️-troubleshooting)
-28. [License](#📄-license)
-29. [Roadmap](#🗺️-roadmap)
-
----
-
-## Dual-Layer Filtering System
 
 Control which database operations are available to AI using a **dual-layer filtering system**:
 
@@ -751,6 +738,47 @@ Both tools support:
   }
 }
 ```
+
+---
+
+## 🔄 Workflow Macros
+
+Workflow Macros are composite tools designed to execute complex, multi-step operations safely and efficiently. They encapsulate best practices and security policies (like data masking) into single, atomic tool calls.
+
+### Available Macros
+
+| Tool | Description |
+|------|-------------|
+| `safe_export_table` | Exports table data to CSV with mandated data masking (redaction/hashing) |
+
+### safe_export_table
+
+Exports table data to CSV format *with enforced data masking*. This is safer than standard export tools because it ensures sensitive data is masked before leaving the database layer, regardless of the global masking configuration.
+
+**Parameters:**
+- `table_name` (required): Name of the table to export.
+- `masking_profile` (optional): "strict" (default), "partial", or "soft".
+- `limit` (optional): Maximum rows to export (default 1000, max 10000).
+- `include_headers` (optional): Whether to include CSV headers (default true).
+
+**Example:**
+*User prompt: "Safely export the users table to a CSV file"*
+
+```json
+{
+  "tool": "safe_export_table",
+  "arguments": {
+    "table_name": "users",
+    "masking_profile": "strict"
+  }
+}
+```
+
+**Result:**
+CSV content where:
+- Emails are masked (e.g., `j***@domain.com`)
+- Passwords/secrets are `[REDACTED]`
+- Phone numbers are partially hidden
 
 ---
 

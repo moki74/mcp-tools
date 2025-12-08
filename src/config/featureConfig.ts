@@ -259,21 +259,6 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
 
   // Backup and restore tools
   backupTable: ToolCategory.UTILITY,
-  backupDatabase: ToolCategory.UTILITY,
-  restoreFromSql: ToolCategory.DDL,
-  getCreateTableStatement: ToolCategory.LIST,
-  getDatabaseSchema: ToolCategory.LIST,
-
-  // Extended data export/import tools
-  exportTableToJSON: ToolCategory.UTILITY,
-  exportQueryToJSON: ToolCategory.UTILITY,
-  exportTableToSql: ToolCategory.UTILITY,
-  importFromCSV: ToolCategory.CREATE,
-  importFromJSON: ToolCategory.CREATE,
-
-  // Data migration tools
-  copyTableData: ToolCategory.CREATE,
-  moveTableData: ToolCategory.DELETE,
   cloneTable: ToolCategory.DDL,
   compareTableStructure: ToolCategory.LIST,
   syncTableData: ToolCategory.UPDATE,
@@ -451,6 +436,7 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   exportTableToJSON: DocCategory.IMPORT_EXPORT,
   exportQueryToJSON: DocCategory.IMPORT_EXPORT,
   exportTableToSql: DocCategory.IMPORT_EXPORT,
+  safe_export_table: DocCategory.IMPORT_EXPORT,
   importFromCSV: DocCategory.IMPORT_EXPORT,
   importFromJSON: DocCategory.IMPORT_EXPORT,
 
@@ -589,11 +575,11 @@ export class FeatureConfig {
       ? this.activePreset.categories.join(",")
       : presetRequested && !categoriesInput
         ? [
-            DocCategory.DATABASE_DISCOVERY,
-            DocCategory.CRUD_OPERATIONS,
-            DocCategory.CUSTOM_QUERIES,
-            DocCategory.UTILITIES,
-          ].join(",")
+          DocCategory.DATABASE_DISCOVERY,
+          DocCategory.CRUD_OPERATIONS,
+          DocCategory.CUSTOM_QUERIES,
+          DocCategory.UTILITIES,
+        ].join(",")
         : "";
 
     if (presetRequested && !this.activePreset) {
@@ -690,7 +676,7 @@ export class FeatureConfig {
       });
     }
 
-   return {
+    return {
       legacy: legacySet,
       doc: docSet,
     };
@@ -722,11 +708,11 @@ export class FeatureConfig {
       ? this.activePreset.categories.join(",")
       : presetRequested && !categoriesStr
         ? [
-            DocCategory.DATABASE_DISCOVERY,
-            DocCategory.CRUD_OPERATIONS,
-            DocCategory.CUSTOM_QUERIES,
-            DocCategory.UTILITIES,
-          ].join(",")
+          DocCategory.DATABASE_DISCOVERY,
+          DocCategory.CRUD_OPERATIONS,
+          DocCategory.CUSTOM_QUERIES,
+          DocCategory.UTILITIES,
+        ].join(",")
         : "";
 
     if (presetRequested && !this.activePreset) {
@@ -926,9 +912,9 @@ export class FeatureConfig {
     return {
       preset: this.activePreset
         ? {
-            name: this.activePreset.name,
-            description: this.activePreset.description,
-          }
+          name: this.activePreset.name,
+          description: this.activePreset.description,
+        }
         : undefined,
       permissions: this.originalPermissionsString || "all",
       categories:
