@@ -40,20 +40,19 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
 
 ## Table of Contents
 
-- [Features](#-features)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [AI Agent Configuration](#-ai-agent-configuration)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [AI Agent Configuration](#ai-agent-configuration)
   - [Standard JSON Config](#standard-json-configuration)
   - [OpenAI Codex (TOML)](#openai-codex-cli--vs-code-extension)
-- [Zed IDE](#zed-ide)
+  - [Zed IDE](#zed-ide)
   - [Environment Variables](#environment-variables-configuration)
   - [Local Development](#local-path-configuration)
-- [Permission System](#-permission-system)
-- [Available Tools (126 total)](#-available-tools)
-- [Documentation](#-detailed-documentation)
-- [Comparison: MCP vs Manual Access](#-mysql-mcp-vs-manual-database-access)
-- [License](#-license)
+- [Permission System](#permission-system)
+- [Available Tools (134 total)](#available-tools)
+- [Documentation](DOCUMENTATIONS.md)
+- [Comparison: MCP vs Manual Access](#mysql-mcp-vs-manual-database-access)
+- [License](#license)
 
 ---
 | **Data Masking** | Protect PII/Secrets in responses with configurable profiles (soft/partial/strict) |
@@ -647,11 +646,11 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 
 ## Available Tools
 
-The MCP server provides **126 powerful tools** organized into 22 categories:
+The MCP server provides **134 powerful tools** organized into 23 categories:
 
 ### Quick Reference
 
-**126 Tools Available** - Organized into 22 categories
+**134 Tools Available** - Organized into 23 categories
 
 | Category | Count | Key Tools |
 |----------|-------|-----------|
@@ -677,7 +676,8 @@ The MCP server provides **126 powerful tools** organized into 22 categories:
 | Data Migration | 5 | `copy_table_data`, `sync_table_data` |
 | Schema Migrations | 9 | `create_migration`, `apply_migrations` |
 | Utilities | 4 | `test_connection`, `export_table_to_csv` |
-| Analysis | 4 | `get_column_statistics`, `get_database_summary`, `get_schema_erd`, `get_schema_rag_context` |
+| Analysis | 4 | `get_column_statistics`, `get_database_summary`, `get_schema_erd` |
+| **AI Enhancement** | 8 | `build_query_from_intent`, `smart_search`, `generate_documentation` |
 
 > **📖 For detailed tool descriptions, parameters, and examples, see [DOCUMENTATIONS.md](DOCUMENTATIONS.md#🔧-complete-tools-reference)**
 
@@ -695,6 +695,7 @@ For comprehensive documentation, see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)**:
 - **Schema Versioning** - Version control for database schema changes
 - **Transaction Management** - ACID transactions
 - **Stored Procedures** - Create and execute with IN/OUT/INOUT parameters
+- **AI Enhancement** - Natural language to SQL, smart discovery, and auto-documentation
 - **Query Logging** - See all SQL queries executed automatically
 - **Security Features** - Built-in security and best practices
 - **Bulk Operations** - High-performance batch processing

@@ -5,6 +5,32 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] - 2025-12-09
+
+### Added
+- **Phase 1: AI Enhancement Tools** - 8 new intelligent tools for AI-powered database interactions:
+
+  #### Intelligent Query Assistant
+  - `build_query_from_intent` - Converts natural language to optimized SQL with context-aware query generation. Supports analytics, reporting, data_entry, and schema_exploration contexts. Includes safety levels and complexity controls.
+  - `suggest_query_improvements` - Analyzes SQL queries and suggests optimizations for speed, memory, or readability.
+
+  #### Smart Data Discovery Agent
+  - `smart_search` - Finds relevant tables, columns, data patterns, and relationships using semantic search. Essential for exploring large databases with hundreds of tables.
+  - `find_similar_columns` - Discovers columns with similar names or data across tables. Identifies potential join candidates and implicit relationships.
+  - `discover_data_patterns` - Analyzes tables for patterns including uniqueness, null rates, duplicates, formats, and value ranges. Provides data quality scores and recommendations.
+
+  #### AI-Powered Documentation Generator
+  - `generate_documentation` - Creates comprehensive database documentation with business glossary in Markdown, HTML, or JSON format. Includes schema, relationships, and example queries.
+  - `generate_data_dictionary` - Generates detailed data dictionaries for specific tables with column descriptions, constraints, sample values, and business terms.
+  - `generate_business_glossary` - Creates business glossaries from database column names with inferred descriptions and categorization.
+
+- **New Documentation Category** - Added `ai_enhancement` category for organizing the new AI tools.
+- **Updated Presets** - Added AI Enhancement tools to the `analyst` preset for immediate access.
+
+### Changed
+- Updated tool count from 126 to 134 tools.
+- Enhanced enhancement tracking file to mark Phase 1 as completed.
+
 ## [1.15.0] - 2025-12-08
 
 ### Added

@@ -20,6 +20,9 @@ import { PerformanceTools } from "./tools/performanceTools";
 import { AnalysisTools } from "./tools/analysisTools";
 import { AiTools } from "./tools/aiTools";
 import { MacroTools } from "./tools/macroTools";
+import { IntelligentQueryTools } from "./tools/intelligentQueryTools";
+import { SmartDiscoveryTools } from "./tools/smartDiscoveryTools";
+import { DocumentationGeneratorTools } from "./tools/documentationGeneratorTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -51,6 +54,9 @@ export class MySQLMCP {
   private analysisTools: AnalysisTools;
   private aiTools: AiTools;
   private macroTools: MacroTools;
+  private intelligentQueryTools: IntelligentQueryTools;
+  private smartDiscoveryTools: SmartDiscoveryTools;
+  private documentationGeneratorTools: DocumentationGeneratorTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -88,6 +94,9 @@ export class MySQLMCP {
     this.analysisTools = new AnalysisTools(this.security);
     this.aiTools = new AiTools(this.security);
     this.macroTools = new MacroTools(this.security);
+    this.intelligentQueryTools = new IntelligentQueryTools(this.security);
+    this.smartDiscoveryTools = new SmartDiscoveryTools(this.security);
+    this.documentationGeneratorTools = new DocumentationGeneratorTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -1443,6 +1452,106 @@ export class MySQLMCP {
     const check = this.checkToolEnabled("resetPerformanceStats");
     if (!check.enabled) return { status: "error", error: check.error };
     return await this.performanceTools.resetPerformanceStats();
+  }
+
+  // ==========================================
+  // PHASE 1: AI Enhancement Tools
+  // ==========================================
+
+  // Intelligent Query Assistant
+  async buildQueryFromIntent(params: {
+    natural_language: string;
+    context?: "analytics" | "reporting" | "data_entry" | "schema_exploration";
+    max_complexity?: "simple" | "medium" | "complex";
+    safety_level?: "strict" | "moderate" | "permissive";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("buildQueryFromIntent");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.intelligentQueryTools.buildQueryFromIntent(params);
+  }
+
+  async suggestQueryImprovements(params: {
+    query: string;
+    optimization_goal?: "speed" | "memory" | "readability";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("suggestQueryImprovements");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.intelligentQueryTools.suggestQueryImprovements(params);
+  }
+
+  // Smart Data Discovery
+  async smartSearch(params: {
+    search_term: string;
+    search_type?: "column" | "table" | "data_pattern" | "relationship" | "all";
+    similarity_threshold?: number;
+    include_sample_data?: boolean;
+    max_results?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("smartSearch");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartDiscoveryTools.smartSearch(params);
+  }
+
+  async findSimilarColumns(params: {
+    column_name?: string;
+    table_name?: string;
+    include_data_comparison?: boolean;
+    max_results?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("findSimilarColumns");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartDiscoveryTools.findSimilarColumns(params);
+  }
+
+  async discoverDataPatterns(params: {
+    table_name: string;
+    pattern_types?: Array<"unique" | "null" | "duplicate" | "format" | "range">;
+    max_columns?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("discoverDataPatterns");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartDiscoveryTools.discoverDataPatterns(params);
+  }
+
+  // Documentation Generator
+  async generateDocumentation(params: {
+    scope?: "database" | "table" | "column" | "relationship";
+    table_name?: string;
+    include_business_glossary?: boolean;
+    format?: "markdown" | "html" | "json";
+    include_examples?: boolean;
+    include_statistics?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("generateDocumentation");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.documentationGeneratorTools.generateDocumentation(params);
+  }
+
+  async generateDataDictionary(params: {
+    table_name: string;
+    include_sample_values?: boolean;
+    include_constraints?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("generateDataDictionary");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.documentationGeneratorTools.generateDataDictionary(params);
+  }
+
+  async generateBusinessGlossary(params: {
+    include_descriptions?: boolean;
+    group_by?: "table" | "category" | "alphabetical";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("generateBusinessGlossary");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.documentationGeneratorTools.generateBusinessGlossaryReport(params);
   }
 }
 

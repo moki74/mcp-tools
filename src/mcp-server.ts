@@ -2952,6 +2952,257 @@ const TOOLS: Tool[] = [
       properties: {},
     },
   },
+  // ==========================================
+  // PHASE 1: AI Enhancement Tools
+  // ==========================================
+  // Intelligent Query Assistant
+  {
+    name: "build_query_from_intent",
+    description:
+      "Converts natural language to optimized SQL with context-aware query generation. Analyzes your intent and generates safe, optimized SQL queries with explanations.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        natural_language: {
+          type: "string",
+          description: "Natural language description of what you want to query, e.g., 'show me all users who registered last month'",
+        },
+        context: {
+          type: "string",
+          enum: ["analytics", "reporting", "data_entry", "schema_exploration"],
+          description: "Context for query generation (default: analytics)",
+        },
+        max_complexity: {
+          type: "string",
+          enum: ["simple", "medium", "complex"],
+          description: "Maximum allowed query complexity (default: medium)",
+        },
+        safety_level: {
+          type: "string",
+          enum: ["strict", "moderate", "permissive"],
+          description: "Safety level for query generation (default: moderate)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["natural_language"],
+    },
+  },
+  {
+    name: "suggest_query_improvements",
+    description:
+      "Analyzes a SQL query and suggests improvements for speed, memory, or readability. Identifies inefficient patterns and provides optimized alternatives.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "SQL query to analyze and improve",
+        },
+        optimization_goal: {
+          type: "string",
+          enum: ["speed", "memory", "readability"],
+          description: "Primary optimization goal (default: speed)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  // Smart Data Discovery
+  {
+    name: "smart_search",
+    description:
+      "Finds relevant tables, columns, data patterns, and relationships using semantic search. Essential for exploring large databases with hundreds of tables.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        search_term: {
+          type: "string",
+          description: "Search term to find related database objects (e.g., 'customer', 'order date', 'email')",
+        },
+        search_type: {
+          type: "string",
+          enum: ["column", "table", "data_pattern", "relationship", "all"],
+          description: "Type of search (default: all)",
+        },
+        similarity_threshold: {
+          type: "number",
+          description: "Minimum similarity score 0-1 (default: 0.3)",
+        },
+        include_sample_data: {
+          type: "boolean",
+          description: "Include sample values from matched columns (default: false)",
+        },
+        max_results: {
+          type: "number",
+          description: "Maximum results per category (default: 20)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["search_term"],
+    },
+  },
+  {
+    name: "find_similar_columns",
+    description:
+      "Finds columns with similar names or data across tables. Discovers potential join candidates and implicit relationships between tables.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        column_name: {
+          type: "string",
+          description: "Optional: reference column name to find similar columns",
+        },
+        table_name: {
+          type: "string",
+          description: "Optional: table containing the reference column",
+        },
+        include_data_comparison: {
+          type: "boolean",
+          description: "Compare actual data overlap between columns (slower but more accurate, default: false)",
+        },
+        max_results: {
+          type: "number",
+          description: "Maximum results (default: 20)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
+  {
+    name: "discover_data_patterns",
+    description:
+      "Discovers data patterns in a table including uniqueness, null rates, duplicates, formats, and value ranges. Provides data quality score and recommendations.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to analyze",
+        },
+        pattern_types: {
+          type: "array",
+          items: {
+            type: "string",
+            enum: ["unique", "null", "duplicate", "format", "range"],
+          },
+          description: "Types of patterns to discover (default: all)",
+        },
+        max_columns: {
+          type: "number",
+          description: "Maximum columns to analyze (default: 20)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  // Documentation Generator
+  {
+    name: "generate_documentation",
+    description:
+      "Generates comprehensive database documentation with business glossary in Markdown, HTML, or JSON format. Includes schema, relationships, and example queries.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        scope: {
+          type: "string",
+          enum: ["database", "table", "column", "relationship"],
+          description: "Documentation scope (default: database)",
+        },
+        table_name: {
+          type: "string",
+          description: "Optional: specific table to document (for table scope)",
+        },
+        include_business_glossary: {
+          type: "boolean",
+          description: "Include business term glossary (default: true)",
+        },
+        format: {
+          type: "string",
+          enum: ["markdown", "html", "json"],
+          description: "Output format (default: markdown)",
+        },
+        include_examples: {
+          type: "boolean",
+          description: "Include example SQL queries (default: true)",
+        },
+        include_statistics: {
+          type: "boolean",
+          description: "Include row counts and statistics (default: true)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
+  {
+    name: "generate_data_dictionary",
+    description:
+      "Generates a detailed data dictionary for a specific table with column descriptions, constraints, sample values, and business terms.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to document",
+        },
+        include_sample_values: {
+          type: "boolean",
+          description: "Include sample values for each column (default: true)",
+        },
+        include_constraints: {
+          type: "boolean",
+          description: "Include constraint information (default: true)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  {
+    name: "generate_business_glossary",
+    description:
+      "Generates a business glossary from database column names with inferred descriptions and categorization. Helps with onboarding and data governance.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        include_descriptions: {
+          type: "boolean",
+          description: "Include auto-generated descriptions (default: true)",
+        },
+        group_by: {
+          type: "string",
+          enum: ["table", "category", "alphabetical"],
+          description: "How to group glossary terms (default: category)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
 ];
 
 // Create the MCP server
@@ -3487,6 +3738,106 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       case "repair_query":
         result = await mysqlMCP.repairQuery(
           (args || {}) as { query: string; error_message?: string },
+        );
+        break;
+
+      // ==========================================
+      // PHASE 1: AI Enhancement Tools
+      // ==========================================
+
+      // Intelligent Query Assistant
+      case "build_query_from_intent":
+        result = await mysqlMCP.buildQueryFromIntent(
+          (args || {}) as {
+            natural_language: string;
+            context?: "analytics" | "reporting" | "data_entry" | "schema_exploration";
+            max_complexity?: "simple" | "medium" | "complex";
+            safety_level?: "strict" | "moderate" | "permissive";
+            database?: string;
+          },
+        );
+        break;
+
+      case "suggest_query_improvements":
+        result = await mysqlMCP.suggestQueryImprovements(
+          (args || {}) as {
+            query: string;
+            optimization_goal?: "speed" | "memory" | "readability";
+            database?: string;
+          },
+        );
+        break;
+
+      // Smart Data Discovery
+      case "smart_search":
+        result = await mysqlMCP.smartSearch(
+          (args || {}) as {
+            search_term: string;
+            search_type?: "column" | "table" | "data_pattern" | "relationship" | "all";
+            similarity_threshold?: number;
+            include_sample_data?: boolean;
+            max_results?: number;
+            database?: string;
+          },
+        );
+        break;
+
+      case "find_similar_columns":
+        result = await mysqlMCP.findSimilarColumns(
+          (args || {}) as {
+            column_name?: string;
+            table_name?: string;
+            include_data_comparison?: boolean;
+            max_results?: number;
+            database?: string;
+          },
+        );
+        break;
+
+      case "discover_data_patterns":
+        result = await mysqlMCP.discoverDataPatterns(
+          (args || {}) as {
+            table_name: string;
+            pattern_types?: Array<"unique" | "null" | "duplicate" | "format" | "range">;
+            max_columns?: number;
+            database?: string;
+          },
+        );
+        break;
+
+      // Documentation Generator
+      case "generate_documentation":
+        result = await mysqlMCP.generateDocumentation(
+          (args || {}) as {
+            scope?: "database" | "table" | "column" | "relationship";
+            table_name?: string;
+            include_business_glossary?: boolean;
+            format?: "markdown" | "html" | "json";
+            include_examples?: boolean;
+            include_statistics?: boolean;
+            database?: string;
+          },
+        );
+        break;
+
+      case "generate_data_dictionary":
+        result = await mysqlMCP.generateDataDictionary(
+          (args || {}) as {
+            table_name: string;
+            include_sample_values?: boolean;
+            include_constraints?: boolean;
+            database?: string;
+          },
+        );
+        break;
+
+      case "generate_business_glossary":
+        result = await mysqlMCP.generateBusinessGlossary(
+          (args || {}) as {
+            include_descriptions?: boolean;
+            group_by?: "table" | "category" | "alphabetical";
+            database?: string;
+          },
         );
         break;
 

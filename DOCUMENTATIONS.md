@@ -7,7 +7,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Category Filtering System](#🆕-category-filtering-system) - NEW!
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 124 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 134 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -24,8 +24,9 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 16. [Table Maintenance](#🔧-table-maintenance)
 17. [Process & Server Management](#📊-process--server-management)
 18. [Performance Monitoring](#📈-performance-monitoring)
-19. [Usage Examples](#📋-usage-examples)
-20. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+19. [AI Enhancement Tools](#🤖-ai-enhancement-tools) - NEW!
+20. [Usage Examples](#📋-usage-examples)
+21. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
 
 Control which database operations are available to AI using a **dual-layer filtering system**:
 
@@ -53,14 +54,14 @@ Control which database operations are available to AI using a **dual-layer filte
 ### Documentation Categories Reference
 
 ```bash
-# All 22 available categories (comma-separated):
+# All 23 available categories (comma-separated):
 database_discovery,crud_operations,bulk_operations,custom_queries,
 schema_management,utilities,transaction_management,stored_procedures,
 views_management,triggers_management,functions_management,index_management,
 constraint_management,table_maintenance,server_management,
 performance_monitoring,cache_management,query_optimization,
 backup_restore,import_export,data_migration,schema_migrations,
-analysis
+analysis,ai_enhancement
 ```
 
 ### Configuration Examples
@@ -2997,6 +2998,292 @@ Reset Performance Schema statistics to start fresh monitoring.
 {
   "tool": "get_top_queries_by_count",
   "arguments": { "limit": 10 }
+}
+```
+
+---
+
+## 🤖 AI Enhancement Tools
+
+The AI Enhancement tools provide intelligent, AI-powered features for database exploration, query generation, and documentation. These tools are part of **Phase 1: Core AI Enhancement**.
+
+### Tool Overview
+
+| Tool | Description | Category |
+|------|-------------|----------|
+| `build_query_from_intent` | Converts natural language to optimized SQL with context-aware generation | `ai_enhancement` |
+| `suggest_query_improvements` | Analyzes SQL queries and suggests optimizations | `ai_enhancement` |
+| `smart_search` | Finds relevant tables, columns, and patterns using semantic search | `ai_enhancement` |
+| `find_similar_columns` | Discovers columns with similar names or data across tables | `ai_enhancement` |
+| `discover_data_patterns` | Analyzes tables for data patterns and quality issues | `ai_enhancement` |
+| `generate_documentation` | Generates comprehensive database documentation | `ai_enhancement` |
+| `generate_data_dictionary` | Creates detailed data dictionaries for tables | `ai_enhancement` |
+| `generate_business_glossary` | Builds business glossaries from column names | `ai_enhancement` |
+
+### Intelligent Query Assistant
+
+#### `build_query_from_intent`
+
+Converts natural language descriptions to optimized SQL queries with context-aware generation.
+
+```javascript
+// Basic usage
+{
+  "tool": "build_query_from_intent",
+  "arguments": {
+    "natural_language": "show me all users who signed up last month"
+  }
+}
+
+// With context and safety settings
+{
+  "tool": "build_query_from_intent",
+  "arguments": {
+    "natural_language": "count orders by product category for 2024",
+    "context": "analytics",
+    "max_complexity": "medium",
+    "safety_level": "moderate"
+  }
+}
+```
+
+**Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `natural_language` | string | Natural language description of what you want to query (required) |
+| `context` | string | Query context: `analytics`, `reporting`, `data_entry`, `schema_exploration` |
+| `max_complexity` | string | Maximum complexity: `simple`, `medium`, `complex` |
+| `safety_level` | string | Safety level: `strict`, `moderate`, `permissive` |
+
+**Response includes:**
+- Generated SQL query
+- Explanation of what the query does
+- Tables and columns involved
+- Safety notes and optimization hints
+- Alternative query suggestions
+
+#### `suggest_query_improvements`
+
+Analyzes a SQL query and provides suggestions for optimization.
+
+```javascript
+{
+  "tool": "suggest_query_improvements",
+  "arguments": {
+    "query": "SELECT * FROM users WHERE email LIKE '%@gmail.com'",
+    "optimization_goal": "speed"
+  }
+}
+```
+
+**Optimization Goals:**
+- `speed` - Focuses on query execution time (default)
+- `memory` - Focuses on memory usage optimization
+- `readability` - Suggests formatting and clarity improvements
+
+### Smart Data Discovery
+
+#### `smart_search`
+
+Search across the database schema using semantic matching to find relevant tables, columns, and data patterns.
+
+```javascript
+// Search for anything related to "customer"
+{
+  "tool": "smart_search",
+  "arguments": {
+    "search_term": "customer",
+    "search_type": "all",
+    "include_sample_data": true
+  }
+}
+
+// Search specifically for columns
+{
+  "tool": "smart_search",
+  "arguments": {
+    "search_term": "email",
+    "search_type": "column",
+    "similarity_threshold": 0.5
+  }
+}
+```
+
+**Search Types:**
+- `all` - Search across tables, columns, patterns, and relationships
+- `table` - Search table names only
+- `column` - Search column names only
+- `data_pattern` - Search for patterns in actual data
+- `relationship` - Search for relationships between tables
+
+#### `find_similar_columns`
+
+Discover columns with similar names or data across tables to identify potential joins and relationships.
+
+```javascript
+// Find columns similar to "user_id" in "orders" table
+{
+  "tool": "find_similar_columns",
+  "arguments": {
+    "column_name": "user_id",
+    "table_name": "orders",
+    "include_data_comparison": true
+  }
+}
+
+// Find all potential join candidates across the database
+{
+  "tool": "find_similar_columns",
+  "arguments": {
+    "include_data_comparison": false,
+    "max_results": 50
+  }
+}
+```
+
+#### `discover_data_patterns`
+
+Analyze a table to discover data patterns, quality issues, and get recommendations.
+
+```javascript
+{
+  "tool": "discover_data_patterns",
+  "arguments": {
+    "table_name": "users",
+    "pattern_types": ["unique", "null", "duplicate", "format", "range"]
+  }
+}
+```
+
+**Pattern Types:**
+- `unique` - Find potentially unique columns not marked as UNIQUE
+- `null` - Detect high null rates and nullable mismatches
+- `duplicate` - Find duplicate values in columns
+- `format` - Detect data formats (email, phone, etc.)
+- `range` - Analyze numeric ranges and detect outliers
+
+**Response includes:**
+- Data quality score (0-100)
+- Patterns found per column
+- Recommendations for each issue
+- Column-level metrics
+
+### Documentation Generator
+
+#### `generate_documentation`
+
+Generate comprehensive database documentation in Markdown, HTML, or JSON format.
+
+```javascript
+// Generate full database documentation
+{
+  "tool": "generate_documentation",
+  "arguments": {
+    "format": "markdown",
+    "include_business_glossary": true,
+    "include_examples": true,
+    "include_statistics": true
+  }
+}
+
+// Document a specific table
+{
+  "tool": "generate_documentation",
+  "arguments": {
+    "scope": "table",
+    "table_name": "orders",
+    "format": "html"
+  }
+}
+```
+
+**Output Formats:**
+- `markdown` - Best for GitHub/GitLab wikis and documentation sites
+- `html` - Standalone HTML page with styling
+- `json` - Structured data for programmatic use
+
+**Documentation includes:**
+- Table of contents
+- ER relationship diagrams (Mermaid.js in markdown)
+- Column details with data types and constraints
+- Foreign key relationships
+- Index information
+- Example SQL queries
+- Business glossary
+
+#### `generate_data_dictionary`
+
+Generate a detailed data dictionary for a specific table.
+
+```javascript
+{
+  "tool": "generate_data_dictionary",
+  "arguments": {
+    "table_name": "products",
+    "include_sample_values": true,
+    "include_constraints": true
+  }
+}
+```
+
+**Response includes:**
+- Column name, type, and description
+- Constraints (PK, FK, NOT NULL, UNIQUE)
+- Default values
+- Sample values from actual data
+- Business terms (auto-inferred)
+
+#### `generate_business_glossary`
+
+Create a business glossary from database column names with auto-generated descriptions.
+
+```javascript
+{
+  "tool": "generate_business_glossary",
+  "arguments": {
+    "include_descriptions": true,
+    "group_by": "category"
+  }
+}
+```
+
+**Grouping Options:**
+- `category` - Group by inferred category (Identifiers, Timestamps, Contact, etc.)
+- `table` - Group by source table
+- `alphabetical` - A-Z sorting
+
+### AI Enhancement Best Practices
+
+1. **Start with Discovery**: Use `smart_search` and `find_similar_columns` to understand unfamiliar databases
+2. **Use Context**: When building queries, specify the `context` parameter for better results
+3. **Validate Generated SQL**: Always review generated SQL before executing, especially for complex queries
+4. **Update Documentation**: Regenerate documentation after schema changes
+5. **Quality Checks**: Run `discover_data_patterns` regularly to catch data quality issues early
+
+### Example Workflow: Exploring a New Database
+
+```javascript
+// Step 1: Get an overview
+{ "tool": "get_database_summary" }
+
+// Step 2: Search for relevant tables
+{
+  "tool": "smart_search",
+  "arguments": { "search_term": "order sales revenue" }
+}
+
+// Step 3: Generate documentation
+{
+  "tool": "generate_documentation",
+  "arguments": { "format": "markdown" }
+}
+
+// Step 4: Build a query from natural language
+{
+  "tool": "build_query_from_intent",
+  "arguments": {
+    "natural_language": "total sales by month for the last year"
+  }
 }
 ```
 
