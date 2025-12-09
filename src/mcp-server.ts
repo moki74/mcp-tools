@@ -420,7 +420,7 @@ const TOOLS: Tool[] = [
   {
     name: "run_query",
     description:
-      "Runs a read-only SQL SELECT query with optional parameters, optimizer hints, and caching support. Only SELECT statements are allowed.",
+      "⚡ USE THIS FOR SELECT QUERIES. Runs a read-only SQL SELECT query with optional parameters, optimizer hints, and caching support. ONLY SELECT statements are allowed - use execute_sql for INSERT/UPDATE/DELETE, use execute_ddl for CREATE/ALTER/DROP.",
     inputSchema: {
       type: "object",
       properties: {
@@ -489,7 +489,7 @@ const TOOLS: Tool[] = [
   {
     name: "execute_sql",
     description:
-      'Executes a write SQL operation (INSERT, UPDATE, DELETE) with optional parameters. DDL operations require "ddl" permission.',
+      '⚡ USE THIS FOR INSERT/UPDATE/DELETE. Executes a write SQL operation (INSERT, UPDATE, DELETE) with optional parameters. NOT for SELECT (use run_query), NOT for DDL (use execute_ddl for CREATE/ALTER/DROP/TRUNCATE/RENAME).',
     inputSchema: {
       type: "object",
       properties: {
@@ -676,13 +676,13 @@ const TOOLS: Tool[] = [
   {
     name: "execute_ddl",
     description:
-      'Executes raw DDL SQL (CREATE, ALTER, DROP, TRUNCATE, RENAME). Requires "ddl" permission.',
+      '⚡ USE THIS FOR DDL ONLY (CREATE, ALTER, DROP, TRUNCATE, RENAME). NOT for SELECT (use run_query), NOT for INSERT/UPDATE/DELETE (use execute_sql). Requires "ddl" permission.',
     inputSchema: {
       type: "object",
       properties: {
         query: {
           type: "string",
-          description: "DDL SQL query to execute",
+          description: "DDL SQL query to execute (must start with CREATE, ALTER, DROP, TRUNCATE, or RENAME - NO SELECT queries!)",
         },
       },
       required: ["query"],
@@ -3297,6 +3297,98 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         result = await mysqlMCP.readTableSchema(
           (args || {}) as { table_name: string },
         );
+        break;
+
+      // CRUD Tools
+      case "create_record":
+        result = await mysqlMCP.createRecord(
+          (args || {}) as { table_name: string; data: Record<string, any> },
+        );
+        break;
+
+      case "read_records":
+        result = await mysqlMCP.readRecords(
+          (args || {}) as {
+            table_name: string;
+            filters?: any[];
+            pagination?: { page: number; limit: number };
+            sorting?: { field: string; direction: "asc" | "desc" };
+          },
+        );
+        break;
+
+      case "update_record":
+        result = await mysqlMCP.updateRecord(
+          (args || {}) as {
+            table_name: string;
+            data: Record<string, any>;
+            conditions: any[];
+          },
+        );
+        break;
+
+      case "delete_record":
+        result = await mysqlMCP.deleteRecord(
+          (args || {}) as { table_name: string; conditions: any[] },
+        );
+        break;
+
+      // Bulk Operations
+      case "bulk_insert":
+        result = await mysqlMCP.bulkInsert(
+          (args || {}) as {
+            table_name: string;
+            data: Record<string, any>[];
+            batch_size?: number;
+          },
+        );
+        break;
+
+      case "bulk_update":
+        result = await mysqlMCP.bulkUpdate(
+          (args || {}) as {
+            table_name: string;
+            updates: Array<{
+              data: Record<string, any>;
+              conditions: any[];
+            }>;
+            batch_size?: number;
+          },
+        );
+        break;
+
+      case "bulk_delete":
+        result = await mysqlMCP.bulkDelete(
+          (args || {}) as {
+            table_name: string;
+            condition_sets: any[][];
+            batch_size?: number;
+          },
+        );
+        break;
+
+      // Query Tools
+      case "run_query":
+        result = await mysqlMCP.runQuery(
+          (args || {}) as {
+            query: string;
+            params?: any[];
+            hints?: any;
+            useCache?: boolean;
+            dry_run?: boolean;
+          },
+        );
+        break;
+
+      case "execute_sql":
+        result = await mysqlMCP.executeSql(
+          (args || {}) as { query: string; params?: any[] },
+        );
+        break;
+
+      // DDL Tools
+      case "create_table":
+        result = await mysqlMCP.createTable(args || {});
         break;
 
       case "alter_table":

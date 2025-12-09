@@ -98,12 +98,12 @@ export class DdlTools {
     table_name: string;
     operations: Array<{
       type:
-        | "add_column"
-        | "drop_column"
-        | "modify_column"
-        | "rename_column"
-        | "add_index"
-        | "drop_index";
+      | "add_column"
+      | "drop_column"
+      | "modify_column"
+      | "rename_column"
+      | "add_index"
+      | "drop_index";
       column_name?: string;
       new_column_name?: string;
       column_type?: string;
@@ -276,7 +276,7 @@ export class DdlTools {
         return {
           status: "error",
           error:
-            "Only DDL operations (CREATE, ALTER, DROP, TRUNCATE, RENAME) are allowed with executeDdl",
+            "Only DDL operations (CREATE, ALTER, DROP, TRUNCATE, RENAME) are allowed with execute_ddl. For SELECT queries, use the 'run_query' tool instead. For INSERT/UPDATE/DELETE, use the 'execute_sql' tool.",
         };
       }
 
