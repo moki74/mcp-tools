@@ -5,6 +5,13 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.2] - 2025-12-11
+
+### Fixed
+- **Documentation Update** - Added missing `ai_enhancement` category to the Documentation Categories table in README.md
+  - The table now correctly shows all 24 documentation categories
+  - Added entry for `ai_enhancement` category with 8 tools and description
+
 ## [1.16.1] - 2025-12-09
 
 ### Improved

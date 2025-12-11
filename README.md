@@ -152,7 +152,7 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
         "-y",
         "@berthojoris/mysql-mcp",
         "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
+        "list,read,utility,create,update,ddl",
       ]
     }
   }
@@ -168,9 +168,9 @@ Most AI agents use a similar JSON configuration format. Use the appropriate conf
       "args": [
         "-y",
         "@berthojoris/mysql-mcp",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility",
-        "database_discovery,crud_operations,custom_queries"
+        "mysql://user:password@localhost:3306/database_name_here",
+        "list,read,utility,create,update,ddl",
+        "database_discovery,crud_operations,custom_queries,schema_management,index_management,constraint_management,table_maintenance,query_optimization,analysis"
       ]
     }
   }
@@ -496,6 +496,7 @@ Use these categories for fine-grained control that matches the tool organization
 | `data_migration` | 5 | Copy, move, clone, sync table data |
 | `schema_migrations` | 9 | Version control for database schema |
 | `analysis` | 4 | AI context optimization and data analysis |
+| `ai_enhancement` | 8 | AI-powered query building, smart search, and documentation generation |
 
 ### Legacy Categories (Backward Compatible)
 
