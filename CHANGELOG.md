@@ -5,6 +5,18 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.3] - 2025-12-11
+
+### Documentation
+- **README.md Enhancement** - Added comprehensive AI Enhancement tools documentation
+  - Updated total tool count from 134 to 142 tools
+  - Added detailed "🤖 AI Enhancement Tools (Phase 1 - Implemented)" section
+  - Listed all 8 AI tools in Available Tools table with full names
+  - Included practical use cases for each AI tool category
+  - Tools documented: `build_query_from_intent`, `suggest_query_improvements`, `smart_search`, 
+    `find_similar_columns`, `discover_data_patterns`, `generate_documentation`, 
+    `generate_data_dictionary`, `generate_business_glossary`
+
 ## [1.16.2] - 2025-12-11
 
 ### Fixed
