@@ -3014,6 +3014,124 @@ const TOOLS: Tool[] = [
       required: ["query"],
     },
   },
+  // ==========================================
+  // PHASE 2: AI Enhancement Tools (Schema + Security + Indexing)
+  // ==========================================
+  {
+    name: "design_schema_from_requirements",
+    description:
+      "Designs a database schema from natural language requirements. Returns a proposed schema spec and CREATE TABLE / CREATE INDEX statements (does not execute DDL).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        requirements_text: {
+          type: "string",
+          description:
+            "Business requirements in natural language, optionally including entity/field hints.",
+        },
+        entities: {
+          type: "array",
+          description:
+            "Optional explicit entity hints to improve accuracy (each entity may include fields).",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              fields: { type: "array", items: { type: "string" } },
+            },
+            required: ["name"],
+          },
+        },
+        naming_convention: {
+          type: "string",
+          enum: ["snake_case", "camelCase"],
+          description: "Naming convention for generated identifiers (default: snake_case).",
+        },
+        include_audit_columns: {
+          type: "boolean",
+          description:
+            "Whether to include created_at/updated_at columns (default: true).",
+        },
+        id_type: {
+          type: "string",
+          enum: ["BIGINT", "UUID"],
+          description: "Primary key type for id columns (default: BIGINT).",
+        },
+        engine: {
+          type: "string",
+          description: "Storage engine for CREATE TABLE (default: InnoDB).",
+        },
+        charset: {
+          type: "string",
+          description: "Default charset (default: utf8mb4).",
+        },
+        collation: {
+          type: "string",
+          description: "Default collation (default: utf8mb4_unicode_ci).",
+        },
+      },
+      required: ["requirements_text"],
+    },
+  },
+  {
+    name: "audit_database_security",
+    description:
+      "Audits MySQL security configuration and (optionally) accounts/privileges using read-only inspection queries. Returns prioritized findings and recommendations.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+        include_user_account_checks: {
+          type: "boolean",
+          description:
+            "Include account checks (requires mysql.user privileges, default: true).",
+        },
+        include_privilege_checks: {
+          type: "boolean",
+          description:
+            "Include privilege summary checks via INFORMATION_SCHEMA (default: true).",
+        },
+      },
+    },
+  },
+  {
+    name: "recommend_indexes",
+    description:
+      "Analyzes real query patterns from performance_schema digests and suggests concrete CREATE INDEX statements. Uses heuristics to avoid duplicate/redundant indexes.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+        max_query_patterns: {
+          type: "number",
+          description: "Max query patterns to analyze from digests (default: 25, max: 200).",
+        },
+        max_recommendations: {
+          type: "number",
+          description: "Max index recommendations to return (default: 25, max: 200).",
+        },
+        min_execution_count: {
+          type: "number",
+          description: "Minimum executions for a digest to be considered (default: 5).",
+        },
+        min_avg_time_ms: {
+          type: "number",
+          description: "Minimum average execution time (ms) for a digest to be considered (default: 5).",
+        },
+        include_unused_index_warnings: {
+          type: "boolean",
+          description:
+            "Include unused index warnings (default: false).",
+        },
+      },
+    },
+  },
   // Smart Data Discovery
   {
     name: "smart_search",
@@ -3929,6 +4047,48 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
             include_descriptions?: boolean;
             group_by?: "table" | "category" | "alphabetical";
             database?: string;
+          },
+        );
+        break;
+
+      // ==========================================
+      // PHASE 2: AI Enhancement Tools (Schema + Security + Indexing)
+      // ==========================================
+
+      case "design_schema_from_requirements":
+        result = await mysqlMCP.designSchemaFromRequirements(
+          (args || {}) as {
+            requirements_text: string;
+            entities?: Array<{ name: string; fields?: string[] }>;
+            naming_convention?: "snake_case" | "camelCase";
+            include_audit_columns?: boolean;
+            id_type?: "BIGINT" | "UUID";
+            engine?: string;
+            charset?: string;
+            collation?: string;
+          },
+        );
+        break;
+
+      case "audit_database_security":
+        result = await mysqlMCP.auditDatabaseSecurity(
+          (args || {}) as {
+            database?: string;
+            include_user_account_checks?: boolean;
+            include_privilege_checks?: boolean;
+          },
+        );
+        break;
+
+      case "recommend_indexes":
+        result = await mysqlMCP.recommendIndexes(
+          (args || {}) as {
+            database?: string;
+            max_query_patterns?: number;
+            max_recommendations?: number;
+            min_execution_count?: number;
+            min_avg_time_ms?: number;
+            include_unused_index_warnings?: boolean;
           },
         );
         break;

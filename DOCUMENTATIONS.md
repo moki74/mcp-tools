@@ -7,7 +7,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Category Filtering System](#🆕-category-filtering-system) - NEW!
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 134 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 145 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -240,7 +240,7 @@ The system uses both arguments to determine access:
 - **3rd argument**: Categories (Layer 2, optional) - comma-separated documentation categories
 
 **Decision logic**:
-1. If no arguments: All 120 tools enabled
+1. If no arguments: All 145 tools enabled
 2. If only 2nd argument (permissions): Tools enabled if they match permission
 3. If both arguments: Tools enabled if they match BOTH permission AND category
 
@@ -285,7 +285,7 @@ Add 'bulk_operations' to the categories argument.
 
 ## 🔧 Complete Tools Reference
 
-This section provides a comprehensive reference of all 120 available tools organized by category.
+This section provides a comprehensive reference of all 145 available tools organized by category.
 
 ### Database Discovery
 
@@ -3005,7 +3005,7 @@ Reset Performance Schema statistics to start fresh monitoring.
 
 ## 🤖 AI Enhancement Tools
 
-The AI Enhancement tools provide intelligent, AI-powered features for database exploration, query generation, and documentation. These tools are part of **Phase 1: Core AI Enhancement**.
+The AI Enhancement tools provide intelligent, AI-powered features for database exploration, query generation, documentation, schema design, security auditing, and index recommendations. These tools include **Phase 1-2** enhancements.
 
 ### Tool Overview
 
@@ -3019,6 +3019,9 @@ The AI Enhancement tools provide intelligent, AI-powered features for database e
 | `generate_documentation` | Generates comprehensive database documentation | `ai_enhancement` |
 | `generate_data_dictionary` | Creates detailed data dictionaries for tables | `ai_enhancement` |
 | `generate_business_glossary` | Builds business glossaries from column names | `ai_enhancement` |
+| `design_schema_from_requirements` | Designs a proposed schema and outputs DDL from natural language requirements | `ai_enhancement` |
+| `audit_database_security` | Audits MySQL security configuration and (optionally) accounts/privileges | `ai_enhancement` |
+| `recommend_indexes` | Suggests concrete CREATE INDEX statements from observed query patterns | `ai_enhancement` |
 
 ### Intelligent Query Assistant
 
@@ -3080,6 +3083,85 @@ Analyzes a SQL query and provides suggestions for optimization.
 - `speed` - Focuses on query execution time (default)
 - `memory` - Focuses on memory usage optimization
 - `readability` - Suggests formatting and clarity improvements
+
+### Schema Design
+
+#### `design_schema_from_requirements`
+
+Design a proposed schema (tables, columns, relationships) from business requirements and output suggested DDL. This tool **does not execute** any DDL.
+
+```javascript
+{
+  "tool": "design_schema_from_requirements",
+  "arguments": {
+    "requirements_text": "We need to manage customers and orders. A customer has many orders. Orders have total_amount and order_date.",
+    "naming_convention": "snake_case",
+    "include_audit_columns": true,
+    "id_type": "BIGINT"
+  }
+}
+
+// With explicit entity hints to improve accuracy
+{
+  "tool": "design_schema_from_requirements",
+  "arguments": {
+    "requirements_text": "Basic e-commerce",
+    "entities": [
+      { "name": "customers", "fields": ["email", "name"] },
+      { "name": "orders", "fields": ["total_amount", "order_date"] }
+    ]
+  }
+}
+```
+
+**Response includes:**
+- Proposed tables + columns (with inferred types)
+- Inferred relationships (FK suggestions)
+- `ddl_statements` array with CREATE TABLE / CREATE INDEX suggestions
+
+### Security Audit
+
+#### `audit_database_security`
+
+Runs a best-effort security audit using read-only inspection queries (e.g., `SHOW VARIABLES`, and optionally `mysql.user` / `INFORMATION_SCHEMA` where permitted).
+
+```javascript
+{
+  "tool": "audit_database_security",
+  "arguments": {
+    "include_user_account_checks": true,
+    "include_privilege_checks": true
+  }
+}
+```
+
+**Response includes:**
+- Prioritized findings with severities and recommendations
+- Summary counts by severity
+- Notes when checks are skipped due to missing privileges
+
+### Index Recommendations
+
+#### `recommend_indexes`
+
+Analyzes `performance_schema` digests to propose concrete indexing strategies.
+
+```javascript
+{
+  "tool": "recommend_indexes",
+  "arguments": {
+    "max_query_patterns": 25,
+    "min_execution_count": 10,
+    "min_avg_time_ms": 5,
+    "max_recommendations": 20,
+    "include_unused_index_warnings": true
+  }
+}
+```
+
+**Notes:**
+- Requires `performance_schema` enabled and accessible by the MySQL user.
+- Always validate recommendations with `EXPLAIN` and production-like testing.
 
 ### Smart Data Discovery
 

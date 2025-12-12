@@ -356,6 +356,11 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   generateDocumentation: ToolCategory.UTILITY,
   generateDataDictionary: ToolCategory.UTILITY,
   generateBusinessGlossary: ToolCategory.UTILITY,
+
+  // Phase 2: AI Enhancement Tools
+  designSchemaFromRequirements: ToolCategory.UTILITY,
+  auditDatabaseSecurity: ToolCategory.UTILITY,
+  recommendIndexes: ToolCategory.UTILITY,
 };
 
 /**
@@ -542,6 +547,11 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   generateDocumentation: DocCategory.AI_ENHANCEMENT,
   generateDataDictionary: DocCategory.AI_ENHANCEMENT,
   generateBusinessGlossary: DocCategory.AI_ENHANCEMENT,
+
+  // Phase 2: AI Enhancement
+  designSchemaFromRequirements: DocCategory.AI_ENHANCEMENT,
+  auditDatabaseSecurity: DocCategory.AI_ENHANCEMENT,
+  recommendIndexes: DocCategory.AI_ENHANCEMENT,
 };
 
 /**

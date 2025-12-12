@@ -23,6 +23,9 @@ import { MacroTools } from "./tools/macroTools";
 import { IntelligentQueryTools } from "./tools/intelligentQueryTools";
 import { SmartDiscoveryTools } from "./tools/smartDiscoveryTools";
 import { DocumentationGeneratorTools } from "./tools/documentationGeneratorTools";
+import { SchemaDesignTools } from "./tools/schemaDesignTools";
+import { SecurityAuditTools } from "./tools/securityAuditTools";
+import { IndexRecommendationTools } from "./tools/indexRecommendationTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -57,6 +60,9 @@ export class MySQLMCP {
   private intelligentQueryTools: IntelligentQueryTools;
   private smartDiscoveryTools: SmartDiscoveryTools;
   private documentationGeneratorTools: DocumentationGeneratorTools;
+  private schemaDesignTools: SchemaDesignTools;
+  private securityAuditTools: SecurityAuditTools;
+  private indexRecommendationTools: IndexRecommendationTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -97,6 +103,9 @@ export class MySQLMCP {
     this.intelligentQueryTools = new IntelligentQueryTools(this.security);
     this.smartDiscoveryTools = new SmartDiscoveryTools(this.security);
     this.documentationGeneratorTools = new DocumentationGeneratorTools(this.security);
+    this.schemaDesignTools = new SchemaDesignTools(this.security);
+    this.securityAuditTools = new SecurityAuditTools();
+    this.indexRecommendationTools = new IndexRecommendationTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -1552,6 +1561,48 @@ export class MySQLMCP {
     const check = this.checkToolEnabled("generateBusinessGlossary");
     if (!check.enabled) return { status: "error", error: check.error };
     return await this.documentationGeneratorTools.generateBusinessGlossaryReport(params);
+  }
+
+  // ==========================================
+  // PHASE 2: AI Enhancement Tools (Schema + Security + Indexing)
+  // ==========================================
+
+  async designSchemaFromRequirements(params: {
+    requirements_text: string;
+    entities?: Array<{ name: string; fields?: string[] }>;
+    naming_convention?: "snake_case" | "camelCase";
+    include_audit_columns?: boolean;
+    id_type?: "BIGINT" | "UUID";
+    engine?: string;
+    charset?: string;
+    collation?: string;
+  }) {
+    const check = this.checkToolEnabled("designSchemaFromRequirements");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.schemaDesignTools.designSchemaFromRequirements(params);
+  }
+
+  async auditDatabaseSecurity(params?: {
+    database?: string;
+    include_user_account_checks?: boolean;
+    include_privilege_checks?: boolean;
+  }) {
+    const check = this.checkToolEnabled("auditDatabaseSecurity");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.securityAuditTools.auditDatabaseSecurity(params);
+  }
+
+  async recommendIndexes(params?: {
+    database?: string;
+    max_query_patterns?: number;
+    max_recommendations?: number;
+    min_execution_count?: number;
+    min_avg_time_ms?: number;
+    include_unused_index_warnings?: boolean;
+  }) {
+    const check = this.checkToolEnabled("recommendIndexes");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.indexRecommendationTools.recommendIndexes(params);
   }
 }
 

@@ -5,6 +5,17 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.4] - 2025-12-12
+
+### Added
+- **Phase 2: AI Enhancement Tools** - 3 new tools to improve AI-assisted database engineering:
+  - `design_schema_from_requirements` - Natural-language schema design assistant that proposes tables, relationships, and DDL (non-executing)
+  - `audit_database_security` - Best-effort database security audit assistant with prioritized findings and recommendations
+  - `recommend_indexes` - Automated index recommendation system using performance_schema query digests and existing index introspection
+
+### Documentation
+- Updated README.md and DOCUMENTATIONS.md to include the new Phase 2 AI Enhancement tools.
+
 ## [1.16.3] - 2025-12-11
 
 ### Documentation

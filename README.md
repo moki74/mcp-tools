@@ -49,7 +49,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
   - [Environment Variables](#environment-variables-configuration)
   - [Local Development](#local-path-configuration)
 - [Permission System](#permission-system)
-- [Available Tools (134 total)](#available-tools)
+- [Available Tools (145 total)](#available-tools)
 - [Documentation](DOCUMENTATIONS.md)
 - [Comparison: MCP vs Manual Access](#mysql-mcp-vs-manual-database-access)
 - [License](#license)
@@ -496,7 +496,7 @@ Use these categories for fine-grained control that matches the tool organization
 | `data_migration` | 5 | Copy, move, clone, sync table data |
 | `schema_migrations` | 9 | Version control for database schema |
 | `analysis` | 4 | AI context optimization and data analysis |
-| `ai_enhancement` | 8 | AI-powered query building, smart search, and documentation generation |
+| `ai_enhancement` | 11 | AI-powered query building, smart discovery, documentation, schema design, security audit, and index recommendations |
 
 ### Legacy Categories (Backward Compatible)
 
@@ -526,7 +526,7 @@ Use these categories for fine-grained control that matches the tool organization
 | **Application Backend** | `database_discovery,crud_operations,bulk_operations,custom_queries,transaction_management` | Full app support |
 | **Development & Testing** | `database_discovery,crud_operations,bulk_operations,custom_queries,schema_management,utilities,transaction_management` | Development access |
 | **DBA & DevOps** | `database_discovery,schema_management,table_maintenance,backup_restore,schema_migrations,performance_monitoring` | Admin tasks |
-| **Full Access** | *(leave empty)* | All 124 tools enabled |
+| **Full Access** | *(leave empty)* | All 145 tools enabled |
 
 #### Using Legacy Categories (Backward Compatible)
 
@@ -647,11 +647,11 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 
 ## Available Tools
 
-The MCP server provides **142 powerful tools** organized into 23 categories:
+The MCP server provides **145 powerful tools** organized into 23 categories:
 
 ### Quick Reference
 
-**142 Tools Available** - Organized into 23 categories
+**145 Tools Available** - Organized into 23 categories
 
 | Category | Count | Key Tools |
 |----------|-------|-----------|
@@ -678,9 +678,9 @@ The MCP server provides **142 powerful tools** organized into 23 categories:
 | Schema Migrations | 9 | `create_migration`, `apply_migrations` |
 | Utilities | 4 | `test_connection`, `export_table_to_csv` |
 | Analysis | 4 | `get_column_statistics`, `get_database_summary`, `get_schema_erd` |
-| **AI Enhancement** | 8 | `build_query_from_intent`, `suggest_query_improvements`, `smart_search`, `find_similar_columns`, `discover_data_patterns`, `generate_documentation`, `generate_data_dictionary`, `generate_business_glossary` |
+| **AI Enhancement** | 11 | `build_query_from_intent`, `suggest_query_improvements`, `smart_search`, `find_similar_columns`, `discover_data_patterns`, `generate_documentation`, `generate_data_dictionary`, `generate_business_glossary`, `design_schema_from_requirements`, `audit_database_security`, `recommend_indexes` |
 
-### 🤖 AI Enhancement Tools (Phase 1 - Implemented)
+### 🤖 AI Enhancement Tools (Phase 1-2 - Implemented)
 
 The MySQL MCP server includes advanced AI-powered productivity tools:
 
@@ -701,6 +701,11 @@ The MySQL MCP server includes advanced AI-powered productivity tools:
 - **`generate_business_glossary`** - Business terminology mapping to technical fields
 - *Use case: Generate complete documentation for a new database in seconds*
 
+#### **Schema + Security + Indexing (Phase 2)**
+- **`design_schema_from_requirements`** - Generate proposed tables, relationships, and DDL from business requirements
+- **`audit_database_security`** - Best-effort MySQL security audit with prioritized findings
+- **`recommend_indexes`** - Concrete index recommendations from observed query patterns (performance_schema)
+
 > **📖 For detailed tool descriptions, parameters, and examples, see [DOCUMENTATIONS.md](DOCUMENTATIONS.md#🔧-complete-tools-reference)**
 
 ---
@@ -717,7 +722,7 @@ For comprehensive documentation, see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)**:
 - **Schema Versioning** - Version control for database schema changes
 - **Transaction Management** - ACID transactions
 - **Stored Procedures** - Create and execute with IN/OUT/INOUT parameters
-- **🤖 AI Enhancement** - Natural language to SQL, smart data discovery, and auto-documentation (Phase 1 Complete)
+- **🤖 AI Enhancement** - Natural language to SQL, smart data discovery, schema design, security audit, and index recommendations (Phase 1-2)
 - **Query Logging** - See all SQL queries executed automatically
 - **Security Features** - Built-in security and best practices
 - **Bulk Operations** - High-performance batch processing

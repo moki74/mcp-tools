@@ -1,7 +1,7 @@
 {
   "name": "mysql-mcp",
   "description": "A Model Context Protocol for MySQL database interaction",
-  "version": "1.13.0",
+  "version": "1.16.4",
   "tools": [
     {
       "name": "list_databases",
@@ -534,6 +534,86 @@
               "type": "string"
             }
           }
+        }
+      }
+    }
+    ,
+    {
+      "name": "design_schema_from_requirements",
+      "description": "Designs a database schema from natural language requirements and outputs proposed DDL (does not execute).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "requirements_text": { "type": "string" },
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "fields": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["name"]
+            }
+          },
+          "naming_convention": { "type": "string", "enum": ["snake_case", "camelCase"] },
+          "include_audit_columns": { "type": "boolean" },
+          "id_type": { "type": "string", "enum": ["BIGINT", "UUID"] },
+          "engine": { "type": "string" },
+          "charset": { "type": "string" },
+          "collation": { "type": "string" }
+        },
+        "required": ["requirements_text"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "data": { "type": "object" },
+          "error": { "type": ["string", "null"] }
+        }
+      }
+    },
+    {
+      "name": "audit_database_security",
+      "description": "Audits MySQL security configuration and (optionally) accounts/privileges using read-only inspection queries.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "database": { "type": "string" },
+          "include_user_account_checks": { "type": "boolean" },
+          "include_privilege_checks": { "type": "boolean" }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "data": { "type": "object" },
+          "error": { "type": ["string", "null"] }
+        }
+      }
+    },
+    {
+      "name": "recommend_indexes",
+      "description": "Analyzes performance_schema query digests and suggests concrete CREATE INDEX statements.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "database": { "type": "string" },
+          "max_query_patterns": { "type": "number" },
+          "max_recommendations": { "type": "number" },
+          "min_execution_count": { "type": "number" },
+          "min_avg_time_ms": { "type": "number" },
+          "include_unused_index_warnings": { "type": "boolean" }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "data": { "type": "object" },
+          "error": { "type": ["string", "null"] }
         }
       }
     }
