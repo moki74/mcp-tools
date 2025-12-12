@@ -3132,6 +3132,146 @@ const TOOLS: Tool[] = [
       },
     },
   },
+  // ==========================================
+  // PHASE 3: AI Enhancement Tools (Data Gen + Patterns + Visualization + Forecasting)
+  // ==========================================
+  {
+    name: "generate_test_data",
+    description:
+      "Generates synthetic test data as SQL INSERT statements for a given table (does not execute). Attempts FK-aware value selection for referential integrity.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Target table to generate INSERT statements for",
+        },
+        row_count: {
+          type: "number",
+          description: "Number of rows to generate (max 5000)",
+        },
+        batch_size: {
+          type: "number",
+          description: "Rows per INSERT statement (default 100, max 1000)",
+        },
+        include_nulls: {
+          type: "boolean",
+          description: "Whether generated values may include NULLs when columns are nullable (default true)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name", "row_count"],
+    },
+  },
+  {
+    name: "analyze_schema_patterns",
+    description:
+      "Analyzes the schema for common patterns and anti-patterns (missing PKs, wide tables, unindexed FKs, EAV-like tables, etc.) and returns recommendations.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        scope: {
+          type: "string",
+          enum: ["database", "table"],
+          description: "Analysis scope (default: database unless table_name provided)",
+        },
+        table_name: {
+          type: "string",
+          description: "Optional: specific table to analyze (implies table scope)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
+  {
+    name: "visualize_query",
+    description:
+      "Creates a visual representation of a read-only SQL query as a Mermaid flowchart, based on EXPLAIN FORMAT=JSON and lightweight SQL parsing.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Read-only SQL query to visualize",
+        },
+        include_explain_json: {
+          type: "boolean",
+          description: "Include full EXPLAIN JSON in the response (default true)",
+        },
+        format: {
+          type: "string",
+          enum: ["mermaid", "json", "both"],
+          description: "Output format (default: both)",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "predict_query_performance",
+    description:
+      "Predicts how EXPLAIN-estimated scan volume/cost could change under table growth assumptions (heuristic).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Read-only SQL query to analyze",
+        },
+        row_growth_multiplier: {
+          type: "number",
+          description: "Default multiplicative growth factor to apply to table row estimates (default 2)",
+        },
+        per_table_row_growth: {
+          type: "object",
+          description: "Optional per-table growth overrides: { tableName: factor }",
+          additionalProperties: { type: "number" },
+        },
+        include_explain_json: {
+          type: "boolean",
+          description: "Include full EXPLAIN JSON in the response (default false)",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "forecast_database_growth",
+    description:
+      "Forecasts database/table growth based on current INFORMATION_SCHEMA sizes and user-supplied growth rate assumptions.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        horizon_days: {
+          type: "number",
+          description: "Forecast horizon in days (default 30, max 3650)",
+        },
+        growth_rate_percent_per_day: {
+          type: "number",
+          description: "Base daily growth rate percent applied to all tables unless overridden (e.g., 0.5)",
+        },
+        growth_rate_percent_per_month: {
+          type: "number",
+          description: "Base monthly growth rate percent (converted to daily compound rate)",
+        },
+        per_table_growth_rate_percent_per_day: {
+          type: "object",
+          description: "Optional per-table daily growth rate percent overrides: { tableName: percentPerDay }",
+          additionalProperties: { type: "number" },
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
   // Smart Data Discovery
   {
     name: "smart_search",
@@ -3327,7 +3467,7 @@ const TOOLS: Tool[] = [
 const server = new Server(
   {
     name: "mysql-mcp-server",
-    version: "1.12.0",
+    version: "1.17.0",
   },
   {
     capabilities: {
@@ -4089,6 +4229,65 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
             min_execution_count?: number;
             min_avg_time_ms?: number;
             include_unused_index_warnings?: boolean;
+          },
+        );
+        break;
+
+      // ==========================================
+      // PHASE 3: AI Enhancement Tools (Data Gen + Patterns + Visualization + Forecasting)
+      // ==========================================
+
+      case "generate_test_data":
+        result = await mysqlMCP.generateTestData(
+          (args || {}) as {
+            table_name: string;
+            row_count: number;
+            batch_size?: number;
+            include_nulls?: boolean;
+            database?: string;
+          },
+        );
+        break;
+
+      case "analyze_schema_patterns":
+        result = await mysqlMCP.analyzeSchemaPatterns(
+          (args || {}) as {
+            scope?: "database" | "table";
+            table_name?: string;
+            database?: string;
+          },
+        );
+        break;
+
+      case "visualize_query":
+        result = await mysqlMCP.visualizeQuery(
+          (args || {}) as {
+            query: string;
+            include_explain_json?: boolean;
+            format?: "mermaid" | "json" | "both";
+          },
+        );
+        break;
+
+      case "predict_query_performance":
+        result = await mysqlMCP.predictQueryPerformance(
+          (args || {}) as {
+            query: string;
+            row_growth_multiplier?: number;
+            per_table_row_growth?: Record<string, number>;
+            include_explain_json?: boolean;
+          },
+        );
+        break;
+
+      case "forecast_database_growth":
+        result = await mysqlMCP.forecastDatabaseGrowth(
+          (args || {}) as {
+            horizon_days?: number;
+            growth_rate_percent_per_day?: number;
+            growth_rate_percent_per_month?: number;
+            per_table_growth_rate_percent_per_day?: Record<string, number>;
+            database?: string;
           },
         );
         break;

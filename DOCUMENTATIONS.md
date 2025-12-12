@@ -6,27 +6,263 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 ## Table of Contents
 
-1. [Category Filtering System](#🆕-category-filtering-system) - NEW!
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 145 tools organized by category
-3. [DDL Operations](#🏗️-ddl-operations)
-4. [Data Export Tools](#📤-data-export-tools)
-5. [Data Import Tools](#📥-data-import-tools)
-6. [Database Backup & Restore](#💾-database-backup--restore)
-7. [Data Migration Tools](#🔄-data-migration-tools)
-8. [Schema Versioning & Migrations](#🔄-schema-versioning-and-migrations)
-9. [Transaction Management](#💰-transaction-management)
-10. [Stored Procedures](#🔧-stored-procedures)
-11. [Views Management](#👁️-views-management)
-12. [Triggers Management](#⚡-triggers-management)
-13. [Functions Management](#🔢-functions-management)
-14. [Index Management](#📇-index-management)
-15. [Constraint Management](#🔗-constraint-management)
-16. [Table Maintenance](#🔧-table-maintenance)
-17. [Process & Server Management](#📊-process--server-management)
-18. [Performance Monitoring](#📈-performance-monitoring)
-19. [AI Enhancement Tools](#🤖-ai-enhancement-tools) - NEW!
-20. [Usage Examples](#📋-usage-examples)
-21. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Agent clients, env vars, local path, multi-DB
+2. [Category Filtering System](#🆕-category-filtering-system) - NEW!
+3. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 150 tools organized by category
+4. [DDL Operations](#🏗️-ddl-operations)
+5. [Data Export Tools](#📤-data-export-tools)
+6. [Data Import Tools](#📥-data-import-tools)
+7. [Database Backup & Restore](#💾-database-backup--restore)
+8. [Data Migration Tools](#🔄-data-migration-tools)
+9. [Schema Versioning & Migrations](#🔄-schema-versioning-and-migrations)
+10. [Transaction Management](#💰-transaction-management)
+11. [Stored Procedures](#🔧-stored-procedures)
+12. [Views Management](#👁️-views-management)
+13. [Triggers Management](#⚡-triggers-management)
+14. [Functions Management](#🔢-functions-management)
+15. [Index Management](#📇-index-management)
+16. [Constraint Management](#🔗-constraint-management)
+17. [Table Maintenance](#🔧-table-maintenance)
+18. [Process & Server Management](#📊-process--server-management)
+19. [Performance Monitoring](#📈-performance-monitoring)
+20. [AI Enhancement Tools](#🤖-ai-enhancement-tools) - NEW!
+21. [Usage Examples](#📋-usage-examples)
+22. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+
+---
+
+## Setup & Configuration (Extended)
+
+This section collects **client-specific configuration snippets** and **advanced setup patterns**. For the shortest setup, see [README.md](README.md).
+
+### Agent Configuration Examples
+
+Most clients ultimately need the same `command` + `args` shape, but the **config file path** differs.
+
+| AI Agent | Config File Location |
+|----------|---------------------|
+| **Claude Code** | `.mcp.json` (project root) or `~/.mcp.json` (global) |
+| **Cursor** | `.cursor/mcp.json` |
+| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` |
+| **Cline** | VS Code settings or Cline config file |
+| **Gemini CLI** | `~/.gemini/settings.json` |
+| **Kilo Code** | VS Code MCP settings |
+| **Roo Code** | VS Code MCP settings |
+| **Trae AI** | MCP configuration in settings |
+| **Qwen Code** | MCP configuration in settings |
+| **Droid CLI** | MCP configuration in settings |
+
+#### Standard JSON Configuration (Universal)
+
+**Option 1: Single-Layer (Permissions Only) - Simple Setup**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mysql-mcp",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+**Option 2: Dual-Layer (Permissions + Categories) - Recommended for Fine Control**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mysql-mcp",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility",
+        "database_discovery,performance_monitoring"
+      ]
+    }
+  }
+}
+```
+
+#### Multiple Database Configuration
+
+```json
+{
+  "mcpServers": {
+    "mysql-prod": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mysql-mcp",
+        "mysql://reader:pass@prod-server:3306/prod_db",
+        "list,read,utility"
+      ]
+    },
+    "mysql-dev": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mysql-mcp",
+        "mysql://root:pass@localhost:3306/dev_db",
+        "list,read,create,update,delete,execute,ddl,utility"
+      ]
+    }
+  }
+}
+```
+
+### OpenAI Codex CLI & VS Code Extension
+
+OpenAI Codex uses TOML format in `~/.codex/config.toml`.
+
+**Quick setup via CLI:**
+
+```bash
+codex mcp add mysql -- npx -y @berthojoris/mysql-mcp mysql://user:pass@localhost:3306/db list,read,utility
+```
+
+**Manual TOML configuration:**
+
+```toml
+[mcp_servers.mysql]
+command = "npx"
+args = ["-y", "@berthojoris/mysql-mcp", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
+startup_timeout_sec = 20
+```
+
+### Zed IDE
+
+Zed uses `~/.config/zed/settings.json`:
+
+```json
+{
+  "context_servers": {
+    "mysql": {
+      "command": {
+        "path": "npx",
+        "args": [
+          "-y",
+          "@berthojoris/mysql-mcp",
+          "mysql://user:password@localhost:3306/database",
+          "list,read,utility"
+        ]
+      }
+    }
+  }
+}
+```
+
+### Environment Variables Configuration
+
+Alternative approach using environment variables instead of a connection string.
+
+**Option 1: Permissions Only (Simple)**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@berthojoris/mysql-mcp"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "your_password",
+        "DB_NAME": "your_database",
+        "MCP_PERMISSIONS": "list,read,utility"
+      }
+    }
+  }
+}
+```
+
+**Option 2: Permissions + Categories (Recommended)**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@berthojoris/mysql-mcp"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "your_password",
+        "DB_NAME": "your_database",
+        "MCP_PERMISSIONS": "list,read,utility",
+        "MCP_CATEGORIES": "database_discovery,performance_monitoring",
+        "MCP_MASKING_PROFILE": "partial"
+      }
+    }
+  }
+}
+```
+
+**Option 3: Adaptive Preset (Merges with Overrides)**
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@berthojoris/mysql-mcp"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "your_password",
+        "DB_NAME": "your_database",
+        "MCP_PRESET": "readonly",
+        "MCP_PERMISSIONS": "list,read,utility",
+        "MCP_CATEGORIES": "performance_monitoring"
+      }
+    }
+  }
+}
+```
+
+Presets and profiles (`dev`/`stage`/`prod`) are described in the [Category Filtering System](#🆕-category-filtering-system).
+
+### Local Path Configuration
+
+For development or when you need full control over the source code:
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "node",
+      "args": [
+        "/path/to/mcp_mysql/bin/mcp-mysql.js",
+        "mysql://user:password@localhost:3306/database",
+        "list,read,utility"
+      ]
+    }
+  }
+}
+```
+
+When to use local path:
+
+- You need offline usage (no npm registry access)
+- You are developing/debugging the server
+- You need to pin to a custom build
+
+Build requirements:
+
+```bash
+npm install
+npm run build
+```
 
 Control which database operations are available to AI using a **dual-layer filtering system**:
 
@@ -240,7 +476,7 @@ The system uses both arguments to determine access:
 - **3rd argument**: Categories (Layer 2, optional) - comma-separated documentation categories
 
 **Decision logic**:
-1. If no arguments: All 145 tools enabled
+1. If no arguments: All 150 tools enabled
 2. If only 2nd argument (permissions): Tools enabled if they match permission
 3. If both arguments: Tools enabled if they match BOTH permission AND category
 
@@ -285,7 +521,7 @@ Add 'bulk_operations' to the categories argument.
 
 ## 🔧 Complete Tools Reference
 
-This section provides a comprehensive reference of all 145 available tools organized by category.
+This section provides a comprehensive reference of all 150 available tools organized by category.
 
 ### Database Discovery
 
@@ -3005,7 +3241,38 @@ Reset Performance Schema statistics to start fresh monitoring.
 
 ## 🤖 AI Enhancement Tools
 
-The AI Enhancement tools provide intelligent, AI-powered features for database exploration, query generation, documentation, schema design, security auditing, and index recommendations. These tools include **Phase 1-2** enhancements.
+The AI Enhancement tools provide intelligent, AI-powered features for database exploration, query generation, documentation, schema design, security auditing, index recommendations, data generation, visualization, and forecasting. These tools include **Phase 1-3** enhancements.
+
+### At a Glance (Phase 1–3 - Implemented)
+
+- **Intelligent Query Assistant**
+  - **`build_query_from_intent`** - Converts natural language to optimized SQL queries
+  - **`suggest_query_improvements`** - AI-powered query optimization suggestions
+  - *Use case: "Show me active users from last month" → Automatically generates SQL*
+
+- **Smart Data Discovery Agent**
+  - **`smart_search`** - Semantic search for tables, columns, and data patterns
+  - **`find_similar_columns`** - Discover columns with similar names or data patterns
+  - **`discover_data_patterns`** - Automatic identification of data patterns and relationships
+  - *Use case: Find all customer-related columns across hundreds of tables*
+
+- **AI-Powered Documentation Generator**
+  - **`generate_documentation`** - Automatic database documentation with business glossary
+  - **`generate_data_dictionary`** - Interactive data dictionaries with examples
+  - **`generate_business_glossary`** - Business terminology mapping to technical fields
+  - *Use case: Generate complete documentation for a new database in seconds*
+
+- **Schema + Security + Indexing**
+  - **`design_schema_from_requirements`** - Generate proposed tables, relationships, and DDL from business requirements
+  - **`audit_database_security`** - Best-effort MySQL security audit with prioritized findings
+  - **`recommend_indexes`** - Concrete index recommendations from observed query patterns (performance_schema)
+
+- **Data Generation + Patterns + Visualization + Forecasting**
+  - **`generate_test_data`** - Generate FK-aware SQL INSERT statements for synthetic test data (does not execute)
+  - **`analyze_schema_patterns`** - Detect schema anti-patterns (missing PKs, wide tables, unindexed FKs, EAV-like tables)
+  - **`visualize_query`** - Mermaid flowchart visualization of queries using EXPLAIN FORMAT=JSON
+  - **`predict_query_performance`** - Heuristic prediction of EXPLAIN scan/cost under growth assumptions
+  - **`forecast_database_growth`** - Forecast table/database size growth from current sizes and user-supplied rates
 
 ### Tool Overview
 
@@ -3022,6 +3289,11 @@ The AI Enhancement tools provide intelligent, AI-powered features for database e
 | `design_schema_from_requirements` | Designs a proposed schema and outputs DDL from natural language requirements | `ai_enhancement` |
 | `audit_database_security` | Audits MySQL security configuration and (optionally) accounts/privileges | `ai_enhancement` |
 | `recommend_indexes` | Suggests concrete CREATE INDEX statements from observed query patterns | `ai_enhancement` |
+| `generate_test_data` | Generates SQL INSERT statements for synthetic test data (non-executing) | `ai_enhancement` |
+| `analyze_schema_patterns` | Detects schema patterns/anti-patterns and provides recommendations | `ai_enhancement` |
+| `visualize_query` | Produces Mermaid query diagrams from EXPLAIN JSON | `ai_enhancement` |
+| `predict_query_performance` | Predicts query scan/cost changes under growth assumptions (heuristic) | `ai_enhancement` |
+| `forecast_database_growth` | Forecasts table/database growth from current sizes and rates | `ai_enhancement` |
 
 ### Intelligent Query Assistant
 

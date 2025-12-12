@@ -26,6 +26,10 @@ import { DocumentationGeneratorTools } from "./tools/documentationGeneratorTools
 import { SchemaDesignTools } from "./tools/schemaDesignTools";
 import { SecurityAuditTools } from "./tools/securityAuditTools";
 import { IndexRecommendationTools } from "./tools/indexRecommendationTools";
+import { TestDataTools } from "./tools/testDataTools";
+import { SchemaPatternTools } from "./tools/schemaPatternTools";
+import { QueryVisualizationTools } from "./tools/queryVisualizationTools";
+import { ForecastingTools } from "./tools/forecastingTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -63,6 +67,10 @@ export class MySQLMCP {
   private schemaDesignTools: SchemaDesignTools;
   private securityAuditTools: SecurityAuditTools;
   private indexRecommendationTools: IndexRecommendationTools;
+  private testDataTools: TestDataTools;
+  private schemaPatternTools: SchemaPatternTools;
+  private queryVisualizationTools: QueryVisualizationTools;
+  private forecastingTools: ForecastingTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -106,6 +114,10 @@ export class MySQLMCP {
     this.schemaDesignTools = new SchemaDesignTools(this.security);
     this.securityAuditTools = new SecurityAuditTools();
     this.indexRecommendationTools = new IndexRecommendationTools(this.security);
+    this.testDataTools = new TestDataTools(this.security);
+    this.schemaPatternTools = new SchemaPatternTools(this.security);
+    this.queryVisualizationTools = new QueryVisualizationTools(this.security);
+    this.forecastingTools = new ForecastingTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -1603,6 +1615,65 @@ export class MySQLMCP {
     const check = this.checkToolEnabled("recommendIndexes");
     if (!check.enabled) return { status: "error", error: check.error };
     return await this.indexRecommendationTools.recommendIndexes(params);
+  }
+
+  // ==========================================
+  // PHASE 3: AI Enhancement Tools (Data Gen + Patterns + Visualization + Forecasting)
+  // ==========================================
+
+  async generateTestData(params: {
+    table_name: string;
+    row_count: number;
+    batch_size?: number;
+    include_nulls?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("generateTestData");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.testDataTools.generateTestData(params);
+  }
+
+  async analyzeSchemaPatterns(params?: {
+    scope?: "database" | "table";
+    table_name?: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("analyzeSchemaPatterns");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.schemaPatternTools.analyzeSchemaPatterns(params);
+  }
+
+  async visualizeQuery(params: {
+    query: string;
+    include_explain_json?: boolean;
+    format?: "mermaid" | "json" | "both";
+  }) {
+    const check = this.checkToolEnabled("visualizeQuery");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.queryVisualizationTools.visualizeQuery(params);
+  }
+
+  async predictQueryPerformance(params: {
+    query: string;
+    row_growth_multiplier?: number;
+    per_table_row_growth?: Record<string, number>;
+    include_explain_json?: boolean;
+  }) {
+    const check = this.checkToolEnabled("predictQueryPerformance");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.forecastingTools.predictQueryPerformance(params);
+  }
+
+  async forecastDatabaseGrowth(params?: {
+    horizon_days?: number;
+    growth_rate_percent_per_day?: number;
+    growth_rate_percent_per_month?: number;
+    per_table_growth_rate_percent_per_day?: Record<string, number>;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("forecastDatabaseGrowth");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.forecastingTools.forecastDatabaseGrowth(params);
   }
 }
 

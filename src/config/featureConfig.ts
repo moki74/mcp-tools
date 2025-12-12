@@ -361,6 +361,13 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   designSchemaFromRequirements: ToolCategory.UTILITY,
   auditDatabaseSecurity: ToolCategory.UTILITY,
   recommendIndexes: ToolCategory.UTILITY,
+
+  // Phase 3: AI Enhancement Tools
+  generateTestData: ToolCategory.UTILITY,
+  analyzeSchemaPatterns: ToolCategory.UTILITY,
+  visualizeQuery: ToolCategory.UTILITY,
+  predictQueryPerformance: ToolCategory.UTILITY,
+  forecastDatabaseGrowth: ToolCategory.UTILITY,
 };
 
 /**
@@ -552,6 +559,13 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   designSchemaFromRequirements: DocCategory.AI_ENHANCEMENT,
   auditDatabaseSecurity: DocCategory.AI_ENHANCEMENT,
   recommendIndexes: DocCategory.AI_ENHANCEMENT,
+
+  // Phase 3: AI Enhancement
+  generateTestData: DocCategory.AI_ENHANCEMENT,
+  analyzeSchemaPatterns: DocCategory.AI_ENHANCEMENT,
+  visualizeQuery: DocCategory.AI_ENHANCEMENT,
+  predictQueryPerformance: DocCategory.AI_ENHANCEMENT,
+  forecastDatabaseGrowth: DocCategory.AI_ENHANCEMENT,
 };
 
 /**

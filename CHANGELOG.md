@@ -5,6 +5,22 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.0] - 2025-12-12
+
+### Added
+- **Phase 3: AI Enhancement Tools** - 5 new tools for data generation, schema review, visualization, and forecasting:
+  - `generate_test_data` - Generate FK-aware SQL INSERT statements for synthetic test data (does not execute)
+  - `analyze_schema_patterns` - Detect common schema anti-patterns (missing PKs, wide tables, unindexed FKs, EAV-like design)
+  - `visualize_query` - Produce a Mermaid flowchart representation of a query using EXPLAIN FORMAT=JSON
+  - `predict_query_performance` - Heuristic prediction of query scan/cost impact under growth assumptions
+  - `forecast_database_growth` - Forecast table/database size growth from current INFORMATION_SCHEMA sizes and user-supplied rates
+
+### Changed
+- Updated total tool count from 145 to 150 tools.
+
+### Documentation
+- Updated README.md and DOCUMENTATIONS.md to include Phase 3 AI Enhancement tools.
+
 ## [1.16.4] - 2025-12-12
 
 ### Added
