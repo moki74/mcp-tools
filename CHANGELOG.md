@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Preset-based access control configuration: CLI `--preset` flag and `MCP_PRESET` / `MCP_PERMISSION_PRESET` environment variables. Use `MCP_PERMISSIONS` and optionally `MCP_CATEGORIES`.
 - Global masking configuration via `MCP_MASKING_PROFILE`. If you need enforced masking for exports, use the `safe_export_table` macro's `masking_profile` argument.
 
+
+## [1.18.2] - 2025-12-13
+
+### Removed
+- Removed outdated comparison docs under `docs/comparison` (and the related README section). The canonical documentation is `DOCUMENTATIONS.md`.
+
+
+## [1.18.1] - 2025-12-13
+
+### Changed
+- Updated documentation files with current datetime stamps
+
 ## [1.17.0] - 2025-12-12
 
 ### Added

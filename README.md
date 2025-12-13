@@ -4,6 +4,8 @@
 
 **A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
+**Last Updated:** 2025-12-13T03:05:56.256Z
+
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mysql-mcp)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -333,17 +335,7 @@ For comprehensive documentation, see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)**:
 
 This MySQL MCP is a **powerful intermediary layer** between AI assistants and MySQL databases.
 
-| Comparison Topic | Documentation |
-|------------------|---------------|
-| Data Access & Querying | [docs/comparison/data-access-querying.md](docs/comparison/data-access-querying.md) |
-| Data Analysis | [docs/comparison/data-analysis.md](docs/comparison/data-analysis.md) |
-| Data Validation | [docs/comparison/data-validation.md](docs/comparison/data-validation.md) |
-| Schema Inspection | [docs/comparison/schema-inspection.md](docs/comparison/schema-inspection.md) |
-| Debugging & Diagnostics | [docs/comparison/debugging-diagnostics.md](docs/comparison/debugging-diagnostics.md) |
-| Advanced Operations | [docs/comparison/advanced-operations.md](docs/comparison/advanced-operations.md) |
-| Key Benefits | [docs/comparison/key-benefits.md](docs/comparison/key-benefits.md) |
-| Example Workflows | [docs/comparison/example-workflows.md](docs/comparison/example-workflows.md) |
-| When to Use | [docs/comparison/when-to-use.md](docs/comparison/when-to-use.md) |
+For full feature coverage and usage examples, see **[DOCUMENTATIONS.md](DOCUMENTATIONS.md)**.
 
 ---
 

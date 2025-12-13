@@ -1,9 +1,30 @@
 # AGENTS Development Guidelines
 
-- This project uses MCP MySQL with the latest version of Node.js.
-- When creating a new feature:
-  - Update both `README.md` and `DOCUMENTATIONS.md` with the feature details.
-  - Increment the version number in `package.json` after the task is completed.
-- Always update `CHANGELOG.md` for each new feature and increment the version number upon completion.
-- Any temporary test file created during development must be removed after the test is completed.
-- Before publishing to npmjs, ensure the `dist-tag` is set to `latest` for the current version.
+- This project uses **MySQL MCP** with the latest stable version of **Node.js**.
+
+## Feature & Code Changes
+- For **any new feature, fix, or enhancement**:
+  - Update `DOCUMENTATIONS.md` **first**.
+  - Update `README.md` if the change is user-facing.
+  - Always increment the version number in `package.json` after the task is completed.
+  - Add an entry to `CHANGELOG.md` for every version change.
+
+## Documentation Rules
+- Do **not** create new documentation files.
+- All documentation updates must be written to `DOCUMENTATIONS.md`.
+- Keep documentation changes concise and include a datetime if applicable.
+
+## Versioning Rules
+- Increment the version in `package.json` when:
+  - A new feature is added
+  - A bug is fixed
+  - Documentation is updated
+  - Any production code is modified
+
+## Testing & Cleanup
+- Any temporary or test files created during development **must be removed** after testing is completed.
+
+## Publishing Rules
+- Before publishing to **npmjs**:
+  - Ensure the `dist-tag` is set to `latest`
+  - Verify the version number matches `CHANGELOG.md`
