@@ -78,7 +78,6 @@ DB_USER=root
 DB_PASSWORD=yourpassword
 DB_NAME=yourdatabase
 MCP_CONFIG=list,read,utility
-MCP_MASKING_PROFILE=partial
 ```
 
 ### 2. Build Project (If Cloned Locally)
@@ -194,40 +193,14 @@ Alternative approach using environment variables instead of connection string:
         "DB_PASSWORD": "your_password",
         "DB_NAME": "your_database",
         "MCP_PERMISSIONS": "list,read,utility",
-        "MCP_CATEGORIES": "database_discovery,performance_monitoring",
-        "MCP_MASKING_PROFILE": "partial"
+        "MCP_CATEGORIES": "database_discovery,performance_monitoring"
       }
     }
   }
 }
 ```
 
-**Option 3: Adaptive Preset (Merges with Overrides)**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": ["-y", "@berthojoris/mysql-mcp"],
-      "env": {
-        "DB_HOST": "localhost",
-        "DB_PORT": "3306",
-        "DB_USER": "root",
-        "DB_PASSWORD": "your_password",
-        "DB_NAME": "your_database",
-        "MCP_PRESET": "readonly",
-        "MCP_PERMISSIONS": "list,read,utility",
-        "MCP_CATEGORIES": "performance_monitoring"
-      }
-    }
-  }
-}
-```
-
-Add `MCP_PRESET` for the base bundle and optionally layer on `MCP_PERMISSIONS` / `MCP_CATEGORIES` for project-specific overrides.
-
-For more environment-variable patterns (presets/profiles, client-specific env blocks), see **[DOCUMENTATIONS.md → Setup & Configuration](DOCUMENTATIONS.md#setup--configuration-extended)**.
+For more client-specific config snippets, see **[DOCUMENTATIONS.md → Setup & Configuration](DOCUMENTATIONS.md#setup--configuration-extended)**.
 
 ---
 
@@ -244,15 +217,63 @@ Control database access with a **dual-layer filtering system** that provides bot
 
 Use documentation categories to fine-tune which tools are exposed (Layer 2):
 
+<table>
+  <thead>
+    <tr>
+      <th align="left">Category A</th>
+      <th align="left">Category B</th>
+      <th align="left">Category C</th>
+      <th align="left">Category D</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>database_discovery</code></td>
+      <td><code>crud_operations</code></td>
+      <td><code>bulk_operations</code></td>
+      <td><code>custom_queries</code></td>
+    </tr>
+    <tr>
+      <td><code>schema_management</code></td>
+      <td><code>utilities</code></td>
+      <td><code>transaction_management</code></td>
+      <td><code>stored_procedures</code></td>
+    </tr>
+    <tr>
+      <td><code>views_management</code></td>
+      <td><code>triggers_management</code></td>
+      <td><code>functions_management</code></td>
+      <td><code>index_management</code></td>
+    </tr>
+    <tr>
+      <td><code>constraint_management</code></td>
+      <td><code>table_maintenance</code></td>
+      <td><code>server_management</code></td>
+      <td><code>performance_monitoring</code></td>
+    </tr>
+    <tr>
+      <td><code>cache_management</code></td>
+      <td><code>query_optimization</code></td>
+      <td><code>backup_restore</code></td>
+      <td><code>import_export</code></td>
+    </tr>
+    <tr>
+      <td><code>data_migration</code></td>
+      <td><code>schema_migrations</code></td>
+      <td><code>analysis</code></td>
+      <td><code>ai_enhancement</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<details>
+  <summary>Copy/paste list (comma-separated, no spaces)</summary>
+
 ```text
-database_discovery,crud_operations,bulk_operations,custom_queries,
-schema_management,utilities,transaction_management,stored_procedures,
-views_management,triggers_management,functions_management,index_management,
-constraint_management,table_maintenance,server_management,
-performance_monitoring,cache_management,query_optimization,
-backup_restore,import_export,data_migration,schema_migrations,
-analysis,ai_enhancement
+database_discovery,crud_operations,bulk_operations,custom_queries,schema_management,utilities,transaction_management,stored_procedures,views_management,triggers_management,functions_management,index_management,constraint_management,table_maintenance,server_management,performance_monitoring,cache_management,query_optimization,backup_restore,import_export,data_migration,schema_migrations,analysis,ai_enhancement
 ```
+
+</details>
 
 Full category → tool mapping (and examples) lives in **[DOCUMENTATIONS.md → Category Filtering System](DOCUMENTATIONS.md#🆕-category-filtering-system)**.
 
@@ -271,7 +292,7 @@ Full category → tool mapping (and examples) lives in **[DOCUMENTATIONS.md → 
 | `transaction` | BEGIN, COMMIT, ROLLBACK | ACID operations |
 | `utility` | Connection testing, diagnostics | Troubleshooting |
 
-Common presets, environment bundles, and multi-environment examples are documented in **[DOCUMENTATIONS.md → Category Filtering System](DOCUMENTATIONS.md#🆕-category-filtering-system)**.
+Common configuration examples are documented in **[DOCUMENTATIONS.md → Category Filtering System](DOCUMENTATIONS.md#🆕-category-filtering-system)**.
 
 ---
 

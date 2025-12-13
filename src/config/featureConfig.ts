@@ -51,140 +51,6 @@ export enum DocCategory {
 }
 
 /**
- * Permission preset bundles for faster, safer configuration
- */
-export interface PermissionPreset {
-  name: string;
-  description: string;
-  permissions: ToolCategory[];
-  categories: DocCategory[];
-  allowedTools?: string[];
-  deniedTools?: string[];
-}
-
-const normalizePresetName = (value?: string): string =>
-  (value || "").toLowerCase().replace(/[\s_-]/g, "");
-
-const permissionPresets: Record<string, PermissionPreset> = {
-  readonly: {
-    name: "readonly",
-    description:
-      "Safe read-only profile with discovery, querying, exports, and diagnostics",
-    permissions: [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY],
-    categories: [
-      DocCategory.DATABASE_DISCOVERY,
-      DocCategory.CRUD_OPERATIONS,
-      DocCategory.CUSTOM_QUERIES,
-      DocCategory.UTILITIES,
-      DocCategory.IMPORT_EXPORT,
-      DocCategory.PERFORMANCE_MONITORING,
-      DocCategory.ANALYSIS,
-    ],
-  },
-  analyst: {
-    name: "analyst",
-    description:
-      "Exploratory analytics profile with query insights and safe exports",
-    permissions: [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY],
-    categories: [
-      DocCategory.DATABASE_DISCOVERY,
-      DocCategory.CRUD_OPERATIONS,
-      DocCategory.CUSTOM_QUERIES,
-      DocCategory.UTILITIES,
-      DocCategory.IMPORT_EXPORT,
-      DocCategory.PERFORMANCE_MONITORING,
-      DocCategory.ANALYSIS,
-      DocCategory.QUERY_OPTIMIZATION,
-      DocCategory.CACHE_MANAGEMENT,
-      DocCategory.SERVER_MANAGEMENT,
-      DocCategory.AI_ENHANCEMENT,
-    ],
-  },
-  dbalite: {
-    name: "dba-lite",
-    description:
-      "Admin-lite profile for schema care, migrations, and maintenance",
-    permissions: [
-      ToolCategory.LIST,
-      ToolCategory.READ,
-      ToolCategory.UTILITY,
-      ToolCategory.DDL,
-      ToolCategory.TRANSACTION,
-      ToolCategory.PROCEDURE,
-    ],
-    categories: [
-      DocCategory.DATABASE_DISCOVERY,
-      DocCategory.CUSTOM_QUERIES,
-      DocCategory.UTILITIES,
-      DocCategory.SERVER_MANAGEMENT,
-      DocCategory.SCHEMA_MANAGEMENT,
-      DocCategory.TABLE_MAINTENANCE,
-      DocCategory.INDEX_MANAGEMENT,
-      DocCategory.CONSTRAINT_MANAGEMENT,
-      DocCategory.BACKUP_RESTORE,
-      DocCategory.SCHEMA_MIGRATIONS,
-      DocCategory.PERFORMANCE_MONITORING,
-      DocCategory.VIEWS_MANAGEMENT,
-      DocCategory.TRIGGERS_MANAGEMENT,
-      DocCategory.FUNCTIONS_MANAGEMENT,
-      DocCategory.STORED_PROCEDURES,
-    ],
-  },
-  dev: {
-    name: "dev",
-    description: "Development profile with full access to all tools",
-    permissions: Object.values(ToolCategory),
-    categories: Object.values(DocCategory),
-    deniedTools: [], // Explicitly allow everything
-  },
-  stage: {
-    name: "stage",
-    description: "Staging profile with data modification but no destructive DDL",
-    permissions: [
-      ToolCategory.LIST,
-      ToolCategory.READ,
-      ToolCategory.CREATE,
-      ToolCategory.UPDATE,
-      ToolCategory.DELETE,
-      ToolCategory.UTILITY,
-      ToolCategory.TRANSACTION,
-    ],
-    categories: [
-      DocCategory.DATABASE_DISCOVERY,
-      DocCategory.CRUD_OPERATIONS,
-      DocCategory.BULK_OPERATIONS,
-      DocCategory.CUSTOM_QUERIES,
-      DocCategory.UTILITIES,
-      DocCategory.TRANSACTION_MANAGEMENT,
-      DocCategory.IMPORT_EXPORT,
-      DocCategory.DATA_MIGRATION,
-      DocCategory.PERFORMANCE_MONITORING,
-      DocCategory.ANALYSIS,
-    ],
-    deniedTools: ["drop_table", "truncate_table", "drop_database"],
-  },
-  prod: {
-    name: "prod",
-    description: "Production profile with strict read-only access and safety checks",
-    permissions: [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY],
-    categories: [
-      DocCategory.DATABASE_DISCOVERY,
-      DocCategory.CRUD_OPERATIONS, // Read only via permissions
-      DocCategory.CUSTOM_QUERIES,
-      DocCategory.UTILITIES,
-      DocCategory.PERFORMANCE_MONITORING,
-      DocCategory.ANALYSIS,
-    ],
-    deniedTools: [
-      "create_table", "alter_table", "drop_table", "truncate_table",
-      "create_record", "update_record", "delete_record",
-      "bulk_insert", "bulk_update", "bulk_delete",
-      "execute_sql", "execute_ddl"
-    ],
-  },
-};
-
-/**
  * Map of tool names to their legacy categories
  */
 export const toolCategoryMap: Record<string, ToolCategory> = {
@@ -638,31 +504,11 @@ export class FeatureConfig {
   private enabledLegacyCategories: Set<ToolCategory>;
   private enabledDocCategories: Set<DocCategory>;
 
-  // New Allow/Deny Lists
-  private allowedTools: Set<string>;
-  private deniedTools: Set<string>;
-
   private originalPermissionsString: string;
   private originalCategoriesString: string;
   private useDualLayer: boolean; // Flag to determine if using dual-layer filtering
-  private activePreset?: PermissionPreset;
-  private presetName?: string;
 
-  constructor(
-    permissionsStr?: string,
-    categoriesStr?: string,
-    presetName?: string,
-  ) {
-    const presetInput =
-      presetName ||
-      process.env.MCP_PERMISSION_PRESET ||
-      process.env.MCP_PRESET ||
-      "";
-
-    this.activePreset = this.resolvePreset(presetInput);
-    this.presetName = this.activePreset?.name;
-    const presetRequested = !!presetInput.trim();
-
+  constructor(permissionsStr?: string, categoriesStr?: string) {
     // Support both old single-parameter and new dual-parameter signatures
     const permissionsInput =
       permissionsStr ||
@@ -671,39 +517,8 @@ export class FeatureConfig {
       "";
     const categoriesInput = categoriesStr || process.env.MCP_CATEGORIES || "";
 
-    // Use preset values when available, otherwise fall back to user input
-    // If an unknown preset is requested without explicit permissions/categories,
-    // default to a safe read-only baseline rather than enabling everything.
-    const basePermissions = this.activePreset
-      ? this.activePreset.permissions.join(",")
-      : presetRequested && !permissionsInput
-        ? [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY].join(",")
-        : "";
-    const baseCategories = this.activePreset
-      ? this.activePreset.categories.join(",")
-      : presetRequested && !categoriesInput
-        ? [
-          DocCategory.DATABASE_DISCOVERY,
-          DocCategory.CRUD_OPERATIONS,
-          DocCategory.CUSTOM_QUERIES,
-          DocCategory.UTILITIES,
-        ].join(",")
-        : "";
-
-    if (presetRequested && !this.activePreset) {
-      console.warn(
-        `Preset '${presetInput}' not recognized. Falling back to safe read-only defaults.`,
-      );
-    }
-
-    const mergedPermissions = this.mergeConfigStrings(
-      basePermissions,
-      permissionsInput,
-    );
-    const mergedCategories = this.mergeConfigStrings(
-      baseCategories,
-      categoriesInput,
-    );
+    const mergedPermissions = this.mergeConfigStrings("", permissionsInput);
+    const mergedCategories = this.mergeConfigStrings("", categoriesInput);
 
     this.originalPermissionsString = mergedPermissions;
     this.originalCategoriesString = mergedCategories;
@@ -712,10 +527,6 @@ export class FeatureConfig {
     const parsed = this.parseConfig(mergedPermissions, mergedCategories);
     this.enabledLegacyCategories = parsed.legacy;
     this.enabledDocCategories = parsed.doc;
-
-    // Initialize Allow/Deny Lists
-    this.allowedTools = new Set(this.activePreset?.allowedTools || []);
-    this.deniedTools = new Set(this.activePreset?.deniedTools || []);
   }
 
   /**
@@ -726,14 +537,6 @@ export class FeatureConfig {
       .map((c) => c.trim().toLowerCase())
       .filter(Boolean);
     return Array.from(new Set(items)).join(",");
-  }
-
-  /**
-   * Resolve a preset name to its configuration
-   */
-  private resolvePreset(name?: string): PermissionPreset | undefined {
-    const normalized = normalizePresetName(name);
-    return normalized ? permissionPresets[normalized] : undefined;
   }
 
   /**
@@ -788,10 +591,6 @@ export class FeatureConfig {
       });
     }
 
-    // Re-initialize Allow/Deny Lists if preset changed
-    this.allowedTools = new Set(this.activePreset?.allowedTools || []);
-    this.deniedTools = new Set(this.activePreset?.deniedTools || []);
-
     return {
       legacy: legacySet,
       doc: docSet,
@@ -804,47 +603,9 @@ export class FeatureConfig {
   setConfig(
     permissionsStr: string,
     categoriesStr?: string,
-    presetName?: string,
   ): void {
-    const presetRequested =
-      presetName !== undefined ? !!presetName.trim() : !!this.presetName;
-
-    this.activePreset =
-      presetName === ""
-        ? undefined
-        : this.resolvePreset(presetName || this.presetName);
-    this.presetName = this.activePreset?.name;
-
-    const basePermissions = this.activePreset
-      ? this.activePreset.permissions.join(",")
-      : presetRequested && !permissionsStr
-        ? [ToolCategory.LIST, ToolCategory.READ, ToolCategory.UTILITY].join(",")
-        : "";
-    const baseCategories = this.activePreset
-      ? this.activePreset.categories.join(",")
-      : presetRequested && !categoriesStr
-        ? [
-          DocCategory.DATABASE_DISCOVERY,
-          DocCategory.CRUD_OPERATIONS,
-          DocCategory.CUSTOM_QUERIES,
-          DocCategory.UTILITIES,
-        ].join(",")
-        : "";
-
-    if (presetRequested && !this.activePreset) {
-      console.warn(
-        `Preset '${presetName}' not recognized. Falling back to safe read-only defaults.`,
-      );
-    }
-
-    const mergedPermissions = this.mergeConfigStrings(
-      basePermissions,
-      permissionsStr,
-    );
-    const mergedCategories = this.mergeConfigStrings(
-      baseCategories,
-      categoriesStr || "",
-    );
+    const mergedPermissions = this.mergeConfigStrings("", permissionsStr);
+    const mergedCategories = this.mergeConfigStrings("", categoriesStr || "");
 
     this.originalPermissionsString = mergedPermissions;
     this.originalCategoriesString = mergedCategories;
@@ -868,16 +629,6 @@ export class FeatureConfig {
     if (!docCategory && !legacyCategory) {
       console.warn(`Unknown tool: ${toolName}`);
       return false;
-    }
-
-    // Layer 0: Check explicit Deny/Allow lists
-    // Deny takes precedence
-    if (this.deniedTools.has(toolName)) {
-      return false;
-    }
-    // Allow overrides other checks
-    if (this.allowedTools.has(toolName)) {
-      return true;
     }
 
     // Layer 1: Check permission (legacy category)
@@ -910,10 +661,6 @@ export class FeatureConfig {
 
     if (!docCategory && !legacyCategory) {
       return `Unknown tool '${toolName}'. This tool is not recognized by the MCP server.`;
-    }
-
-    if (this.deniedTools.has(toolName)) {
-      return `Permission denied: Tool '${toolName}' is explicitly denied by the current profile ('${this.presetName}').`;
     }
 
     const isAllEnabled =
@@ -1022,17 +769,9 @@ export class FeatureConfig {
   }
 
   /**
-   * Get the active preset (if any)
-   */
-  getActivePreset(): PermissionPreset | undefined {
-    return this.activePreset;
-  }
-
-  /**
    * Snapshot of the resolved configuration for logging/telemetry
    */
   getConfigSnapshot(): {
-    preset?: { name: string; description: string };
     permissions: string;
     categories: string;
     filteringMode: string;
@@ -1040,12 +779,6 @@ export class FeatureConfig {
     enabledDoc: DocCategory[];
   } {
     return {
-      preset: this.activePreset
-        ? {
-          name: this.activePreset.name,
-          description: this.activePreset.description,
-        }
-        : undefined,
       permissions: this.originalPermissionsString || "all",
       categories:
         this.originalCategoriesString ||

@@ -6,73 +6,38 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 
 ## Table of Contents
 
-1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Agent clients, env vars, local path, multi-DB
-2. [Category Filtering System](#🆕-category-filtering-system) - NEW!
-3. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 150 tools organized by category
-4. [DDL Operations](#🏗️-ddl-operations)
-5. [Data Export Tools](#📤-data-export-tools)
-6. [Data Import Tools](#📥-data-import-tools)
-7. [Database Backup & Restore](#💾-database-backup--restore)
-8. [Data Migration Tools](#🔄-data-migration-tools)
-9. [Schema Versioning & Migrations](#🔄-schema-versioning-and-migrations)
-10. [Transaction Management](#💰-transaction-management)
-11. [Stored Procedures](#🔧-stored-procedures)
-12. [Views Management](#👁️-views-management)
-13. [Triggers Management](#⚡-triggers-management)
-14. [Functions Management](#🔢-functions-management)
-15. [Index Management](#📇-index-management)
-16. [Constraint Management](#🔗-constraint-management)
-17. [Table Maintenance](#🔧-table-maintenance)
-18. [Process & Server Management](#📊-process--server-management)
-19. [Performance Monitoring](#📈-performance-monitoring)
-20. [AI Enhancement Tools](#🤖-ai-enhancement-tools) - NEW!
-21. [Usage Examples](#📋-usage-examples)
-22. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
+1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Permissions + Categories
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 150 tools organized by category
+3. [DDL Operations](#🏗️-ddl-operations)
+4. [Data Export Tools](#📤-data-export-tools)
+5. [Data Import Tools](#📥-data-import-tools)
+6. [Database Backup & Restore](#💾-database-backup--restore)
+7. [Data Migration Tools](#🔄-data-migration-tools)
+8. [Schema Versioning & Migrations](#🔄-schema-versioning-and-migrations)
+9. [Transaction Management](#💰-transaction-management)
+10. [Stored Procedures](#🔧-stored-procedures)
+11. [Views Management](#👁️-views-management)
+12. [Triggers Management](#⚡-triggers-management)
+13. [Functions Management](#🔢-functions-management)
+14. [Index Management](#📇-index-management)
+15. [Constraint Management](#🔗-constraint-management)
+16. [Table Maintenance](#🔧-table-maintenance)
+17. [Process & Server Management](#📊-process--server-management)
+18. [Performance Monitoring](#📈-performance-monitoring)
+19. [AI Enhancement Tools](#🤖-ai-enhancement-tools)
+20. [Usage Examples](#📋-usage-examples)
+21. [Query Logging & Automatic SQL Display](#📝-query-logging--automatic-sql-display)
 
 ---
 
 ## Setup & Configuration (Extended)
 
-This section collects **client-specific configuration snippets** and **advanced setup patterns**. For the shortest setup, see [README.md](README.md).
+This server is configured with **two access-control settings**:
 
-### Agent Configuration Examples
+- **Permissions (Layer 1)**: `MCP_PERMISSIONS` (comma-separated)
+- **Categories (Layer 2)**: `MCP_CATEGORIES` (comma-separated)
 
-Most clients ultimately need the same `command` + `args` shape, but the **config file path** differs.
-
-| AI Agent | Config File Location |
-|----------|---------------------|
-| **Claude Code** | `.mcp.json` (project root) or `~/.mcp.json` (global) |
-| **Cursor** | `.cursor/mcp.json` |
-| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` |
-| **Cline** | VS Code settings or Cline config file |
-| **Gemini CLI** | `~/.gemini/settings.json` |
-| **Kilo Code** | VS Code MCP settings |
-| **Roo Code** | VS Code MCP settings |
-| **Trae AI** | MCP configuration in settings |
-| **Qwen Code** | MCP configuration in settings |
-| **Droid CLI** | MCP configuration in settings |
-
-#### Standard JSON Configuration (Universal)
-
-**Option 1: Single-Layer (Permissions Only) - Simple Setup**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mysql-mcp",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
-```
-
-**Option 2: Dual-Layer (Permissions + Categories) - Recommended for Fine Control**
+### Recommended: Permissions + Categories (Dual-Layer)
 
 ```json
 {
@@ -91,100 +56,7 @@ Most clients ultimately need the same `command` + `args` shape, but the **config
 }
 ```
 
-#### Multiple Database Configuration
-
-```json
-{
-  "mcpServers": {
-    "mysql-prod": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mysql-mcp",
-        "mysql://reader:pass@prod-server:3306/prod_db",
-        "list,read,utility"
-      ]
-    },
-    "mysql-dev": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@berthojoris/mysql-mcp",
-        "mysql://root:pass@localhost:3306/dev_db",
-        "list,read,create,update,delete,execute,ddl,utility"
-      ]
-    }
-  }
-}
-```
-
-### OpenAI Codex CLI & VS Code Extension
-
-OpenAI Codex uses TOML format in `~/.codex/config.toml`.
-
-**Quick setup via CLI:**
-
-```bash
-codex mcp add mysql -- npx -y @berthojoris/mysql-mcp mysql://user:pass@localhost:3306/db list,read,utility
-```
-
-**Manual TOML configuration:**
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mysql-mcp", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
-startup_timeout_sec = 20
-```
-
-### Zed IDE
-
-Zed uses `~/.config/zed/settings.json`:
-
-```json
-{
-  "context_servers": {
-    "mysql": {
-      "command": {
-        "path": "npx",
-        "args": [
-          "-y",
-          "@berthojoris/mysql-mcp",
-          "mysql://user:password@localhost:3306/database",
-          "list,read,utility"
-        ]
-      }
-    }
-  }
-}
-```
-
-### Environment Variables Configuration
-
-Alternative approach using environment variables instead of a connection string.
-
-**Option 1: Permissions Only (Simple)**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": ["-y", "@berthojoris/mysql-mcp"],
-      "env": {
-        "DB_HOST": "localhost",
-        "DB_PORT": "3306",
-        "DB_USER": "root",
-        "DB_PASSWORD": "your_password",
-        "DB_NAME": "your_database",
-        "MCP_PERMISSIONS": "list,read,utility"
-      }
-    }
-  }
-}
-```
-
-**Option 2: Permissions + Categories (Recommended)**
+### Environment Variables: Permissions + Categories
 
 ```json
 {
@@ -199,69 +71,11 @@ Alternative approach using environment variables instead of a connection string.
         "DB_PASSWORD": "your_password",
         "DB_NAME": "your_database",
         "MCP_PERMISSIONS": "list,read,utility",
-        "MCP_CATEGORIES": "database_discovery,performance_monitoring",
-        "MCP_MASKING_PROFILE": "partial"
+        "MCP_CATEGORIES": "database_discovery,performance_monitoring"
       }
     }
   }
 }
-```
-
-**Option 3: Adaptive Preset (Merges with Overrides)**
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": ["-y", "@berthojoris/mysql-mcp"],
-      "env": {
-        "DB_HOST": "localhost",
-        "DB_PORT": "3306",
-        "DB_USER": "root",
-        "DB_PASSWORD": "your_password",
-        "DB_NAME": "your_database",
-        "MCP_PRESET": "readonly",
-        "MCP_PERMISSIONS": "list,read,utility",
-        "MCP_CATEGORIES": "performance_monitoring"
-      }
-    }
-  }
-}
-```
-
-Presets and profiles (`dev`/`stage`/`prod`) are described in the [Category Filtering System](#🆕-category-filtering-system).
-
-### Local Path Configuration
-
-For development or when you need full control over the source code:
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "node",
-      "args": [
-        "/path/to/mcp_mysql/bin/mcp-mysql.js",
-        "mysql://user:password@localhost:3306/database",
-        "list,read,utility"
-      ]
-    }
-  }
-}
-```
-
-When to use local path:
-
-- You need offline usage (no npm registry access)
-- You are developing/debugging the server
-- You need to pin to a custom build
-
-Build requirements:
-
-```bash
-npm install
-npm run build
 ```
 
 Control which database operations are available to AI using a **dual-layer filtering system**:
@@ -274,18 +88,8 @@ Control which database operations are available to AI using a **dual-layer filte
 ### Why Use Dual-Layer Filtering?
 
 - **Security**: Multiple layers of protection - broad permissions + specific tool access
-- **Flexibility**: Simple permission-only mode OR advanced dual-layer mode
-- **Backward Compatible**: Existing single-layer configurations continue to work
-- **Granular Control**: 10 permissions × 22 categories = precise access control
+- **Fine control**: broad permissions + specific tool access
 - **Clear Intent**: Separate "what operations are allowed" from "which specific tools"
-
-### Filtering Modes
-
-| Mode | Configuration | Use Case |
-|------|--------------|----------|
-| **No Filtering** | No args specified | Development, full trust |
-| **Single-Layer** | Permissions only (2nd arg) | Simple, broad control |
-| **Dual-Layer** | Permissions + Categories (2nd + 3rd args) | Production, precise control |
 
 ### Documentation Categories Reference
 
@@ -302,30 +106,7 @@ analysis,ai_enhancement
 
 ### Configuration Examples
 
-#### Example 1: Single-Layer (Permissions Only) - Backward Compatible
-
-Use only the 2nd argument for broad control:
-
-```json
-{
-  "mcpServers": {
-    "mysql": {
-      "command": "node",
-      "args": [
-        "/path/to/bin/mcp-mysql.js",
-        "mysql://user:pass@localhost:3306/db",
-        "list,read,utility"
-      ]
-    }
-  }
-}
-```
-
-**Result**: All tools within `list`, `read`, and `utility` permissions are enabled.
-
-**Enabled tools**: `list_databases`, `list_tables`, `read_records`, `run_query`, `test_connection`, `export_table_to_csv`, etc.
-
-#### Example 2: Dual-Layer (Permissions + Categories) - Production Read-Only
+#### Example: Dual-Layer (Permissions + Categories)
 
 Use both 2nd argument (permissions) and 3rd argument (categories):
 
@@ -355,98 +136,6 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 - `test_connection` - Has `utility` permission but category is `utilities` (not in category list)
 - `create_record` - No `create` permission (blocked by Layer 1)
 
-#### Example 3: Development Environment - Single-Layer
-
-Full access using permissions only:
-
-```json
-{
-  "mcpServers": {
-    "mysql-dev": {
-      "command": "node",
-      "args": [
-        "/path/to/bin/mcp-mysql.js",
-        "mysql://dev:pass@localhost:3306/dev_db",
-        "list,read,create,update,delete,ddl,transaction,utility"
-      ]
-    }
-  }
-}
-```
-
-**Result**: All tools within specified permissions are enabled (no category filtering).
-
-#### Example 4: DBA Tasks - Dual-Layer
-
-Schema management and maintenance only:
-
-```json
-{
-  "mcpServers": {
-    "mysql-dba": {
-      "command": "node",
-      "args": [
-        "/path/to/bin/mcp-mysql.js",
-        "mysql://dba:pass@server:3306/app_db",
-        "list,ddl,utility",
-        "database_discovery,schema_management,table_maintenance,backup_restore,index_management"
-      ]
-    }
-  }
-}
-```
-
-**Enabled**: Schema changes, backups, maintenance - NO data modification.
-
-#### Example 5: Application Backend - Dual-Layer
-
-Data operations without schema changes:
-
-```json
-{
-  "mcpServers": {
-    "mysql-app": {
-      "command": "node",
-      "args": [
-        "/path/to/bin/mcp-mysql.js",
-        "mysql://app:pass@localhost:3306/app_db",
-        "list,read,create,update,delete,transaction,utility",
-        "crud_operations,bulk_operations,transaction_management,cache_management"
-      ]
-    }
-  }
-}
-```
-
-**Enabled**: Full data CRUD + bulk ops + transactions - NO schema changes (no `ddl` permission).
-
-### Adaptive Permission Presets (ReadOnly/Analyst/DBA Lite)
-
-Preset bundles provide safe starting points and **merge** with any explicit permissions/categories you pass (CLI args or env vars).
-
-| Preset | Permissions | Categories | Intended Use |
-|--------|-------------|------------|--------------|
-| `readonly` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis` | Safe read-only access, exports, and diagnostics |
-| `analyst` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,import_export,performance_monitoring,analysis,query_optimization,cache_management,server_management` | Exploration with EXPLAIN, cache, and performance visibility |
-| `dba-lite` | `list,read,utility,ddl,transaction,procedure` | `database_discovery,custom_queries,utilities,server_management,schema_management,table_maintenance,index_management,constraint_management,backup_restore,schema_migrations,performance_monitoring,views_management,triggers_management,functions_management,stored_procedures` | Admin-lite schema care, maintenance, and migrations |
-| `dev` | ALL | ALL | Full access to all tools (Development environment) |
-| `stage` | `list,read,create,update,delete,utility,transaction` | Most categories (except schema_management) | Data modification allowed, but destructive DDL (drop_table, truncate_table) is **explicitly denied** |
-| `prod` | `list,read,utility` | `database_discovery,crud_operations,custom_queries,utilities,performance_monitoring,analysis` | Strict read-only. Data modification and DDL are **strictly denied** (even if permissions suggest otherwise) |
-
-### Connection Profiles (Allow/Deny Lists)
-
-The new mechanism introduces "Connection Profiles" which can enforce strict `allow` and `deny` lists for tools, providing security beyond standard permissions.
-
-- **Explicit Deny**: Tools in the `deniedTools` list are blocked *regardless* of their permissions. E.g., `prod` profile denies `create_record` even if `create` permission is somehow granted.
-- **Explicit Allow**: Tools in the `allowedTools` list are enabled even if their category is not listed (unless denied).
-
-**Usage**
-
-- CLI: `mcp-mysql mysql://user:pass@host:3306/db --preset readonly`
-- CLI with overrides: `mcp-mysql mysql://... --preset analyst "list,read,utility" "performance_monitoring"`
-- Env: `MCP_PRESET=analyst` (or `MCP_PERMISSION_PRESET=analyst`) and optionally extend with `MCP_PERMISSIONS` / `MCP_CATEGORIES`
-
-If a preset name is not recognized and no overrides are provided, the server falls back to a safe read-only baseline instead of enabling everything.
 
 ### Permissions Reference (Layer 1)
 
@@ -476,9 +165,7 @@ The system uses both arguments to determine access:
 - **3rd argument**: Categories (Layer 2, optional) - comma-separated documentation categories
 
 **Decision logic**:
-1. If no arguments: All 150 tools enabled
-2. If only 2nd argument (permissions): Tools enabled if they match permission
-3. If both arguments: Tools enabled if they match BOTH permission AND category
+1. If both permissions + categories are provided: tools must match **BOTH** layers
 
 **Example**:
 ```bash
@@ -486,15 +173,6 @@ The system uses both arguments to determine access:
 # Permission required: create
 # Category required: bulk_operations
 
-# Single-layer (permissions only)
-args: ["mysql://...", "list,create,read"]
-Result: ✅ Enabled (has 'create' permission)
-
-# Dual-layer (permissions + categories)
-args: ["mysql://...", "list,create,read", "database_discovery,crud_operations"]
-Result: ✗ Disabled (has 'create' but category is 'bulk_operations', not in list)
-
-# Dual-layer with correct category
 args: ["mysql://...", "list,create,read", "bulk_operations,crud_operations"]
 Result: ✅ Enabled (has both 'create' permission AND 'bulk_operations' category)
 ```
@@ -1006,7 +684,7 @@ Workflow Macros are composite tools designed to execute complex, multi-step oper
 
 ### safe_export_table
 
-Exports table data to CSV format *with enforced data masking*. This is safer than standard export tools because it ensures sensitive data is masked before leaving the database layer, regardless of the global masking configuration.
+Exports table data to CSV format *with enforced data masking*. This is safer than standard export tools because it ensures sensitive data is masked before leaving the database layer.
 
 **Parameters:**
 - `table_name` (required): Name of the table to export.
@@ -1577,13 +1255,20 @@ The MySQL MCP Server provides comprehensive schema versioning and migration tool
 Schema versioning operations require `ddl` permission:
 
 ```json
-"args": [
-  "--mysql-host", "localhost",
-  "--mysql-user", "root",
-  "--mysql-password", "password",
-  "--mysql-database", "mydb",
-  "--permissions", "list,read,create,update,delete,ddl"
-]
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@berthojoris/mysql-mcp",
+        "mysql://user:password@localhost:3306/mydb",
+        "list,ddl,utility",
+        "schema_migrations"
+      ]
+    }
+  }
+}
 ```
 
 ### Initialize Migrations Table
@@ -4444,316 +4129,6 @@ Each bulk operation returns performance metrics:
 
 ---
 
-## 🎭 Data Masking
- 
- The MySQL MCP server includes a robust data masking layer to protect sensitive information (PII, credentials) in query results. This is useful when sharing database access with AI agents or third parties.
- 
- ### Features
- 
- - **Profile-Based Masking**: Easy configuration profiles (`none`, `soft`, `partial`, `strict`)
- - **Automatic Detection**: Automatically identifies sensitive columns by name (e.g., `email`, `password`, `ssn`)
- - **Multiple Strategies**:
-   - **REDACT**: Replaces value with `[REDACTED]`
-   - **PARTIAL**: Partially masks email (`j***@d.com`) and phone/CC (`***1234`)
-   - **HASH**: (Internal placeholder)
- 
- ### Configuration
- 
- Configure the masking profile via the `MCP_MASKING_PROFILE` environment variable:
- 
- ```bash
- MCP_MASKING_PROFILE=partial
- ```
- 
- ### Profiles Reference
- 
- | Profile | Description | Credentials (password, key) | PII (email, phone, ssn) |
- |---------|-------------|-----------------------------|-------------------------|
- | `none` | No masking (default) | Show | Show |
- | `soft` | Protect secrets only | **REDACT** | Show |
- | `partial` | Balanced security | **REDACT** | **PARTIAL** (j***@...) |
- | `strict` | Maximum security | **REDACT** | **REDACT** |
- 
- ### Behavior
- 
- - Masking applies automatically to `run_query` and `read_records` results.
- - It filters output **after** the query is run, so WHERE clauses still work on the real data (e.g., you can search by email, but the result will be masked).
- 
- ---
- 
-
- ---
- 
- ## ⚡ Workflow Macros
-
- Workflow macros are high-level tools that combine multiple operations into a single, safe, and efficient workflow. They are designed to simplify complex tasks and ensure best practices (like data masking) are automatically applied.
-
- ### Safe Export Table
-
- The `safe_export_table` tool allows you to export table data to CSV while strictly enforcing data masking rules. This ensures that sensitive information (PII) is never leaked during exports, even if the agent forgets to apply masking manually.
-
- #### Features
-
- - **Forced Masking**: Applies a masking profile (default: `strict`) to all exported data.
- - **Hard Limit**: Enforces a maximum row limit (10,000) to prevent Out-Of-Memory errors during large exports.
- - **CSV Formatting**: Automatically handles special characters, quotes, and newlines.
- - **Header Control**: Option to include or exclude CSV headers.
-
- #### Usage
-
- ```json
- {
-   "tool": "safe_export_table",
-   "arguments": {
-     "table_name": "users",
-     "masking_profile": "partial",
-     "limit": 1000
-   }
- }
- ```
-
- #### Parameters
-
- | Parameter | Type | Required | Description | Default |
- |-----------|------|----------|-------------|---------|
- | `table_name` | string | Yes | Name of the table to export | - |
- | `masking_profile` | string | No | Masking profile to apply (`strict`, `partial`, `soft`) | `strict` |
- | `limit` | number | No | Number of rows to export (max 10,000) | 1000 |
- | `include_headers` | boolean | No | Whether to include CSV headers | `true` |
-
- #### Response
-
- ```json
- {
-   "status": "success",
-   "data": {
-     "csv": "id,name,email\n1,John Doe,j***@example.com...",
-     "row_count": 50,
-     "applied_profile": "partial"
-   }
- }
- ```
-
- ---
-
- ## 🤖 OpenAI Codex Integration
-
-OpenAI Codex CLI and VS Code Extension support MCP servers through a shared TOML configuration file. This section provides detailed setup instructions for integrating the MySQL MCP Server with Codex.
-
-### Configuration Overview
-
-| Feature | Details |
-|---------|---------|
-| **Config File** | `~/.codex/config.toml` |
-| **Shared Config** | CLI and VS Code extension use the same file |
-| **Transport** | STDIO (standard input/output) |
-| **Format** | TOML |
-
-### Quick Setup via CLI
-
-The fastest way to add MySQL MCP to Codex:
-
-```bash
-# Basic setup with connection string
-codex mcp add mysql -- npx -y @berthojoris/mcp-mysql-server mysql://user:password@localhost:3306/database list,read,utility
-
-# With environment variables
-codex mcp add mysql --env DB_HOST=localhost --env DB_PORT=3306 --env DB_USER=root --env DB_PASSWORD=secret --env DB_NAME=mydb --env MCP_PERMISSIONS=list,read,utility -- npx -y @berthojoris/mcp-mysql-server
-```
-
-### Manual TOML Configuration
-
-Edit `~/.codex/config.toml` directly for more control:
-
-#### Basic Configuration
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:password@localhost:3306/database", "list,read,utility"]
-```
-
-#### With Environment Variables
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server"]
-
-[mcp_servers.mysql.env]
-DB_HOST = "localhost"
-DB_PORT = "3306"
-DB_USER = "root"
-DB_PASSWORD = "your_password"
-DB_NAME = "your_database"
-MCP_PERMISSIONS = "list,read,utility"
-```
-
-#### Local Path Configuration (Development)
-
-```toml
-[mcp_servers.mysql]
-command = "node"
-args = ["C:\\DEKSTOP\\MCP\\mcp_mysql\\bin\\mcp-mysql.js", "mysql://user:pass@localhost:3306/database", "list,read,utility"]
-cwd = "C:\\DEKSTOP\\MCP\\mcp_mysql"
-```
-
-### Configuration Options Reference
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `command` | String | Required | The executable to launch the server |
-| `args` | Array | `[]` | Command-line arguments passed to the server |
-| `env` | Table | `{}` | Environment variables for the server process |
-| `env_vars` | Array | `[]` | Additional env vars to whitelist/forward |
-| `cwd` | String | - | Working directory to launch the server from |
-| `startup_timeout_sec` | Number | `10` | Server startup timeout in seconds |
-| `tool_timeout_sec` | Number | `60` | Per-tool execution timeout in seconds |
-| `enabled` | Boolean | `true` | Set to `false` to disable without deleting |
-| `enabled_tools` | Array | - | Allow-list of tools to expose from server |
-| `disabled_tools` | Array | - | Deny-list of tools to hide |
-
-### Advanced Configurations
-
-#### Production (Read-Only) + Development (Full Access)
-
-```toml
-# Production database - Read Only
-[mcp_servers.mysql-prod]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://reader:pass@prod-server:3306/prod_db", "list,read,utility"]
-startup_timeout_sec = 30
-tool_timeout_sec = 120
-
-# Development database - Full Access
-[mcp_servers.mysql-dev]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://root:pass@localhost:3306/dev_db", "list,read,create,update,delete,execute,ddl,transaction,utility"]
-```
-
-#### With Tool Filtering (Limit Exposed Tools)
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,utility"]
-
-# Only expose specific tools
-enabled_tools = [
-  "list_tables",
-  "read_table_schema",
-  "read_records",
-  "run_query",
-  "test_connection"
-]
-
-# Or hide specific dangerous tools
-# disabled_tools = ["drop_table", "delete_record", "execute_sql"]
-```
-
-#### With Custom Timeouts for Large Operations
-
-```toml
-[mcp_servers.mysql]
-command = "npx"
-args = ["-y", "@berthojoris/mcp-mysql-server", "mysql://user:pass@localhost:3306/db", "list,read,create,update,delete,utility"]
-startup_timeout_sec = 30    # Allow more time for startup
-tool_timeout_sec = 300      # 5 minutes for large bulk operations
-```
-
-### Codex MCP Management Commands
-
-```bash
-# List all configured MCP servers
-codex mcp list
-
-# List with JSON output (for scripting)
-codex mcp list --json
-
-# Get details about a specific server
-codex mcp get mysql
-
-# Remove an MCP server
-codex mcp remove mysql
-
-# Add server with multiple env vars
-codex mcp add mysql --env DB_HOST=localhost --env DB_USER=root -- npx -y @berthojoris/mcp-mysql-server
-```
-
-### VS Code Extension Setup
-
-1. Install the Codex VS Code Extension
-2. Open the extension settings (gear icon in top right)
-3. Click "MCP settings" > "Open config.toml"
-4. Add your MySQL MCP configuration
-5. Save the file - changes apply immediately
-
-### Verifying the Setup
-
-After configuration, test your setup:
-
-```bash
-# In Codex CLI
-codex mcp list
-
-# You should see:
-# mysql: npx -y @berthojoris/mcp-mysql-server ...
-```
-
-Then ask Codex:
-- "What databases are available?"
-- "List all tables in my database"
-- "Show me the structure of the users table"
-
-### Troubleshooting Codex Integration
-
-#### Server Not Starting
-
-1. **Check TOML syntax** - A single syntax error breaks both CLI and VS Code extension
-2. **Verify paths** - Use absolute paths for local installations
-3. **Check startup timeout** - Increase `startup_timeout_sec` if server takes time to initialize
-
-#### Tools Not Appearing
-
-1. Verify server configuration with `codex mcp list --json`
-2. Check that `enabled = true` (or not set, defaults to true)
-3. Ensure `enabled_tools` doesn't accidentally filter out needed tools
-
-#### Connection Errors
-
-1. Test MySQL connection manually: `mysql -u user -p -h host database`
-2. Verify credentials in connection string
-3. Check network connectivity to MySQL server
-
-#### Common TOML Syntax Errors
-
-```toml
-# WRONG - missing quotes around string values
-args = [-y, @berthojoris/mcp-mysql-server]
-
-# CORRECT
-args = ["-y", "@berthojoris/mcp-mysql-server"]
-
-# WRONG - using JSON syntax
-"mcp_servers": { "mysql": { ... } }
-
-# CORRECT - TOML table syntax
-[mcp_servers.mysql]
-command = "npx"
-```
-
-### Permission Sets for Common Use Cases
-
-| Use Case | Permissions |
-|----------|-------------|
-| Read-Only Analysis | `list,read,utility` |
-| Data Entry | `list,read,create,utility` |
-| Full Data Access | `list,read,create,update,delete,utility` |
-| With Transactions | `list,read,create,update,delete,transaction,utility` |
-| Development (Full) | `list,read,create,update,delete,execute,ddl,transaction,procedure,utility` |
-
----
-
 ## 🛠️ Troubleshooting
 
 ### MCP Server Not Connecting
@@ -4845,89 +4220,3 @@ This error occurred in earlier versions (< 1.4.1) when AI agents called MCP tool
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## 🗺️ Roadmap
-
-### Core Features
-- ✅ **Transaction support (BEGIN, COMMIT, ROLLBACK)** - **COMPLETED!**
-- ✅ **Stored procedure execution** - **COMPLETED!**
-- ✅ **Bulk operations (batch insert/update/delete)** - **COMPLETED!**
-- ✅ **Add query log on output** - **COMPLETED!**
-- ✅ **Query result caching** - **COMPLETED!**
-- ✅ **Advanced query optimization hints** - **COMPLETED!**
-
-### Essential Database Objects (v1.6.0)
-- ✅ **Views Management** - Create, alter, drop, and query database views - **COMPLETED!**
-- ✅ **Triggers Management** - Full trigger lifecycle management - **COMPLETED!**
-- ✅ **Functions Management** - Stored function creation and execution - **COMPLETED!**
-
-### Administration Features (v1.6.0)
-- ✅ **Index Management** - Create, drop, and analyze indexes - **COMPLETED!**
-- ✅ **Foreign Keys & Constraints** - Constraint management with referential integrity - **COMPLETED!**
-- ✅ **Table Maintenance** - Analyze, optimize, check, repair tables - **COMPLETED!**
-- ✅ **Process Management** - Server processes, status, and query analysis - **COMPLETED!**
-
-### Enterprise Features
-- ✅ **Database backup and restore tools** - **COMPLETED!**
-- ✅ **Data export/import utilities** (CSV, JSON, SQL dumps) - **COMPLETED!**
-- ✅ **Data migration utilities** - **COMPLETED!**
-- ✅ **Schema versioning and migrations** - **COMPLETED!**
-
-### Recommended Implementation Order
-
-#### **Phase 1: Performance & Monitoring** 🚀
-- ✅ **Query result caching** - Dramatically improve response times for repeated queries - **COMPLETED!**
-- ✅ **Performance metrics** - Track query execution times and database performance - **COMPLETED!**
-- ✅ **Connection pool monitoring** - Monitor database connection health and usage - **COMPLETED!**
-- ✅ **Database health checks** - Comprehensive system health monitoring - **COMPLETED!**
-
-#### **Phase 2: Data Management** 📊
-- ✅ **Database backup and restore tools** - Essential for production data safety - **COMPLETED!**
-- ✅ **Data migration utilities** - Move data between databases and environments - **COMPLETED!**
-- ✅ **Enhanced export/import** - Support for JSON, SQL dump formats - **COMPLETED!**
-
-#### **Phase 3: Enterprise Features** 🏢
-- ✅ **Schema versioning and migrations** - Version control for database schema changes - **COMPLETED!**
-- ✅ **Query optimization** - Automatic query analysis and optimization suggestions - **COMPLETED!**
-
-#### **Implementation Priority Matrix**
-
-| Feature | Impact | Effort | Priority | Status |
-|---------|--------|--------|----------|--------|
-| Query Result Caching | High | Medium | 1 | ✅ COMPLETED |
-| Views Management | High | Medium | 2 | ✅ COMPLETED |
-| Triggers Management | High | Medium | 3 | ✅ COMPLETED |
-| Functions Management | High | Medium | 4 | ✅ COMPLETED |
-| Index Management | High | Medium | 5 | ✅ COMPLETED |
-| Foreign Keys & Constraints | High | Medium | 6 | ✅ COMPLETED |
-| Table Maintenance | High | Low | 7 | ✅ COMPLETED |
-| Process Management | High | Medium | 8 | ✅ COMPLETED |
-| Query Optimization | Medium | Medium | 9 | ✅ COMPLETED |
-| Database Backup/Restore | High | High | 10 | ✅ COMPLETED |
-| Data Export/Import (JSON, SQL) | High | Medium | 11 | ✅ COMPLETED |
-| Data Migration | High | High | 12 | ✅ COMPLETED |
-| Schema Versioning | Medium | Medium | 13 | ✅ COMPLETED |
-| Performance Monitoring | High | Medium | 14 | ✅ COMPLETED |
-
-#### **Proposed Enhancements (AI Productivity)**
-
-| Feature | Impact | Effort | Priority | Status |
-|---------|--------|--------|----------|--------|
-| Adaptive Permission Presets (ReadOnly/Analyst/DBA Lite) | High | Medium | 1 | ✅ Completed |
-| Schema-Aware RAG Context Pack | High | Medium | 2 | ✅ Completed |
-| Guided Query Builder/Fixer (Intent → Safe SQL + EXPLAIN Repair) | High | Medium | 3 | ✅ Completed |
-| Drift & Migration Assistant (Schema diff + risk summary) | High | High | 4 | ✅ Completed |
-| Safety Sandbox Mode (runQuery dry-run/EXPLAIN-only) | Medium | Low | 5 | ✅ Completed |
-| Anomaly & Slow-Query Watcher | Medium | Medium | 6 | ✅ Completed |
-| Data Masking Profiles for Responses | Medium | Medium | 7 | ✅ Completed |
-| Workflow Macros (e.g., safe_export_table) | Medium | Low | 8 | ✅ Completed |
-| Agent-Facing Changelog Feed | Medium | Low | 9 | ✅ Completed |
-| Connection Profiles (dev/stage/prod with allow/deny) | High | Low | 10 | ✅ Completed |
-
----
-
-**Made with ❤️ for the AI community**
-
-*Help AI agents interact with MySQL databases safely and efficiently!*

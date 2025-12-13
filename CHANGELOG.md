@@ -5,6 +5,12 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+- Preset-based access control configuration: CLI `--preset` flag and `MCP_PRESET` / `MCP_PERMISSION_PRESET` environment variables. Use `MCP_PERMISSIONS` and optionally `MCP_CATEGORIES`.
+- Global masking configuration via `MCP_MASKING_PROFILE`. If you need enforced masking for exports, use the `safe_export_table` macro's `masking_profile` argument.
+
 ## [1.17.0] - 2025-12-12
 
 ### Added

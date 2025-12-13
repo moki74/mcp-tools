@@ -77,13 +77,8 @@ export class MySQLMCP {
   constructor(
     permissionsConfig?: string,
     categoriesConfig?: string,
-    presetName?: string,
   ) {
-    this.featureConfig = new FeatureConfig(
-      permissionsConfig,
-      categoriesConfig,
-      presetName,
-    );
+    this.featureConfig = new FeatureConfig(permissionsConfig, categoriesConfig);
     this.security = new SecurityLayer(this.featureConfig);
     this.dbTools = new DatabaseTools();
     this.crudTools = new CrudTools(this.security);
@@ -861,7 +856,6 @@ export class MySQLMCP {
       status: "success",
       data: {
         config: snapshot,
-        preset: this.featureConfig.getActivePreset(),
         filteringMode: this.featureConfig.getFilteringMode(),
         enabledCategories: this.featureConfig.getEnabledCategories(),
         categoryStatus: this.featureConfig.getCategoryStatus(),
@@ -880,7 +874,7 @@ export class MySQLMCP {
   }
 
   /**
-   * Expose resolved access profile (preset + merged permissions/categories)
+   * Expose resolved access profile (resolved permissions/categories)
    */
   getAccessProfile() {
     return this.featureConfig.getConfigSnapshot();

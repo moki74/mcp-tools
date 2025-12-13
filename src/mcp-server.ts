@@ -14,8 +14,6 @@ import { MySQLMCP } from "./index.js";
 // Layer 2 (Categories): MCP_CATEGORIES (optional, for fine-grained control)
 const permissions = process.env.MCP_PERMISSIONS || process.env.MCP_CONFIG || "";
 const categories = process.env.MCP_CATEGORIES || "";
-const preset =
-  process.env.MCP_PRESET || process.env.MCP_PERMISSION_PRESET || "";
 
 // Declare the MySQL MCP instance (will be initialized in main())
 let mysqlMCP: MySQLMCP;
@@ -4380,17 +4378,10 @@ async function main() {
 
   // Initialize the MySQL MCP instance AFTER transport is connected
   // This ensures the database connection pool is created when the server is ready
-  mysqlMCP = new MySQLMCP(permissions, categories, preset);
+  mysqlMCP = new MySQLMCP(permissions, categories);
 
   // Log the effective filtering configuration to stderr
   const accessProfile = mysqlMCP.getAccessProfile();
-  if (accessProfile.preset) {
-    console.error(
-      `Preset: ${accessProfile.preset.name} (${accessProfile.preset.description})`,
-    );
-  } else if (preset) {
-    console.error(`Preset requested but not recognized: ${preset}`);
-  }
   console.error(`Permissions (resolved): ${accessProfile.permissions}`);
   if (accessProfile.categories) {
     console.error(`Categories (resolved): ${accessProfile.categories}`);

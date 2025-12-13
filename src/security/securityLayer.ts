@@ -14,9 +14,8 @@ export class SecurityLayer {
     this.ajv = new Ajv();
     this.featureConfig = featureConfig || new FeatureConfig();
 
-    // Initialize masking layer from environment variable
-    const maskingProfile = process.env.MCP_MASKING_PROFILE || "none";
-    this.masking = new MaskingLayer(maskingProfile);
+    // Masking is intentionally not configurable via environment variables.
+    this.masking = new MaskingLayer("none");
 
     // Define dangerous SQL keywords that should ALWAYS be blocked (critical security threats)
     // These are blocked even with 'execute' permission
