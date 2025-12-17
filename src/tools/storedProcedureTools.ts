@@ -365,6 +365,59 @@ export class StoredProcedureTools {
   }
 
   /**
+   * Validate stored procedure body content for security
+   */
+  private validateProcedureBody(body: string): {
+    valid: boolean;
+    error?: string;
+  } {
+    if (!body || typeof body !== "string") {
+      return {
+        valid: false,
+        error: "Procedure body must be a non-empty string",
+      };
+    }
+
+    const trimmedBody = body.trim();
+
+    // Check for dangerous SQL patterns in procedure body
+    const dangerousPatterns = [
+      /\bGRANT\b/i,
+      /\bREVOKE\b/i,
+      /\bDROP\s+USER\b/i,
+      /\bCREATE\s+USER\b/i,
+      /\bALTER\s+USER\b/i,
+      /\bSET\s+PASSWORD\b/i,
+      /\bINTO\s+OUTFILE\b/i,
+      /\bINTO\s+DUMPFILE\b/i,
+      /\bLOAD\s+DATA\b/i,
+      /\bLOAD_FILE\s*\(/i,
+      /\bSYSTEM\s*\(/i,
+      /\bEXEC\s*\(/i,
+      /\bEVAL\s*\(/i,
+    ];
+
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(trimmedBody)) {
+        return {
+          valid: false,
+          error: `Dangerous SQL pattern detected: ${pattern.source}`,
+        };
+      }
+    }
+
+    // Check for multiple statement separators that might indicate injection attempts
+    const semicolonCount = (trimmedBody.match(/;/g) || []).length;
+    if (semicolonCount > 50) {
+      return {
+        valid: false,
+        error: "Too many statements in procedure body",
+      };
+    }
+
+    return { valid: true };
+  }
+  /**
    * Create a new stored procedure
    */
   async createStoredProcedure(params: {
@@ -411,6 +464,20 @@ export class StoredProcedureTools {
         };
       }
 
+      // SECURITY VALIDATION: Validate procedure body content
+      const bodyValidation = this.validateProcedureBody(body);
+      if (!bodyValidation.valid) {
+        return {
+          status: "error",
+          error: bodyValidation.error || "Invalid procedure body",
+        };
+      }
+
+      // Sanitize comment to prevent SQL injection
+      const sanitizedComment = comment
+        ? comment.replace(/'/g, "''").replace(/\\/g, "\\\\")
+        : "";
+
       // Build parameter list
       const parameterList = parameters
         .map((param) => {
@@ -424,9 +491,8 @@ export class StoredProcedureTools {
       // Build CREATE PROCEDURE statement
       let createQuery = `CREATE PROCEDURE \`${database}\`.\`${procedure_name}\`(${parameterList})\n`;
 
-      if (comment) {
-        createQuery += `COMMENT '${comment.replace(/'/g, "''")}'
-`;
+      if (sanitizedComment) {
+        createQuery += `COMMENT '${sanitizedComment}'\n`;
       }
 
       // Check if body already contains BEGIN/END, if not add them

@@ -1,4 +1,5 @@
 import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
 
 export interface TransactionResult {
   status: "success" | "error";
@@ -10,9 +11,11 @@ export interface TransactionResult {
 
 export class TransactionTools {
   private db: DatabaseConnection;
+  private security: SecurityLayer;
 
-  constructor() {
+  constructor(security: SecurityLayer) {
     this.db = DatabaseConnection.getInstance();
+    this.security = security;
   }
 
   /**
@@ -144,10 +147,36 @@ export class TransactionTools {
         };
       }
 
+      // SECURITY VALIDATION: Check if user has execute permission
+      const hasExecutePermission = this.security.isToolEnabled("executeSql");
+
+      // SECURITY VALIDATION: Validate the query before execution
+      const queryValidation = this.security.validateQuery(
+        params.query,
+        hasExecutePermission,
+      );
+      if (!queryValidation.valid) {
+        return {
+          status: "error",
+          error: `Query validation failed: ${queryValidation.error}`,
+        };
+      }
+
+      // SECURITY VALIDATION: Validate and sanitize parameters
+      const paramValidation = this.security.validateParameters(
+        params.params || [],
+      );
+      if (!paramValidation.valid) {
+        return {
+          status: "error",
+          error: `Parameter validation failed: ${paramValidation.error}`,
+        };
+      }
+
       const result = await this.db.executeInTransaction(
         params.transactionId,
         params.query,
-        params.params,
+        paramValidation.sanitizedParams!,
       );
 
       return {

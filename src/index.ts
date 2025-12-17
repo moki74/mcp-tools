@@ -74,18 +74,15 @@ export class MySQLMCP {
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
-  constructor(
-    permissionsConfig?: string,
-    categoriesConfig?: string,
-  ) {
+  constructor(permissionsConfig?: string, categoriesConfig?: string) {
     this.featureConfig = new FeatureConfig(permissionsConfig, categoriesConfig);
     this.security = new SecurityLayer(this.featureConfig);
     this.dbTools = new DatabaseTools();
     this.crudTools = new CrudTools(this.security);
     this.queryTools = new QueryTools(this.security);
     this.utilityTools = new UtilityTools();
-    this.ddlTools = new DdlTools();
-    this.transactionTools = new TransactionTools();
+    this.ddlTools = new DdlTools(this.security);
+    this.transactionTools = new TransactionTools(this.security);
     this.storedProcedureTools = new StoredProcedureTools(this.security);
     this.dataExportTools = new DataExportTools(this.security);
     this.viewTools = new ViewTools(this.security);
@@ -105,7 +102,9 @@ export class MySQLMCP {
     this.macroTools = new MacroTools(this.security);
     this.intelligentQueryTools = new IntelligentQueryTools(this.security);
     this.smartDiscoveryTools = new SmartDiscoveryTools(this.security);
-    this.documentationGeneratorTools = new DocumentationGeneratorTools(this.security);
+    this.documentationGeneratorTools = new DocumentationGeneratorTools(
+      this.security,
+    );
     this.schemaDesignTools = new SchemaDesignTools(this.security);
     this.securityAuditTools = new SecurityAuditTools();
     this.indexRecommendationTools = new IndexRecommendationTools(this.security);
@@ -216,7 +215,13 @@ export class MySQLMCP {
   }
 
   // Query Tools
-  async runQuery(params: { query: string; params?: any[]; hints?: any; useCache?: boolean; dry_run?: boolean }) {
+  async runQuery(params: {
+    query: string;
+    params?: any[];
+    hints?: any;
+    useCache?: boolean;
+    dry_run?: boolean;
+  }) {
     const check = this.checkToolEnabled("runQuery");
     if (!check.enabled) {
       return { status: "error", error: check.error };
@@ -254,7 +259,11 @@ export class MySQLMCP {
   }
 
   // Analysis Tools
-  async getColumnStatistics(params: { table_name: string; column_name: string; database?: string }) {
+  async getColumnStatistics(params: {
+    table_name: string;
+    column_name: string;
+    database?: string;
+  }) {
     const check = this.checkToolEnabled("getColumnStatistics");
     if (!check.enabled) {
       return { status: "error", error: check.error };
@@ -1556,7 +1565,9 @@ export class MySQLMCP {
   }) {
     const check = this.checkToolEnabled("generateDataDictionary");
     if (!check.enabled) return { status: "error", error: check.error };
-    return await this.documentationGeneratorTools.generateDataDictionary(params);
+    return await this.documentationGeneratorTools.generateDataDictionary(
+      params,
+    );
   }
 
   async generateBusinessGlossary(params: {
@@ -1566,7 +1577,9 @@ export class MySQLMCP {
   }) {
     const check = this.checkToolEnabled("generateBusinessGlossary");
     if (!check.enabled) return { status: "error", error: check.error };
-    return await this.documentationGeneratorTools.generateBusinessGlossaryReport(params);
+    return await this.documentationGeneratorTools.generateBusinessGlossaryReport(
+      params,
+    );
   }
 
   // ==========================================

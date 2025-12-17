@@ -1,10 +1,65 @@
 import DatabaseConnection from "../db/connection";
+import { SecurityLayer } from "../security/securityLayer";
 
 export class DdlTools {
   private db: DatabaseConnection;
+  private security: SecurityLayer;
 
-  constructor() {
+  constructor(security: SecurityLayer) {
     this.db = DatabaseConnection.getInstance();
+    this.security = security;
+  }
+
+  /**
+   * Sanitize default value for SQL safety
+   */
+  private sanitizeDefaultValue(defaultValue: any): string {
+    if (defaultValue === null || defaultValue === undefined) {
+      return "NULL";
+    }
+
+    if (typeof defaultValue === "number") {
+      return String(defaultValue);
+    }
+
+    if (typeof defaultValue === "boolean") {
+      return defaultValue ? "1" : "0";
+    }
+
+    if (typeof defaultValue === "string") {
+      // Check for dangerous SQL patterns in default values
+      const dangerousPatterns = [
+        /;/g, // Statement separators
+        /--/g, // SQL comments
+        /\/\*/g, // Block comment start
+        /\*\//g, // Block comment end
+        /\bUNION\b/gi, // UNION operations
+        /\bSELECT\b/gi, // SELECT statements
+        /\bINSERT\b/gi, // INSERT statements
+        /\bUPDATE\b/gi, // UPDATE statements
+        /\bDELETE\b/gi, // DELETE statements
+        /\bDROP\b/gi, // DROP statements
+        /\bCREATE\b/gi, // CREATE statements
+        /\bALTER\b/gi, // ALTER statements
+      ];
+
+      let sanitized = defaultValue;
+      for (const pattern of dangerousPatterns) {
+        if (pattern.test(sanitized)) {
+          throw new Error(
+            `Dangerous SQL pattern detected in default value: ${pattern.source}`,
+          );
+        }
+      }
+
+      // Escape single quotes and backslashes
+      sanitized = sanitized.replace(/\\/g, "\\\\").replace(/'/g, "''");
+
+      return `'${sanitized}'`;
+    }
+
+    // For other types, convert to string and escape
+    return `'${String(defaultValue).replace(/\\/g, "\\\\").replace(/'/g, "''")}'`;
   }
 
   /**
@@ -47,7 +102,9 @@ export class DdlTools {
           }
 
           if (col.default !== undefined) {
-            def += ` DEFAULT ${col.default}`;
+            // SECURITY: Properly sanitize default values to prevent SQL injection
+            const sanitizedDefault = this.sanitizeDefaultValue(col.default);
+            def += ` DEFAULT ${sanitizedDefault}`;
           }
 
           if (col.primary_key) {
@@ -98,12 +155,12 @@ export class DdlTools {
     table_name: string;
     operations: Array<{
       type:
-      | "add_column"
-      | "drop_column"
-      | "modify_column"
-      | "rename_column"
-      | "add_index"
-      | "drop_index";
+        | "add_column"
+        | "drop_column"
+        | "modify_column"
+        | "rename_column"
+        | "add_index"
+        | "drop_index";
       column_name?: string;
       new_column_name?: string;
       column_type?: string;
@@ -134,7 +191,11 @@ export class DdlTools {
             }
             query += ` ADD COLUMN \`${op.column_name}\` ${op.column_type}`;
             if (op.nullable === false) query += " NOT NULL";
-            if (op.default !== undefined) query += ` DEFAULT ${op.default}`;
+            if (op.default !== undefined) {
+              // SECURITY: Properly sanitize default values to prevent SQL injection
+              const sanitizedDefault = this.sanitizeDefaultValue(op.default);
+              query += ` DEFAULT ${sanitizedDefault}`;
+            }
             break;
 
           case "drop_column":
@@ -156,7 +217,11 @@ export class DdlTools {
             }
             query += ` MODIFY COLUMN \`${op.column_name}\` ${op.column_type}`;
             if (op.nullable === false) query += " NOT NULL";
-            if (op.default !== undefined) query += ` DEFAULT ${op.default}`;
+            if (op.default !== undefined) {
+              // SECURITY: Properly sanitize default values to prevent SQL injection
+              const sanitizedDefault = this.sanitizeDefaultValue(op.default);
+              query += ` DEFAULT ${sanitizedDefault}`;
+            }
             break;
 
           case "rename_column":

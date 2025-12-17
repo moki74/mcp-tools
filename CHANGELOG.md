@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- Fixed critical SQL execution bypass in transactions by adding comprehensive security validation
+- Enhanced stored procedure creation with body content validation and injection prevention
+- Improved DDL operations with proper default value sanitization to prevent SQL injection
+- Added transaction timeout mechanism (30 minutes) with automatic cleanup to prevent resource exhaustion
+- Integrated security layer across all transaction operations for complete coverage
+
+### Changed
+- Updated TransactionTools to require SecurityLayer for proper validation
+- Enhanced DdlTools with comprehensive input sanitization
+- Improved database connection management with timeout and cleanup features
+
+### Fixed
+- Resolved TypeScript compilation error in SecurityLayer access patterns
+- Eliminated all security bypass paths through the system
+
 ### Removed
 - Preset-based access control configuration: CLI `--preset` flag and `MCP_PRESET` / `MCP_PERMISSION_PRESET` environment variables. Use `MCP_PERMISSIONS` and optionally `MCP_CATEGORIES`.
 - Global masking configuration via `MCP_MASKING_PROFILE`. If you need enforced masking for exports, use the `safe_export_table` macro's `masking_profile` argument.

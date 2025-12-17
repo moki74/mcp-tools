@@ -45,6 +45,13 @@ export class SecurityLayer {
   }
 
   /**
+   * Check if a specific tool is enabled in the feature configuration
+   */
+  public isToolEnabled(toolName: string): boolean {
+    return this.featureConfig.isToolEnabled(toolName);
+  }
+
+  /**
    * Check if a query is a read-only information query (SHOW, DESCRIBE, EXPLAIN, etc.)
    */
   private isInformationQuery(query: string): boolean {

@@ -6,8 +6,17 @@ import { QueryCache } from "../cache/queryCache";
 class DatabaseConnection {
   private static instance: DatabaseConnection;
   private pool: mysql.Pool;
-  private activeTransactions: Map<string, mysql.PoolConnection>;
+  private activeTransactions: Map<
+    string,
+    {
+      connection: mysql.PoolConnection;
+      createdAt: Date;
+      lastActivity: Date;
+      timeout?: NodeJS.Timeout;
+    }
+  >;
   private queryCache: QueryCache;
+  private readonly TRANSACTION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes default timeout
 
   private constructor() {
     this.pool = mysql.createPool({
@@ -22,6 +31,14 @@ class DatabaseConnection {
     });
     this.activeTransactions = new Map();
     this.queryCache = QueryCache.getInstance();
+
+    // Set up periodic cleanup of expired transactions
+    setInterval(
+      () => {
+        this.cleanupExpiredTransactions();
+      },
+      5 * 60 * 1000,
+    ); // Check every 5 minutes
   }
 
   public static getInstance(): DatabaseConnection {
@@ -134,32 +151,132 @@ class DatabaseConnection {
     }
   }
 
+  /**
+   * Clean up expired transactions to prevent resource exhaustion
+   */
+  private cleanupExpiredTransactions(): void {
+    const now = new Date();
+    const expiredTransactions: string[] = [];
+
+    for (const [
+      transactionId,
+      transaction,
+    ] of this.activeTransactions.entries()) {
+      const timeSinceLastActivity =
+        now.getTime() - transaction.lastActivity.getTime();
+
+      if (timeSinceLastActivity > this.TRANSACTION_TIMEOUT_MS) {
+        expiredTransactions.push(transactionId);
+      }
+    }
+
+    for (const transactionId of expiredTransactions) {
+      this.forceRollbackTransaction(transactionId, "Transaction timed out");
+    }
+  }
+
+  /**
+   * Force rollback a transaction (used for cleanup)
+   */
+  private forceRollbackTransaction(
+    transactionId: string,
+    reason: string,
+  ): void {
+    const transaction = this.activeTransactions.get(transactionId);
+    if (!transaction) return;
+
+    try {
+      // Clear timeout if exists
+      if (transaction.timeout) {
+        clearTimeout(transaction.timeout);
+      }
+
+      // Attempt to rollback
+      transaction.connection.rollback();
+      transaction.connection.release();
+    } catch (error) {
+      console.error(
+        `Failed to rollback expired transaction ${transactionId}:`,
+        error,
+      );
+      try {
+        // Force release connection even if rollback fails
+        transaction.connection.release();
+      } catch (releaseError) {
+        console.error(
+          `Failed to release connection for expired transaction ${transactionId}:`,
+          releaseError,
+        );
+      }
+    }
+
+    this.activeTransactions.delete(transactionId);
+    console.warn(`Transaction ${transactionId} force rolled back: ${reason}`);
+  }
+
+  /**
+   * Reset transaction timeout (call this when there's activity)
+   */
+  private resetTransactionTimeout(transactionId: string): void {
+    const transaction = this.activeTransactions.get(transactionId);
+    if (!transaction) return;
+
+    // Clear existing timeout
+    if (transaction.timeout) {
+      clearTimeout(transaction.timeout);
+    }
+
+    // Update last activity
+    transaction.lastActivity = new Date();
+
+    // Set new timeout
+    transaction.timeout = setTimeout(() => {
+      this.forceRollbackTransaction(transactionId, "Transaction timeout");
+    }, this.TRANSACTION_TIMEOUT_MS);
+  }
+
   // Transaction Management Methods
   public async beginTransaction(transactionId: string): Promise<void> {
     try {
       const connection = await this.getConnection();
       await connection.beginTransaction();
-      this.activeTransactions.set(transactionId, connection);
+
+      const now = new Date();
+      const timeout = setTimeout(() => {
+        this.forceRollbackTransaction(transactionId, "Transaction timeout");
+      }, this.TRANSACTION_TIMEOUT_MS);
+
+      this.activeTransactions.set(transactionId, {
+        connection,
+        createdAt: now,
+        lastActivity: now,
+        timeout,
+      });
     } catch (error) {
       throw new Error(`Failed to begin transaction: ${error}`);
     }
   }
 
   public async commitTransaction(transactionId: string): Promise<void> {
-    const connection = this.activeTransactions.get(transactionId);
-    if (!connection) {
+    const transaction = this.activeTransactions.get(transactionId);
+    if (!transaction) {
       throw new Error(`No active transaction found with ID: ${transactionId}`);
     }
 
     try {
-      await connection.commit();
-      connection.release();
+      // Clear timeout
+      if (transaction.timeout) {
+        clearTimeout(transaction.timeout);
+      }
+
+      await transaction.connection.commit();
+      transaction.connection.release();
       this.activeTransactions.delete(transactionId);
     } catch (error) {
       // If commit fails, rollback and release connection
       try {
-        await connection.rollback();
-        connection.release();
+        await transaction.connection.rollback();
+        transaction.connection.release();
       } catch (rollbackError) {
         console.error("Failed to rollback after commit error:", rollbackError);
       }
@@ -169,17 +286,22 @@ class DatabaseConnection {
   }
 
   public async rollbackTransaction(transactionId: string): Promise<void> {
-    const connection = this.activeTransactions.get(transactionId);
-    if (!connection) {
+    const transaction = this.activeTransactions.get(transactionId);
+    if (!transaction) {
       throw new Error(`No active transaction found with ID: ${transactionId}`);
     }
 
     try {
-      await connection.rollback();
-      connection.release();
+      // Clear timeout
+      if (transaction.timeout) {
+        clearTimeout(transaction.timeout);
+      }
+
+      await transaction.connection.rollback();
+      transaction.connection.release();
       this.activeTransactions.delete(transactionId);
     } catch (error) {
-      connection.release();
+      transaction.connection.release();
       this.activeTransactions.delete(transactionId);
       throw new Error(`Failed to rollback transaction: ${error}`);
     }
@@ -191,6 +313,29 @@ class DatabaseConnection {
 
   public hasActiveTransaction(transactionId: string): boolean {
     return this.activeTransactions.has(transactionId);
+  }
+
+  /**
+   * Get transaction information for debugging/monitoring
+   */
+  public getTransactionInfo(transactionId: string): {
+    exists: boolean;
+    createdAt?: Date;
+    lastActivity?: Date;
+    ageMs?: number;
+  } {
+    const transaction = this.activeTransactions.get(transactionId);
+    if (!transaction) {
+      return { exists: false };
+    }
+
+    const now = new Date();
+    return {
+      exists: true,
+      createdAt: transaction.createdAt,
+      lastActivity: transaction.lastActivity,
+      ageMs: now.getTime() - transaction.createdAt.getTime(),
+    };
   }
 
   public getQueryLogs() {
@@ -254,16 +399,20 @@ class DatabaseConnection {
     sql: string,
     params?: any[],
   ): Promise<T> {
-    const connection = this.activeTransactions.get(transactionId);
-    if (!connection) {
+    const transaction = this.activeTransactions.get(transactionId);
+    if (!transaction) {
       throw new Error(`No active transaction found with ID: ${transactionId}`);
     }
 
     const startTime = Date.now();
     try {
-      const [results] = await connection.query(sql, params);
+      const [results] = await transaction.connection.query(sql, params);
       const duration = Date.now() - startTime;
       QueryLogger.log(sql, params, duration, "success");
+
+      // Reset timeout on successful activity
+      this.resetTransactionTimeout(transactionId);
+
       return results as T;
     } catch (error: any) {
       const duration = Date.now() - startTime;
