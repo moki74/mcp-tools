@@ -735,6 +735,19 @@ const TOOLS: Tool[] = [
       required: ["table_name"],
     },
   },
+  {
+    name: "get_all_tables_relationships",
+    description: "Gets foreign key relationships for ALL tables in a single call. Processes relationships in memory to avoid multiple queries.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+    },
+  },
   // Transaction Tools
   {
     name: "begin_transaction",
@@ -3676,6 +3689,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       case "get_table_relationships":
         result = await mysqlMCP.getTableRelationships(
           (args || {}) as { table_name: string },
+        );
+        break;
+
+      case "get_all_tables_relationships":
+        result = await mysqlMCP.getAllTablesRelationships(
+          (args || {}) as { database?: string },
         );
         break;
 

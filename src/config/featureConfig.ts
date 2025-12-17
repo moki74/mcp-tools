@@ -90,6 +90,7 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   describeConnection: ToolCategory.UTILITY,
   testConnection: ToolCategory.UTILITY,
   getTableRelationships: ToolCategory.UTILITY,
+  getAllTablesRelationships: ToolCategory.UTILITY,
   exportTableToCSV: ToolCategory.UTILITY,
   exportQueryToCSV: ToolCategory.UTILITY,
   safe_export_table: ToolCategory.UTILITY,
@@ -245,6 +246,7 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   listTables: DocCategory.DATABASE_DISCOVERY,
   readTableSchema: DocCategory.DATABASE_DISCOVERY,
   getTableRelationships: DocCategory.DATABASE_DISCOVERY,
+  getAllTablesRelationships: DocCategory.DATABASE_DISCOVERY,
 
   // CRUD Operations
   createRecord: DocCategory.CRUD_OPERATIONS,

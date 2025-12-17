@@ -1,6 +1,6 @@
 # MySQL MCP Server - Detailed Documentation
 
-**Last Updated:** 2025-12-17 00:00:00
+**Last Updated:** 2025-12-17 15:30:00
 
 This file contains detailed documentation for all features of the MySQL MCP Server. For quick start and basic information, see [README.md](README.md).
 
@@ -9,7 +9,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Permissions + Categories
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 150 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 144 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -201,7 +201,7 @@ Add 'bulk_operations' to the categories argument.
 
 ## 🔧 Complete Tools Reference
 
-This section provides a comprehensive reference of all 150 available tools organized by category.
+This section provides a comprehensive reference of all 144 available tools organized by category.
 
 ### Database Discovery
 
@@ -211,6 +211,7 @@ This section provides a comprehensive reference of all 150 available tools organ
 | `list_tables` | Lists all tables in the current/specified database |
 | `read_table_schema` | Gets detailed schema (columns, types, keys, indexes) |
 | `get_table_relationships` | Discovers foreign key relationships |
+| `get_all_tables_relationships` | Gets foreign key relationships for ALL tables in a single call with in-memory processing |
 
 ### Data Operations - CRUD
 
@@ -3657,7 +3658,7 @@ Parameters:
 
 Query logs are now included in responses from **ALL 30 tools**:
 
-✅ **Database Discovery** - `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`
+✅ **Database Discovery** - `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`, `get_all_tables_relationships`
 ✅ **Data Operations** - `create_record`, `read_records`, `update_record`, `delete_record`
 ✅ **Bulk Operations** - `bulk_insert`, `bulk_update`, `bulk_delete`
 ✅ **Custom Queries** - `run_query`, `execute_sql`

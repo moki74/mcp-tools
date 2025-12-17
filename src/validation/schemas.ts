@@ -297,6 +297,15 @@ export const getTableRelationshipsSchema = {
   additionalProperties: false
 };
 
+export const getAllTablesRelationshipsSchema = {
+  type: 'object',
+  required: [],
+  properties: {
+    database: { type: 'string' }
+  },
+  additionalProperties: false
+};
+
 // Transaction Schemas
 export const beginTransactionSchema = {
   type: 'object',
@@ -584,5 +593,6 @@ export const validateShowCreateProcedure = ajv.compile(showCreateProcedureSchema
 export const validateStoredProcedureExecution = ajv.compile(executeStoredProcedureSchema);
 export const validateStoredProcedureCreation = ajv.compile(createStoredProcedureSchema);
 export const validateGetTableRelationships = ajv.compile(getTableRelationshipsSchema);
+export const validateGetAllTablesRelationships = ajv.compile(getAllTablesRelationshipsSchema);
 export const validateExportTableToCsv = ajv.compile(exportTableToCsvSchema);
 export const validateExportQueryToCsv = ajv.compile(exportQueryToCsvSchema);

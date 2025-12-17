@@ -403,6 +403,66 @@
       }
     },
     {
+      "name": "get_all_tables_relationships",
+      "description": "Gets foreign key relationships for ALL tables in a single call. Processes relationships in memory to avoid multiple queries.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "type": "string",
+            "description": "Optional: specific database name"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "total_tables": {
+            "type": "number"
+          },
+          "total_relationships": {
+            "type": "number"
+          },
+          "relationships": {
+            "type": "object",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "properties": {
+                  "as_parent": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "child_table": { "type": "string" },
+                        "child_column": { "type": "string" },
+                        "parent_table": { "type": "string" },
+                        "parent_column": { "type": "string" },
+                        "constraint_name": { "type": "string" }
+                      }
+                    }
+                  },
+                  "as_child": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "child_table": { "type": "string" },
+                        "child_column": { "type": "string" },
+                        "parent_table": { "type": "string" },
+                        "parent_column": { "type": "string" },
+                        "constraint_name": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "name": "get_schema_rag_context",
       "description": "Returns a condensed schema-aware context pack with tables, PK/FK details, and row estimates for RAG prompts.",
       "input_schema": {

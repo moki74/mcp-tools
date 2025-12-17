@@ -342,6 +342,14 @@ export class MySQLMCP {
     return await this.utilityTools.getTableRelationships(params);
   }
 
+  async getAllTablesRelationships(params?: { database?: string }) {
+    const check = this.checkToolEnabled("getAllTablesRelationships");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.utilityTools.getAllTablesRelationships(params);
+  }
+
   async readChangelog(params?: { version?: string; limit?: number }) {
     const check = this.checkToolEnabled("read_changelog");
     if (!check.enabled) {

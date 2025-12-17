@@ -5,6 +5,23 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.22.0] - 2025-12-17
+
+### Changed
+- Updated tool count from 150 to 144 to reflect current actual number of available tools
+- Updated documentation timestamps and version references across all documentation files
+
+## [1.21.0] - 2025-12-17
+
+### Added
+- New tool `get_all_tables_relationships` for bulk foreign key relationship analysis across all tables in a single call
+- Enhanced relationship discovery with in-memory processing for improved performance
+- Added comprehensive validation schema for the new bulk relationships tool
+
+### Changed
+- Updated documentation to include the new `get_all_tables_relationships` tool
+- Extended query logging support to cover the new bulk relationships functionality
+
 ## [1.20.0] - 2025-12-17
 
 ### Changed

@@ -1,6 +1,6 @@
 import DatabaseConnection from "../db/connection";
 import { dbConfig } from "../config/config";
-import { validateGetTableRelationships } from "../validation/schemas";
+import { validateGetTableRelationships, validateGetAllTablesRelationships } from "../validation/schemas";
 import fs from "fs";
 import path from "path";
 
@@ -222,6 +222,103 @@ export class UtilityTools {
           as_child: childRelationships,
         },
       };
+    } catch (error: any) {
+      return {
+        status: "error",
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Gets foreign key relationships for ALL tables in a single call
+   * Processes relationships in memory to avoid multiple queries
+   */
+  async getAllTablesRelationships(params?: { database?: string }): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
+    try {
+      const databaseName = params?.database || (this.db as any).pool.pool.config.connectionConfig.database;
+
+      // Get all tables in the database
+      const tablesQuery = `
+        SELECT TABLE_NAME as table_name
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_SCHEMA = ?
+        AND TABLE_TYPE = 'BASE TABLE'
+        ORDER BY TABLE_NAME
+      `;
+
+      const tablesResult = await this.db.query<any[]>(tablesQuery, [databaseName]);
+      const tableNames = tablesResult.map(row => row.table_name);
+
+      // Get ALL foreign key relationships in a single query
+      const relationshipsQuery = `
+        SELECT
+          TABLE_NAME as child_table,
+          COLUMN_NAME as child_column,
+          REFERENCED_TABLE_NAME as parent_table,
+          REFERENCED_COLUMN_NAME as parent_column,
+          CONSTRAINT_NAME as constraint_name
+        FROM
+          INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE
+          TABLE_SCHEMA = ?
+          AND REFERENCED_TABLE_NAME IS NOT NULL
+        ORDER BY
+          REFERENCED_TABLE_NAME, TABLE_NAME
+      `;
+
+      const allRelationships = await this.db.query<any[]>(relationshipsQuery, [databaseName]);
+
+      // Initialize result object with all tables having empty relationships
+      const result: { [key: string]: { as_parent: any[], as_child: any[] } } = {};
+      
+      tableNames.forEach(tableName => {
+        result[tableName] = {
+          as_parent: [],
+          as_child: []
+        };
+      });
+
+      // Process relationships in memory
+      allRelationships.forEach(relationship => {
+        const { child_table, parent_table } = relationship;
+
+        // Add to parent table's "as_parent" array
+        if (result[parent_table]) {
+          result[parent_table].as_parent.push({
+            child_table: relationship.child_table,
+            child_column: relationship.child_column,
+            parent_table: relationship.parent_table,
+            parent_column: relationship.parent_column,
+            constraint_name: relationship.constraint_name
+          });
+        }
+
+        // Add to child table's "as_child" array
+        if (result[child_table]) {
+          result[child_table].as_child.push({
+            child_table: relationship.child_table,
+            child_column: relationship.child_column,
+            parent_table: relationship.parent_table,
+            parent_column: relationship.parent_column,
+            constraint_name: relationship.constraint_name
+          });
+        }
+      });
+
+      return {
+        status: "success",
+        data: {
+          total_tables: tableNames.length,
+          total_relationships: allRelationships.length,
+          relationships: result
+        }
+      };
+
     } catch (error: any) {
       return {
         status: "error",
