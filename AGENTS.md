@@ -8,6 +8,7 @@
   - Update `README.md` if the change is user-facing.
   - Always increment the version number in `package.json` after the task is completed.
   - Add an entry to `CHANGELOG.md` for every version change.
+  - Update Last Updated `README.md` with the current date and time and use format `YYYY-MM-DD HH:MM:SS`
 
 ## Documentation Rules
 - Do **not** create new documentation files.
