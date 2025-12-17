@@ -149,7 +149,7 @@ export class SecurityLayer {
   }
 
   /**
-   * Validate SQL query for security issues
+   * Enhanced SQL query validation for security issues
    * @param query - The SQL query to validate
    * @param bypassDangerousCheck - If true, skips dangerous keyword check (for users with 'execute' permission)
    */
@@ -165,16 +165,23 @@ export class SecurityLayer {
       return { valid: false, error: "Query must be a non-empty string" };
     }
 
+    // Enhanced comment detection - prevent comment-based injection
+    const commentCheck = this.detectComments(query);
+    if (!commentCheck.valid) {
+      return commentCheck;
+    }
+
+    // Enhanced multiple statement detection
+    const multiStatementCheck = this.detectMultipleStatements(query);
+    if (!multiStatementCheck.valid) {
+      return multiStatementCheck;
+    }
+
     const trimmedQuery = query.trim().toUpperCase();
 
     // Check for empty query
     if (trimmedQuery.length === 0) {
       return { valid: false, error: "Query cannot be empty" };
-    }
-
-    // Check for multiple statements (basic check)
-    if (query.includes(";") && !query.trim().endsWith(";")) {
-      return { valid: false, error: "Multiple statements not allowed" };
     }
 
     // Remove trailing semicolon for analysis
@@ -185,83 +192,195 @@ export class SecurityLayer {
       return { valid: true, queryType: "INFORMATION" };
     }
 
-    // Determine query type - check basic operations first
-    let queryType = "";
-    for (const operation of this.allowedOperations) {
-      if (cleanQuery.startsWith(operation)) {
-        queryType = operation;
-        break;
+    // Enhanced query type detection with better parsing
+    const queryTypeResult = this.detectQueryType(cleanQuery);
+    if (!queryTypeResult.valid) {
+      return queryTypeResult;
+    }
+
+    // Enhanced dangerous keyword detection
+    if (!bypassDangerousCheck) {
+      const dangerousCheck = this.detectDangerousKeywords(cleanQuery);
+      if (!dangerousCheck.valid) {
+        return dangerousCheck;
+      }
+
+      // Additional checks for specific query types
+      if (queryTypeResult.queryType === "SELECT") {
+        const selectCheck = this.validateSelectQuery(cleanQuery);
+        if (!selectCheck.valid) {
+          return selectCheck;
+        }
       }
     }
 
-    // If not a basic operation, check if it's a DDL operation
-    if (!queryType) {
-      for (const ddlOp of this.ddlOperations) {
-        if (cleanQuery.startsWith(ddlOp)) {
-          // Check if DDL permission is enabled
-          if (this.featureConfig.isCategoryEnabled(ToolCategory.DDL)) {
-            queryType = ddlOp;
-            break;
-          } else {
+    return { valid: true, queryType: queryTypeResult.queryType };
+  }
+
+  /**
+   * Enhanced comment detection to prevent bypass techniques
+   */
+  private detectComments(query: string): { valid: boolean; error?: string } {
+    // Check for various comment types and bypass attempts
+    const commentPatterns = [
+      /\/\*[\s\S]*?\*\//g,  // Multi-line comments
+      /--.*$/gm,             // Single-line comments
+      /#.*$/gm,              // MySQL-style comments
+      /\/\*.*$/,             // Unterminated multi-line comment
+      /\*\//,                // End comment without start
+      /\/\*\*.*?\*\//g,     // Nested comment attempts
+      /\/\*!\s*\d+\s+.*?\*\//g, // MySQL version-specific comments
+    ];
+
+    for (const pattern of commentPatterns) {
+      if (pattern.test(query)) {
+        return { valid: false, error: "Comments not allowed in queries" };
+      }
+    }
+
+    // Check for comment-like sequences that could be used for injection
+    const suspiciousPatterns = [
+      /\/*/,   // Potential comment start
+      /\*\//,  // Potential comment end
+      /--/,    // Potential comment
+      /#/,     // Potential comment
+    ];
+
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(query)) {
+        return { valid: false, error: "Comment-like sequences not allowed in queries" };
+      }
+    }
+
+    return { valid: true };
+  }
+
+  /**
+   * Enhanced multiple statement detection
+   */
+  private detectMultipleStatements(query: string): { valid: boolean; error?: string } {
+    // Remove string literals to avoid false positives
+    const queryWithoutStrings = query.replace(/'[^']*'|"[^"]*"/g, '');
+    
+    // Check for multiple semicolons not at the end
+    const semicolonMatches = queryWithoutStrings.match(/;/g);
+    if (semicolonMatches && semicolonMatches.length > 1) {
+      return { valid: false, error: "Multiple statements not allowed" };
+    }
+
+    // Check for semicolon not at the very end (after trimming)
+    const trimmedQuery = query.trim();
+    if (trimmedQuery.includes(';') && !trimmedQuery.endsWith(';')) {
+      return { valid: false, error: "Multiple statements not allowed" };
+    }
+
+    return { valid: true };
+  }
+
+  /**
+   * Enhanced query type detection
+   */
+  private detectQueryType(cleanQuery: string): { valid: boolean; queryType?: string; error?: string } {
+    // More robust query type detection using regex
+    const queryTypePatterns = [
+      { type: 'SELECT', pattern: /^SELECT\s+/i },
+      { type: 'INSERT', pattern: /^INSERT\s+/i },
+      { type: 'UPDATE', pattern: /^UPDATE\s+/i },
+      { type: 'DELETE', pattern: /^DELETE\s+/i },
+      { type: 'CREATE', pattern: /^CREATE\s+/i },
+      { type: 'ALTER', pattern: /^ALTER\s+/i },
+      { type: 'DROP', pattern: /^DROP\s+/i },
+      { type: 'TRUNCATE', pattern: /^TRUNCATE\s+/i },
+      { type: 'RENAME', pattern: /^RENAME\s+/i },
+    ];
+
+    for (const { type, pattern } of queryTypePatterns) {
+      if (pattern.test(cleanQuery)) {
+        // Check DDL permissions
+        if (this.ddlOperations.includes(type)) {
+          if (!this.featureConfig.isCategoryEnabled(ToolCategory.DDL)) {
             return {
               valid: false,
-              error: `DDL operation '${ddlOp}' requires 'ddl' permission. Add 'ddl' to your permissions configuration.`,
+              error: `DDL operation '${type}' requires 'ddl' permission. Add 'ddl' to your permissions configuration.`,
             };
           }
         }
+        return { valid: true, queryType: type };
       }
     }
 
-    if (!queryType) {
-      return { valid: false, error: "Query type not allowed" };
-    }
+    return { valid: false, error: "Query type not allowed" };
+  }
 
-    // Check for dangerous keywords (blocked unless user has 'execute' permission)
-    // When bypassDangerousCheck is true (user has 'execute' permission), skip this check
-    if (!bypassDangerousCheck) {
-      for (const keyword of this.dangerousKeywords) {
-        // Use word boundary regex to avoid false positives (e.g., "USER" matching "USERS")
-        const keywordRegex = new RegExp(`\\b${keyword}\\b`, "i");
-        if (keywordRegex.test(cleanQuery)) {
-          return {
-            valid: false,
-            error: `Dangerous keyword detected: ${keyword}. This requires 'execute' permission.`,
-          };
-        }
-      }
-    }
+  /**
+   * Enhanced dangerous keyword detection
+   */
+  private detectDangerousKeywords(cleanQuery: string): { valid: boolean; error?: string } {
+    // Remove string literals to avoid false positives
+    const queryWithoutStrings = cleanQuery.replace(/'[^']*'|"[^"]*"/g, '');
 
-    // Additional checks for specific query types
-    // Only enforce these restrictions when user doesn't have 'execute' permission
-    if (queryType === "SELECT" && !bypassDangerousCheck) {
-      // Check for UNION attacks
-      if (cleanQuery.includes("UNION")) {
+    for (const keyword of this.dangerousKeywords) {
+      // Enhanced regex with word boundaries and case insensitivity
+      const keywordRegex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+      if (keywordRegex.test(queryWithoutStrings)) {
         return {
           valid: false,
-          error: "UNION operations not allowed without 'execute' permission",
-        };
-      }
-
-      // Check for subqueries in FROM clause (basic check)
-      if (cleanQuery.includes("FROM (")) {
-        return {
-          valid: false,
-          error:
-            "Subqueries in FROM clause not allowed without 'execute' permission",
+          error: `Dangerous keyword detected: ${keyword}. This requires 'execute' permission.`,
         };
       }
     }
 
-    // Check for comment-based injection attempts
-    if (
-      cleanQuery.includes("/*") ||
-      cleanQuery.includes("--") ||
-      cleanQuery.includes("#")
-    ) {
-      return { valid: false, error: "Comments not allowed in queries" };
+    // Additional dangerous patterns
+    const dangerousPatterns = [
+      /\b(LOAD_FILE|INTO\s+OUTFILE|INTO\s+DUMPFILE)\b/i,
+      /\b(GRANT|REVOKE|CREATE\s+USER|DROP\s+USER|ALTER\s+USER|SET\s+PASSWORD)\b/i,
+      /\b(INFORMATION_SCHEMA\.|MYSQL\.|PERFORMANCE_SCHEMA\.)\b/i,
+    ];
+
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(queryWithoutStrings)) {
+        return {
+          valid: false,
+          error: "Dangerous operation detected. This requires 'execute' permission.",
+        };
+      }
     }
 
-    return { valid: true, queryType };
+    return { valid: true };
+  }
+
+  /**
+   * Enhanced SELECT query validation
+   */
+  private validateSelectQuery(cleanQuery: string): { valid: boolean; error?: string } {
+    // Remove string literals to avoid false positives
+    const queryWithoutStrings = cleanQuery.replace(/'[^']*'|"[^"]*"/g, '');
+
+    // Check for UNION attacks
+    if (/\bUNION\b/i.test(queryWithoutStrings)) {
+      return {
+        valid: false,
+        error: "UNION operations not allowed without 'execute' permission",
+      };
+    }
+
+    // Check for subqueries in FROM clause
+    if (/FROM\s*\(/i.test(queryWithoutStrings)) {
+      return {
+        valid: false,
+        error: "Subqueries in FROM clause not allowed without 'execute' permission",
+      };
+    }
+
+    // Check for procedural statements
+    if (/\b(CALL|EXEC|EXECUTE)\b/i.test(queryWithoutStrings)) {
+      return {
+        valid: false,
+        error: "Procedural statements not allowed without 'execute' permission",
+      };
+    }
+
+    return { valid: true };
   }
 
   /**

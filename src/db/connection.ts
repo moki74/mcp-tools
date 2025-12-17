@@ -3,20 +3,25 @@ import { dbConfig } from "../config/config";
 import { QueryLogger } from "./queryLogger";
 import { QueryCache } from "../cache/queryCache";
 
+interface TransactionInfo {
+  connection: mysql.PoolConnection;
+  createdAt: Date;
+  lastActivity: Date;
+  lastQueryTime?: Date;
+  timeout?: NodeJS.Timeout;
+  queryCount: number;
+  rapidQueryCount?: number;
+}
+
 class DatabaseConnection {
   private static instance: DatabaseConnection;
   private pool: mysql.Pool;
-  private activeTransactions: Map<
-    string,
-    {
-      connection: mysql.PoolConnection;
-      createdAt: Date;
-      lastActivity: Date;
-      timeout?: NodeJS.Timeout;
-    }
-  >;
+  private activeTransactions: Map<string, TransactionInfo>;
   private queryCache: QueryCache;
   private readonly TRANSACTION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes default timeout
+  private readonly TRANSACTION_MONITOR_INTERVAL_MS = 60 * 1000; // 1 minute monitoring interval
+  private readonly MAX_TRANSACTION_DURATION_MS = 60 * 60 * 1000; // 1 hour maximum duration
+  private transactionMonitorInterval?: NodeJS.Timeout;
 
   private constructor() {
     this.pool = mysql.createPool({
@@ -31,7 +36,10 @@ class DatabaseConnection {
     });
     this.activeTransactions = new Map();
     this.queryCache = QueryCache.getInstance();
-
+    
+    // Start transaction monitoring
+    this.startTransactionMonitor();
+    
     // Set up periodic cleanup of expired transactions
     setInterval(
       () => {
@@ -151,32 +159,110 @@ class DatabaseConnection {
     }
   }
 
+  
+
   /**
-   * Clean up expired transactions to prevent resource exhaustion
+   * Start transaction monitoring system
    */
-  private cleanupExpiredTransactions(): void {
-    const now = new Date();
-    const expiredTransactions: string[] = [];
+  private startTransactionMonitor(): void {
+    this.transactionMonitorInterval = setInterval(() => {
+      this.monitorTransactions();
+    }, this.TRANSACTION_MONITOR_INTERVAL_MS);
+  }
 
-    for (const [
-      transactionId,
-      transaction,
-    ] of this.activeTransactions.entries()) {
-      const timeSinceLastActivity =
-        now.getTime() - transaction.lastActivity.getTime();
+  /**
+   * Monitor all active transactions for timeout and security violations
+   */
+  private monitorTransactions(): void {
+    const now = Date.now();
+    const transactionsToCleanup: string[] = [];
 
-      if (timeSinceLastActivity > this.TRANSACTION_TIMEOUT_MS) {
-        expiredTransactions.push(transactionId);
+    for (const [transactionId, transaction] of this.activeTransactions) {
+      const age = now - transaction.createdAt.getTime();
+      const inactivity = now - transaction.lastActivity.getTime();
+
+      // Check for maximum duration violation
+      if (age > this.MAX_TRANSACTION_DURATION_MS) {
+        console.warn(`Transaction ${transactionId} exceeded maximum duration, forcing rollback`);
+        transactionsToCleanup.push(transactionId);
+        continue;
+      }
+
+      // Check for inactivity timeout (server-side verification)
+      if (inactivity > this.TRANSACTION_TIMEOUT_MS) {
+        console.warn(`Transaction ${transactionId} timed out due to inactivity, forcing rollback`);
+        transactionsToCleanup.push(transactionId);
+        continue;
+      }
+
+      // Check for suspicious activity patterns
+      if (this.detectSuspiciousActivity(transaction)) {
+        console.warn(`Transaction ${transactionId} shows suspicious activity patterns, forcing rollback`);
+        transactionsToCleanup.push(transactionId);
+        continue;
       }
     }
 
-    for (const transactionId of expiredTransactions) {
-      this.forceRollbackTransaction(transactionId, "Transaction timed out");
+    // Clean up flagged transactions
+    for (const transactionId of transactionsToCleanup) {
+      this.forceRollbackTransaction(transactionId, "Security violation or timeout");
     }
   }
 
   /**
-   * Force rollback a transaction (used for cleanup)
+   * Detect suspicious transaction activity patterns
+   */
+  private detectSuspiciousActivity(transaction: TransactionInfo): boolean {
+    const now = Date.now();
+    const age = now - transaction.createdAt.getTime();
+    
+    // Very new transactions with excessive activity could indicate automated attacks
+    if (age < 60000 && transaction.queryCount > 100) { // More than 100 queries in first minute
+      return true;
+    }
+    
+    // Transactions with extremely high query count could indicate resource exhaustion attacks
+    if (transaction.queryCount > 10000) {
+      return true;
+    }
+    
+    // Check for rapid-fire queries (potential DoS)
+    if (transaction.lastQueryTime && (now - transaction.lastQueryTime.getTime()) < 10) { // Less than 10ms between queries
+      transaction.rapidQueryCount = (transaction.rapidQueryCount || 0) + 1;
+      if (transaction.rapidQueryCount > 50) { // More than 50 rapid queries
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Enhanced cleanup of expired transactions with security checks
+   */
+  private cleanupExpiredTransactions(): void {
+    const now = Date.now();
+    const transactionsToCleanup: string[] = [];
+
+    for (const [transactionId, transaction] of this.activeTransactions) {
+      const age = now - transaction.createdAt.getTime();
+      const inactivity = now - transaction.lastActivity.getTime();
+
+      // Multiple cleanup criteria for security
+      if (inactivity > this.TRANSACTION_TIMEOUT_MS || 
+          age > this.MAX_TRANSACTION_DURATION_MS ||
+          this.detectSuspiciousActivity(transaction)) {
+        transactionsToCleanup.push(transactionId);
+      }
+    }
+
+    for (const transactionId of transactionsToCleanup) {
+      this.forceRollbackTransaction(transactionId, "Automatic cleanup");
+    }
+  }
+
+  /**
+   * Force rollback a transaction (used for timeout handling)
    */
   private forceRollbackTransaction(
     transactionId: string,
@@ -250,7 +336,10 @@ class DatabaseConnection {
         connection,
         createdAt: now,
         lastActivity: now,
+        lastQueryTime: now,
         timeout,
+        queryCount: 0,
+        rapidQueryCount: 0,
       });
     } catch (error) {
       throw new Error(`Failed to begin transaction: ${error}`);
@@ -404,14 +493,20 @@ class DatabaseConnection {
       throw new Error(`No active transaction found with ID: ${transactionId}`);
     }
 
+    // Update query tracking before execution
+    const now = new Date();
+    transaction.lastQueryTime = now;
+    transaction.queryCount++;
+
     const startTime = Date.now();
     try {
       const [results] = await transaction.connection.query(sql, params);
       const duration = Date.now() - startTime;
       QueryLogger.log(sql, params, duration, "success");
 
-      // Reset timeout on successful activity
+      // Reset timeout on successful activity and update last activity
       this.resetTransactionTimeout(transactionId);
+      transaction.lastActivity = now;
 
       return results as T;
     } catch (error: any) {
