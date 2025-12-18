@@ -9,7 +9,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Permissions + Categories
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 144 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 157 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -201,7 +201,7 @@ Add 'bulk_operations' to the categories argument.
 
 ## 🔧 Complete Tools Reference
 
-This section provides a comprehensive reference of all 144 available tools organized by category.
+This section provides a comprehensive reference of all 157 available tools organized by category.
 
 ### Database Discovery
 
@@ -2982,6 +2982,238 @@ The AI Enhancement tools provide intelligent, AI-powered features for database e
 | `visualize_query` | Produces Mermaid query diagrams from EXPLAIN JSON | `ai_enhancement` |
 | `predict_query_performance` | Predicts query scan/cost changes under growth assumptions (heuristic) | `ai_enhancement` |
 | `forecast_database_growth` | Forecasts table/database growth from current sizes and rates | `ai_enhancement` |
+
+### Smart Query Builder
+
+| Tool | Description | Category |
+|------|-------------|----------|
+| `start_query_builder` | Starts an interactive query building session with step-by-step guidance | `ai_enhancement` |
+| `add_tables_to_query` | Adds tables to the current query building session | `ai_enhancement` |
+| `define_joins` | Defines table relationships and join conditions for the query | `ai_enhancement` |
+| `select_columns` | Selects columns to include in the query output | `ai_enhancement` |
+| `add_conditions` | Adds WHERE conditions to filter query results | `ai_enhancement` |
+| `add_aggregations` | Adds aggregate functions (COUNT, SUM, AVG, MIN, MAX) to the query | `ai_enhancement` |
+| `configure_grouping_and_ordering` | Configures GROUP BY, ORDER BY, LIMIT, and OFFSET clauses | `ai_enhancement` |
+| `preview_query` | Previews the generated SQL query without executing it | `ai_enhancement` |
+| `execute_query` | Executes the built query with optional dry-run mode | `ai_enhancement` |
+| `get_session_state` | Retrieves the current state of the query building session | `ai_enhancement` |
+| `get_query_templates` | Provides pre-built query templates for common analysis tasks | `ai_enhancement` |
+| `apply_query_template` | Applies a predefined template to the current session | `ai_enhancement` |
+| `suggest_next_step` | AI-powered suggestions for the next logical step in query building | `ai_enhancement` |
+| `end_session` | Ends the current query building session and cleans up resources | `ai_enhancement` |
+
+#### `start_query_builder`
+
+Starts an interactive query building session with step-by-step guidance and AI-powered suggestions.
+
+```javascript
+// Start a basic session
+{
+  "tool": "start_query_builder",
+  "arguments": {
+    "intent": "Show me customer orders with total amounts",
+    "context": "analytics"
+  }
+}
+
+// Start with specific database
+{
+  "tool": "start_query_builder",
+  "arguments": {
+    "intent": "Analyze sales performance by region",
+    "context": "reporting",
+    "database": "sales_db"
+  }
+}
+```
+
+**Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `intent` | string | Natural language description of the query goal (required) |
+| `context` | string | Query context: `analytics`, `reporting`, `data_entry`, `schema_exploration` |
+| `database` | string | Target database name (optional) |
+
+**Response includes:**
+- Session ID for subsequent operations
+- Initial suggestions based on intent
+- Available query templates
+- Recommended next steps
+
+#### `add_tables_to_query`
+
+Adds tables to the current query building session with validation and relationship detection.
+
+```javascript
+{
+  "tool": "add_tables_to_query",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "tables": ["customers", "orders", "products"]
+  }
+}
+```
+
+#### `define_joins`
+
+Defines table relationships and join conditions with automatic foreign key detection.
+
+```javascript
+{
+  "tool": "define_joins",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "joins": [
+      {
+        "from_table": "customers",
+        "from_column": "customer_id",
+        "to_table": "orders",
+        "to_column": "customer_id",
+        "join_type": "INNER"
+      }
+    ]
+  }
+}
+```
+
+#### `select_columns`
+
+Selects specific columns to include in the query output with optional aliases.
+
+```javascript
+{
+  "tool": "select_columns",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "columns": [
+      {"table": "customers", "column": "name", "alias": "customer_name"},
+      {"table": "orders", "column": "total_amount"}
+    ]
+  }
+}
+```
+
+#### `add_conditions`
+
+Adds WHERE conditions to filter query results with various operators.
+
+```javascript
+{
+  "tool": "add_conditions",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "conditions": [
+      {
+        "table": "orders",
+        "column": "order_date",
+        "operator": "gte",
+        "value": "2024-01-01"
+      }
+    ]
+  }
+}
+```
+
+#### `add_aggregations`
+
+Adds aggregate functions for data analysis and reporting.
+
+```javascript
+{
+  "tool": "add_aggregations",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "aggregations": [
+      {
+        "function": "SUM",
+        "column": "total_amount",
+        "alias": "total_sales",
+        "table": "orders"
+      }
+    ]
+  }
+}
+```
+
+#### `configure_grouping_and_ordering`
+
+Configures GROUP BY, ORDER BY, LIMIT, and OFFSET clauses for result organization.
+
+```javascript
+{
+  "tool": "configure_grouping_and_ordering",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "group_by": [
+      {"table": "customers", "column": "region"}
+    ],
+    "order_by": [
+      {"table": "orders", "column": "order_date", "direction": "desc"}
+    ],
+    "limit": 100
+  }
+}
+```
+
+#### `preview_query`
+
+Previews the generated SQL query without executing it, allowing for review and validation.
+
+```javascript
+{
+  "tool": "preview_query",
+  "arguments": {
+    "session_id": "uuid-session-id"
+  }
+}
+```
+
+#### `execute_query`
+
+Executes the built query with optional dry-run mode for testing.
+
+```javascript
+{
+  "tool": "execute_query",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "dry_run": false
+  }
+}
+```
+
+#### `get_query_templates`
+
+Provides pre-built query templates for common analysis tasks.
+
+```javascript
+{
+  "tool": "get_query_templates",
+  "arguments": {
+    "category": "analytics"
+  }
+}
+```
+
+**Available Templates:**
+- Customer Analysis (customer lifetime value, purchase patterns)
+- Sales Reporting (regional performance, product trends)
+- Product Analytics (inventory analysis, category performance)
+- User Activity (session analysis, engagement metrics)
+
+#### `suggest_next_step`
+
+AI-powered suggestions for the next logical step in query building based on current state.
+
+```javascript
+{
+  "tool": "suggest_next_step",
+  "arguments": {
+    "session_id": "uuid-session-id",
+    "user_input": "I want to see the top customers"
+  }
+}
+```
 
 ### Intelligent Query Assistant
 

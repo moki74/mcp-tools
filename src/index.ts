@@ -30,6 +30,7 @@ import { TestDataTools } from "./tools/testDataTools";
 import { SchemaPatternTools } from "./tools/schemaPatternTools";
 import { QueryVisualizationTools } from "./tools/queryVisualizationTools";
 import { ForecastingTools } from "./tools/forecastingTools";
+import { SmartQueryBuilderTools } from "./tools/smartQueryBuilderTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -71,6 +72,7 @@ export class MySQLMCP {
   private schemaPatternTools: SchemaPatternTools;
   private queryVisualizationTools: QueryVisualizationTools;
   private forecastingTools: ForecastingTools;
+  private smartQueryBuilderTools: SmartQueryBuilderTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -112,6 +114,7 @@ export class MySQLMCP {
     this.schemaPatternTools = new SchemaPatternTools(this.security);
     this.queryVisualizationTools = new QueryVisualizationTools(this.security);
     this.forecastingTools = new ForecastingTools(this.security);
+    this.smartQueryBuilderTools = new SmartQueryBuilderTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -1689,6 +1692,174 @@ export class MySQLMCP {
     const check = this.checkToolEnabled("forecastDatabaseGrowth");
     if (!check.enabled) return { status: "error", error: check.error };
     return await this.forecastingTools.forecastDatabaseGrowth(params);
+  }
+
+  // Smart Query Builder Tools
+  async startQueryBuilder(params: {
+    intent: string;
+    context?: "analytics" | "reporting" | "data_entry" | "schema_exploration";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("startQueryBuilder");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.startQueryBuilder(params);
+  }
+
+  async addTablesToQuery(params: {
+    session_id: string;
+    tables: string[];
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("addTablesToQuery");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.addTablesToQuery(params);
+  }
+
+  async defineJoins(params: {
+    session_id: string;
+    joins: Array<{
+      from_table: string;
+      from_column: string;
+      to_table: string;
+      to_column: string;
+      join_type?: "INNER" | "LEFT" | "RIGHT" | "FULL";
+    }>;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("defineJoins");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.defineJoins(params);
+  }
+
+  async selectColumns(params: {
+    session_id: string;
+    columns: Array<{
+      table: string;
+      column: string;
+      alias?: string;
+    }>;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("selectColumns");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.selectColumns(params);
+  }
+
+  async addConditions(params: {
+    session_id: string;
+    conditions: Array<{
+      table: string;
+      column: string;
+      operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "like" | "in" | "not_in" | "is_null" | "is_not_null";
+      value?: any;
+      values?: any[];
+    }>;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("addConditions");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.addConditions(params);
+  }
+
+  async addAggregations(params: {
+    session_id: string;
+    aggregations: Array<{
+      function: "COUNT" | "SUM" | "AVG" | "MIN" | "MAX";
+      column: string;
+      alias: string;
+      table: string;
+    }>;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("addAggregations");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.addAggregations(params);
+  }
+
+  async configureGroupingAndOrdering(params: {
+    session_id: string;
+    group_by?: Array<{
+      table: string;
+      column: string;
+    }>;
+    order_by?: Array<{
+      table: string;
+      column: string;
+      direction: "asc" | "desc";
+    }>;
+    limit?: number;
+    offset?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("configureGroupingAndOrdering");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.configureGroupingAndOrdering(params);
+  }
+
+  async previewQuery(params: {
+    session_id: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("previewQuery");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.previewQuery(params);
+  }
+
+  async executeQuery(params: {
+    session_id: string;
+    dry_run?: boolean;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("executeQuery");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.executeQuery(params);
+  }
+
+  async getSessionState(params: {
+    session_id: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("getSessionState");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.getSessionState(params);
+  }
+
+  async getQueryTemplates(params: {
+    category?: "analytics" | "reporting" | "data_entry" | "schema_exploration";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("getQueryTemplates");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.getQueryTemplates(params);
+  }
+
+  async applyQueryTemplate(params: {
+    session_id: string;
+    template_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("applyQueryTemplate");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.applyQueryTemplate(params);
+  }
+
+  async suggestNextStep(params: {
+    session_id: string;
+    user_input?: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("suggestNextStep");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.suggestNextStep(params);
+  }
+
+  async endSession(params: {
+    session_id: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("endSession");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.smartQueryBuilderTools.endSession(params);
   }
 }
 
