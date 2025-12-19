@@ -219,54 +219,32 @@ Control database access with a **dual-layer filtering system** that provides bot
 
 Use documentation categories to fine-tune which tools are exposed (Layer 2):
 
-<table>
-  <thead>
-    <tr>
-      <th align="left">Category A</th>
-      <th align="left">Category B</th>
-      <th align="left">Category C</th>
-      <th align="left">Category D</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>database_discovery</code></td>
-      <td><code>crud_operations</code></td>
-      <td><code>bulk_operations</code></td>
-      <td><code>custom_queries</code></td>
-    </tr>
-    <tr>
-      <td><code>schema_management</code></td>
-      <td><code>utilities</code></td>
-      <td><code>transaction_management</code></td>
-      <td><code>stored_procedures</code></td>
-    </tr>
-    <tr>
-      <td><code>views_management</code></td>
-      <td><code>triggers_management</code></td>
-      <td><code>functions_management</code></td>
-      <td><code>index_management</code></td>
-    </tr>
-    <tr>
-      <td><code>constraint_management</code></td>
-      <td><code>table_maintenance</code></td>
-      <td><code>server_management</code></td>
-      <td><code>performance_monitoring</code></td>
-    </tr>
-    <tr>
-      <td><code>cache_management</code></td>
-      <td><code>query_optimization</code></td>
-      <td><code>backup_restore</code></td>
-      <td><code>import_export</code></td>
-    </tr>
-    <tr>
-      <td><code>data_migration</code></td>
-      <td><code>schema_migrations</code></td>
-      <td><code>analysis</code></td>
-      <td><code>ai_enhancement</code></td>
-    </tr>
-  </tbody>
-</table>
+| Category List | Use Case |
+|---------------|----------|
+| `database_discovery` | Explore databases, tables, and schema structure |
+| `crud_operations` | Create, read, update, delete operations on data |
+| `bulk_operations` | High-performance batch processing operations |
+| `custom_queries` | Execute custom SQL queries and advanced operations |
+| `schema_management` | Manage database schema, tables, and structure |
+| `utilities` | Database utilities, diagnostics, and helper functions |
+| `transaction_management` | Handle ACID transactions and rollback operations |
+| `stored_procedures` | Create, execute, and manage stored procedures |
+| `views_management` | Create and manage database views |
+| `triggers_management` | Create and manage database triggers |
+| `functions_management` | Create and manage database functions |
+| `index_management` | Optimize performance with index management |
+| `constraint_management` | Manage data integrity constraints |
+| `table_maintenance` | Table optimization, repair, and maintenance |
+| `server_management` | MySQL server configuration and administration |
+| `performance_monitoring` | Monitor and analyze database performance |
+| `cache_management` | Manage query cache and optimization |
+| `query_optimization` | Analyze and optimize SQL queries |
+| `backup_restore` | Create backups and restore databases |
+| `import_export` | Import and export data in various formats |
+| `data_migration` | Migrate data between databases or systems |
+| `schema_migrations` | Version control for database schema changes |
+| `analysis` | Data analysis and reporting tools |
+| `ai_enhancement` | AI-powered features and smart automation |
 
 <details>
   <summary>Copy/paste list (comma-separated, no spaces)</summary>
@@ -279,7 +257,7 @@ database_discovery,crud_operations,bulk_operations,custom_queries,schema_managem
 
 Full category → tool mapping (and examples) lives in **[DOCUMENTATIONS.md → Category Filtering System](DOCUMENTATIONS.md#🆕-category-filtering-system)**.
 
-### Legacy Categories (Backward Compatible)
+### Permissions
 
 | Permission | Operations | Use Case |
 |------------|------------|----------|
