@@ -4,7 +4,7 @@
 
 **A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
-**Last Updated:** 2025-12-19 18:08:39
+**Last Updated:** 2025-12-19 19:05:00
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mysql-mcp)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
@@ -215,48 +215,6 @@ Control database access with a **dual-layer filtering system** that provides bot
 
 **Filtering Logic**: `Tool enabled = (Has Permission) AND (Has Category OR No categories specified)`
 
-### Documentation Categories (Recommended)
-
-Use documentation categories to fine-tune which tools are exposed (Layer 2):
-
-| Category List | Use Case |
-|---------------|----------|
-| `database_discovery` | Explore databases, tables, and schema structure |
-| `crud_operations` | Create, read, update, delete operations on data |
-| `bulk_operations` | High-performance batch processing operations |
-| `custom_queries` | Execute custom SQL queries and advanced operations |
-| `schema_management` | Manage database schema, tables, and structure |
-| `utilities` | Database utilities, diagnostics, and helper functions |
-| `transaction_management` | Handle ACID transactions and rollback operations |
-| `stored_procedures` | Create, execute, and manage stored procedures |
-| `views_management` | Create and manage database views |
-| `triggers_management` | Create and manage database triggers |
-| `functions_management` | Create and manage database functions |
-| `index_management` | Optimize performance with index management |
-| `constraint_management` | Manage data integrity constraints |
-| `table_maintenance` | Table optimization, repair, and maintenance |
-| `server_management` | MySQL server configuration and administration |
-| `performance_monitoring` | Monitor and analyze database performance |
-| `cache_management` | Manage query cache and optimization |
-| `query_optimization` | Analyze and optimize SQL queries |
-| `backup_restore` | Create backups and restore databases |
-| `import_export` | Import and export data in various formats |
-| `data_migration` | Migrate data between databases or systems |
-| `schema_migrations` | Version control for database schema changes |
-| `analysis` | Data analysis and reporting tools |
-| `ai_enhancement` | AI-powered features and smart automation |
-
-<details>
-  <summary>Copy/paste list (comma-separated, no spaces)</summary>
-
-```text
-database_discovery,crud_operations,bulk_operations,custom_queries,schema_management,utilities,transaction_management,stored_procedures,views_management,triggers_management,functions_management,index_management,constraint_management,table_maintenance,server_management,performance_monitoring,cache_management,query_optimization,backup_restore,import_export,data_migration,schema_migrations,analysis,ai_enhancement
-```
-
-</details>
-
-Full category → tool mapping (and examples) lives in **[DOCUMENTATIONS.md → Category Filtering System](DOCUMENTATIONS.md#🆕-category-filtering-system)**.
-
 ### Permissions
 
 | Permission | Operations | Use Case |
@@ -273,6 +231,50 @@ Full category → tool mapping (and examples) lives in **[DOCUMENTATIONS.md → 
 | `utility` | Connection testing, diagnostics | Troubleshooting |
 
 Common configuration examples are documented in **[DOCUMENTATIONS.md → Category Filtering System](DOCUMENTATIONS.md#🆕-category-filtering-system)**.
+
+---
+
+### Documentation Categories (Recommended)
+
+Use documentation categories to fine-tune which tools are exposed (Layer 2):
+
+| Category List | Use Case | List Tools |
+|---------------|----------|-----------|
+| `database_discovery` | Explore databases, tables, and schema structure | `list_all_tools` (MCP_CATEGORIES=`database_discovery`) |
+| `crud_operations` | Create, read, update, delete operations on data | `list_all_tools` (MCP_CATEGORIES=`crud_operations`) |
+| `bulk_operations` | High-performance batch processing operations | `list_all_tools` (MCP_CATEGORIES=`bulk_operations`) |
+| `custom_queries` | Execute custom SQL queries and advanced operations | `list_all_tools` (MCP_CATEGORIES=`custom_queries`) |
+| `schema_management` | Manage database schema, tables, and structure | `list_all_tools` (MCP_CATEGORIES=`schema_management`) |
+| `utilities` | Database utilities, diagnostics, and helper functions | `list_all_tools` (MCP_CATEGORIES=`utilities`) |
+| `transaction_management` | Handle ACID transactions and rollback operations | `list_all_tools` (MCP_CATEGORIES=`transaction_management`) |
+| `stored_procedures` | Create, execute, and manage stored procedures | `list_all_tools` (MCP_CATEGORIES=`stored_procedures`) |
+| `views_management` | Create and manage database views | `list_all_tools` (MCP_CATEGORIES=`views_management`) |
+| `triggers_management` | Create and manage database triggers | `list_all_tools` (MCP_CATEGORIES=`triggers_management`) |
+| `functions_management` | Create and manage database functions | `list_all_tools` (MCP_CATEGORIES=`functions_management`) |
+| `index_management` | Optimize performance with index management | `list_all_tools` (MCP_CATEGORIES=`index_management`) |
+| `constraint_management` | Manage data integrity constraints | `list_all_tools` (MCP_CATEGORIES=`constraint_management`) |
+| `table_maintenance` | Table optimization, repair, and maintenance | `list_all_tools` (MCP_CATEGORIES=`table_maintenance`) |
+| `server_management` | MySQL server configuration and administration | `list_all_tools` (MCP_CATEGORIES=`server_management`) |
+| `performance_monitoring` | Monitor and analyze database performance | `list_all_tools` (MCP_CATEGORIES=`performance_monitoring`) |
+| `cache_management` | Manage query cache and optimization | `list_all_tools` (MCP_CATEGORIES=`cache_management`) |
+| `query_optimization` | Analyze and optimize SQL queries | `list_all_tools` (MCP_CATEGORIES=`query_optimization`) |
+| `backup_restore` | Create backups and restore databases | `list_all_tools` (MCP_CATEGORIES=`backup_restore`) |
+| `import_export` | Import and export data in various formats | `list_all_tools` (MCP_CATEGORIES=`import_export`) |
+| `data_migration` | Migrate data between databases or systems | `list_all_tools` (MCP_CATEGORIES=`data_migration`) |
+| `schema_migrations` | Version control for database schema changes | `list_all_tools` (MCP_CATEGORIES=`schema_migrations`) |
+| `analysis` | Data analysis and reporting tools | `list_all_tools` (MCP_CATEGORIES=`analysis`) |
+| `ai_enhancement` | AI-powered features and smart automation | `list_all_tools` (MCP_CATEGORIES=`ai_enhancement`) |
+
+<details>
+  <summary>Copy/paste list (comma-separated, no spaces)</summary>
+
+```text
+database_discovery,crud_operations,bulk_operations,custom_queries,schema_management,utilities,transaction_management,stored_procedures,views_management,triggers_management,functions_management,index_management,constraint_management,table_maintenance,server_management,performance_monitoring,cache_management,query_optimization,backup_restore,import_export,data_migration,schema_migrations,analysis,ai_enhancement
+```
+
+</details>
+
+Full category → tool mapping (and examples) lives in **[DOCUMENTATIONS.md → Category Filtering System](DOCUMENTATIONS.md#🆕-category-filtering-system)**.
 
 ---
 

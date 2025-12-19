@@ -1,6 +1,6 @@
 # MySQL MCP Server - Detailed Documentation
 
-**Last Updated:** 2025-12-19 18:08:39
+**Last Updated:** 2025-12-19 18:45:00
 
 This file contains detailed documentation for all features of the MySQL MCP Server. For quick start and basic information, see [README.md](README.md).
 

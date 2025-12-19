@@ -5,6 +5,18 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.2] - 2025-12-19
+
+### Fixed
+- Updated manifest.json version from 1.17.0 to 1.26.2 to match package.json
+- Verified `list_all_tools` tool is properly registered and available in MCP server
+- Updated documentation timestamps to reflect current changes
+
+## [1.26.3] - 2025-12-19
+
+### Documentation
+- Enhanced README documentation categories table with a "List Tools" column (per-category `list_all_tools` call)
+
 ## [1.26.1] - 2025-12-19
 
 ### Documentation

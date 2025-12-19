@@ -3507,7 +3507,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     );
 
     // Check if tool is enabled based on permissions and categories
-    return mysqlMCP.isToolEnabled(toolNameCamelCase);
+    // Most tools are keyed in featureConfig using camelCase, but a few legacy/meta tools
+    // are keyed using their snake_case MCP names (e.g., read_changelog, list_all_tools).
+    return (
+      mysqlMCP.isToolEnabled(toolNameCamelCase) ||
+      mysqlMCP.isToolEnabled(tool.name)
+    );
   });
 
   // Log the filtering results
