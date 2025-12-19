@@ -722,6 +722,15 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: "list_all_tools",
+    description:
+      "Lists all available MCP tools with their definitions and server metadata.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
     name: "get_table_relationships",
     description: "Returns foreign key relationships for a specified table.",
     inputSchema: {
@@ -3678,6 +3687,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
       case "test_connection":
         result = await mysqlMCP.testConnection();
+        break;
+
+      case "list_all_tools":
+        result = await mysqlMCP.listAllTools();
         break;
 
       case "read_changelog":

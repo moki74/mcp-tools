@@ -362,7 +362,7 @@ export class MySQLMCP {
   }
 
   async listAllTools() {
-    const check = this.checkToolEnabled("listAllTools");
+    const check = this.checkToolEnabled("list_all_tools");
     if (!check.enabled) {
       return { status: "error", error: check.error };
     }

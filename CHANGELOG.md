@@ -5,6 +5,19 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.1] - 2025-12-19
+
+### Documentation
+- Fixed total tools count in README.md and DOCUMENTATIONS.md to match the actual registered tool count (145)
+
+## [1.26.0] - 2025-12-19
+
+### Fixed
+- Added missing `list_all_tools` tool registration in MCP server
+- The `list_all_tools` tool was implemented but not exposed through the MCP interface
+- Updated tool schema and handler registration in mcp-server.ts
+- Updated total tool count from 158 to 159 in documentation
+
 ## [1.22.0] - 2025-12-17
 
 ### Changed

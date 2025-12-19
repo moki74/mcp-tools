@@ -455,6 +455,7 @@ const legacyToDocCategoryMap: Record<string, DocCategory[]> = {
     DocCategory.SERVER_MANAGEMENT,
     DocCategory.SCHEMA_MIGRATIONS,
     DocCategory.ANALYSIS,
+    DocCategory.UTILITIES,
   ],
   read: [DocCategory.CRUD_OPERATIONS, DocCategory.CUSTOM_QUERIES, DocCategory.ANALYSIS],
   create: [

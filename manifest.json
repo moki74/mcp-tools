@@ -349,6 +349,59 @@
       }
     },
     {
+      "name": "list_all_tools",
+      "description": "Lists all available MCP tools with their definitions and server metadata.",
+      "input_schema": {},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "total_tools": {
+                "type": "number"
+              },
+              "server_name": {
+                "type": "string"
+              },
+              "server_version": {
+                "type": "string"
+              },
+              "server_description": {
+                "type": "string"
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "input_schema": {
+                      "type": "object"
+                    },
+                    "output_schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
       "name": "get_table_relationships",
       "description": "Returns foreign key relationships for a specified table.",
       "input_schema": {

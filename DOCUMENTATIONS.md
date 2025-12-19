@@ -1,6 +1,6 @@
 # MySQL MCP Server - Detailed Documentation
 
-**Last Updated:** 2025-12-17 15:30:00
+**Last Updated:** 2025-12-19 18:08:39
 
 This file contains detailed documentation for all features of the MySQL MCP Server. For quick start and basic information, see [README.md](README.md).
 
@@ -9,7 +9,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Permissions + Categories
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 158 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 145 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -201,7 +201,7 @@ Add 'bulk_operations' to the categories argument.
 
 ## 🔧 Complete Tools Reference
 
-This section provides a comprehensive reference of all 158 available tools organized by category.
+This section provides a comprehensive reference of all 145 available tools organized by category.
 
 ### Database Discovery
 
