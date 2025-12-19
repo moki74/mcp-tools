@@ -328,6 +328,54 @@ export class UtilityTools {
   }
 
   /**
+   * Lists all available tools in this MySQL MCP server
+   */
+  async listAllTools(): Promise<{
+    status: string;
+    data?: any;
+    error?: string;
+  }> {
+    try {
+      // Read manifest.json to get tool definitions
+      const manifestPath = path.resolve(__dirname, "..", "..", "manifest.json");
+      
+      if (!fs.existsSync(manifestPath)) {
+        return {
+          status: "error",
+          error: "manifest.json not found in project root.",
+        };
+      }
+
+      const manifestContent = fs.readFileSync(manifestPath, "utf-8");
+      const manifest = JSON.parse(manifestContent);
+
+      const tools = manifest.tools.map((tool: any) => ({
+        name: tool.name,
+        description: tool.description,
+        input_schema: tool.input_schema,
+        output_schema: tool.output_schema
+      }));
+
+      return {
+        status: "success",
+        data: {
+          total_tools: tools.length,
+          server_name: manifest.name,
+          server_version: manifest.version,
+          server_description: manifest.description,
+          tools: tools
+        }
+      };
+
+    } catch (error: any) {
+      return {
+        status: "error",
+        error: `Failed to list tools: ${error.message}`,
+      };
+    }
+  }
+
+  /**
    * Reads the CHANGELOG.md file from the project root
    */
   async readChangelog(params?: { version?: string; limit?: number }): Promise<{

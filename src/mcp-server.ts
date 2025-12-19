@@ -737,7 +737,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_all_tables_relationships",
-    description: "Gets foreign key relationships for ALL tables in a single call. Processes relationships in memory to avoid multiple queries.",
+    description: "Gets all table foreign key relationships in one call with memory-efficient relationship mapping.",
     inputSchema: {
       type: "object",
       properties: {

@@ -361,6 +361,14 @@ export class MySQLMCP {
     return await this.utilityTools.readChangelog(params);
   }
 
+  async listAllTools() {
+    const check = this.checkToolEnabled("listAllTools");
+    if (!check.enabled) {
+      return { status: "error", error: check.error };
+    }
+    return await this.utilityTools.listAllTools();
+  }
+
   // Transaction Tools
   async beginTransaction(params?: { transactionId?: string }) {
     const check = this.checkToolEnabled("beginTransaction");

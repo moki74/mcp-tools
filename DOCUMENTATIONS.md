@@ -9,7 +9,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Permissions + Categories
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 157 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 158 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -201,7 +201,7 @@ Add 'bulk_operations' to the categories argument.
 
 ## 🔧 Complete Tools Reference
 
-This section provides a comprehensive reference of all 157 available tools organized by category.
+This section provides a comprehensive reference of all 158 available tools organized by category.
 
 ### Database Discovery
 
@@ -255,6 +255,7 @@ This section provides a comprehensive reference of all 157 available tools organ
 | `read_changelog` | Read the changelog to see new features/changes |
 | `export_table_to_csv` | Export table data to CSV format |
 | `export_query_to_csv` | Export query results to CSV format |
+| `list_all_tools` | List all available tools in this MySQL MCP server |
 
 ### Transaction Management
 

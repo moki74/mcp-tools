@@ -4,7 +4,7 @@
 
 **A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
-**Last Updated:** 2025-12-18 13:45:00
+**Last Updated:** 2025-12-19 03:59:00
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mysql-mcp)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
@@ -300,7 +300,7 @@ Common configuration examples are documented in **[DOCUMENTATIONS.md → Categor
 
 ## Available Tools
 
-The server exposes **144 tools** organized into categories (CRUD, schema, backups, migrations, perf/monitoring, and AI enhancement).
+The server exposes **145 tools** organized into categories (CRUD, schema, backups, migrations, perf/monitoring, and AI enhancement).
 
 - Complete list of tools: **[DOCUMENTATIONS.md → Complete Tools Reference](DOCUMENTATIONS.md#🔧-complete-tools-reference)**
 - AI enhancement tools overview: **[DOCUMENTATIONS.md → AI Enhancement Tools](DOCUMENTATIONS.md#🤖-ai-enhancement-tools)**

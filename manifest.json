@@ -404,7 +404,7 @@
     },
     {
       "name": "get_all_tables_relationships",
-      "description": "Gets foreign key relationships for ALL tables in a single call. Processes relationships in memory to avoid multiple queries.",
+      "description": "Gets all table foreign key relationships in one call with memory-efficient relationship mapping.",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -781,6 +781,42 @@
         "properties": {
           "status": { "type": "string" },
           "data": { "type": "object" },
+          "error": { "type": ["string", "null"] }
+        }
+      }
+    },
+    {
+      "name": "list_all_tools",
+      "description": "Lists all available tools in this MySQL MCP server with their descriptions and schemas.",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "total_tools": { "type": "number" },
+              "server_name": { "type": "string" },
+              "server_version": { "type": "string" },
+              "server_description": { "type": "string" },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "input_schema": { "type": "object" },
+                    "output_schema": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
           "error": { "type": ["string", "null"] }
         }
       }

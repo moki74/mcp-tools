@@ -27,6 +27,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Version increment for implemented features and improvements
 
+## [1.24.0] - 2025-12-19
+
+### Added
+- New tool `list_all_tools` for listing all available tools in the MySQL MCP server with their descriptions and schemas
+- Enhanced meta-tool capabilities for AI agents to discover available functionality
+
+### Changed
+- Updated tool count from 144 to 145 in README.md
+- Updated tool count from 157 to 158 in DOCUMENTATIONS.md  
+- Added `list_all_tools` to the Utilities section in documentation
+- Updated Last Updated timestamp in README.md
+- Version increment for new tool implementation
+
 ## [Unreleased]
 
 ### Security
