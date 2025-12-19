@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - Enhanced README documentation categories table with a "List Tools" column (per-category `list_all_tools` call)
 
+## [1.26.4] - 2025-12-19
+
+### Documentation
+- Fixed README "Documentation Categories (Recommended)" to list the actual tools per category in the "List Tools" column
+
 ## [1.26.1] - 2025-12-19
 
 ### Documentation

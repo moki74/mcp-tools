@@ -4,7 +4,7 @@
 
 **A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
-**Last Updated:** 2025-12-19 19:05:00
+**Last Updated:** 2025-12-19 19:09:00
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mysql-mcp)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
@@ -240,30 +240,30 @@ Use documentation categories to fine-tune which tools are exposed (Layer 2):
 
 | Category List | Use Case | List Tools |
 |---------------|----------|-----------|
-| `database_discovery` | Explore databases, tables, and schema structure | `list_all_tools` (MCP_CATEGORIES=`database_discovery`) |
-| `crud_operations` | Create, read, update, delete operations on data | `list_all_tools` (MCP_CATEGORIES=`crud_operations`) |
-| `bulk_operations` | High-performance batch processing operations | `list_all_tools` (MCP_CATEGORIES=`bulk_operations`) |
-| `custom_queries` | Execute custom SQL queries and advanced operations | `list_all_tools` (MCP_CATEGORIES=`custom_queries`) |
-| `schema_management` | Manage database schema, tables, and structure | `list_all_tools` (MCP_CATEGORIES=`schema_management`) |
-| `utilities` | Database utilities, diagnostics, and helper functions | `list_all_tools` (MCP_CATEGORIES=`utilities`) |
-| `transaction_management` | Handle ACID transactions and rollback operations | `list_all_tools` (MCP_CATEGORIES=`transaction_management`) |
-| `stored_procedures` | Create, execute, and manage stored procedures | `list_all_tools` (MCP_CATEGORIES=`stored_procedures`) |
-| `views_management` | Create and manage database views | `list_all_tools` (MCP_CATEGORIES=`views_management`) |
-| `triggers_management` | Create and manage database triggers | `list_all_tools` (MCP_CATEGORIES=`triggers_management`) |
-| `functions_management` | Create and manage database functions | `list_all_tools` (MCP_CATEGORIES=`functions_management`) |
-| `index_management` | Optimize performance with index management | `list_all_tools` (MCP_CATEGORIES=`index_management`) |
-| `constraint_management` | Manage data integrity constraints | `list_all_tools` (MCP_CATEGORIES=`constraint_management`) |
-| `table_maintenance` | Table optimization, repair, and maintenance | `list_all_tools` (MCP_CATEGORIES=`table_maintenance`) |
-| `server_management` | MySQL server configuration and administration | `list_all_tools` (MCP_CATEGORIES=`server_management`) |
-| `performance_monitoring` | Monitor and analyze database performance | `list_all_tools` (MCP_CATEGORIES=`performance_monitoring`) |
-| `cache_management` | Manage query cache and optimization | `list_all_tools` (MCP_CATEGORIES=`cache_management`) |
-| `query_optimization` | Analyze and optimize SQL queries | `list_all_tools` (MCP_CATEGORIES=`query_optimization`) |
-| `backup_restore` | Create backups and restore databases | `list_all_tools` (MCP_CATEGORIES=`backup_restore`) |
-| `import_export` | Import and export data in various formats | `list_all_tools` (MCP_CATEGORIES=`import_export`) |
-| `data_migration` | Migrate data between databases or systems | `list_all_tools` (MCP_CATEGORIES=`data_migration`) |
-| `schema_migrations` | Version control for database schema changes | `list_all_tools` (MCP_CATEGORIES=`schema_migrations`) |
-| `analysis` | Data analysis and reporting tools | `list_all_tools` (MCP_CATEGORIES=`analysis`) |
-| `ai_enhancement` | AI-powered features and smart automation | `list_all_tools` (MCP_CATEGORIES=`ai_enhancement`) |
+| `database_discovery` | Explore databases, tables, and schema structure | `get_all_tables_relationships, get_table_relationships, list_databases, list_tables, read_table_schema` |
+| `crud_operations` | Create, read, update, delete operations on data | `create_record, delete_record, read_records, update_record` |
+| `bulk_operations` | High-performance batch processing operations | `bulk_delete, bulk_insert, bulk_update` |
+| `custom_queries` | Execute custom SQL queries and advanced operations | `execute_sql, run_query` |
+| `schema_management` | Manage database schema, tables, and structure | `alter_table, create_table, drop_table, execute_ddl` |
+| `utilities` | Database utilities, diagnostics, and helper functions | `describe_connection, export_query_to_csv, export_table_to_csv, list_all_tools, read_changelog, test_connection` |
+| `transaction_management` | Handle ACID transactions and rollback operations | `begin_transaction, commit_transaction, execute_in_transaction, get_transaction_status, rollback_transaction` |
+| `stored_procedures` | Create, execute, and manage stored procedures | `create_stored_procedure, drop_stored_procedure, execute_stored_procedure, get_stored_procedure_info, list_stored_procedures, show_create_procedure` |
+| `views_management` | Create and manage database views | `alter_view, create_view, drop_view, get_view_info, list_views, show_create_view` |
+| `triggers_management` | Create and manage database triggers | `create_trigger, drop_trigger, get_trigger_info, list_triggers, show_create_trigger` |
+| `functions_management` | Create and manage database functions | `create_function, drop_function, execute_function, get_function_info, list_functions, show_create_function` |
+| `index_management` | Optimize performance with index management | `analyze_index, create_index, drop_index, get_index_info, list_indexes` |
+| `constraint_management` | Manage data integrity constraints | `add_check_constraint, add_foreign_key, add_unique_constraint, drop_constraint, drop_foreign_key, list_constraints, list_foreign_keys` |
+| `table_maintenance` | Table optimization, repair, and maintenance | `analyze_table, check_table, flush_table, get_table_size, get_table_status, optimize_table, repair_table, truncate_table` |
+| `server_management` | MySQL server configuration and administration | `explain_query, get_server_info, kill_process, show_binary_logs, show_engine_status, show_process_list, show_replication_status, show_status, show_variables` |
+| `performance_monitoring` | Monitor and analyze database performance | `get_connection_pool_stats, get_database_health_check, get_index_usage_stats, get_performance_metrics, get_slow_queries, get_table_io_stats, get_top_queries_by_count, get_top_queries_by_time, get_unused_indexes, reset_performance_stats` |
+| `cache_management` | Manage query cache and optimization | `clear_cache, configure_cache_settings, get_cache_config, get_cache_stats, invalidate_cache_for_table` |
+| `query_optimization` | Analyze and optimize SQL queries | `analyze_query, get_optimization_hints` |
+| `backup_restore` | Create backups and restore databases | `backup_database, backup_table, get_create_table_statement, get_database_schema, restore_from_sql` |
+| `import_export` | Import and export data in various formats | `export_query_to_json, export_table_to_json, export_table_to_sql, import_from_csv, import_from_json, safe_export_table` |
+| `data_migration` | Migrate data between databases or systems | `clone_table, compare_table_structure, copy_table_data, move_table_data, sync_table_data` |
+| `schema_migrations` | Version control for database schema changes | `apply_migrations, create_migration, generate_migration_from_diff, get_migration_status, get_schema_version, init_migrations_table, reset_failed_migration, rollback_migration, validate_migrations` |
+| `analysis` | Data analysis and reporting tools | `get_column_statistics, get_database_summary, get_schema_erd, get_schema_rag_context` |
+| `ai_enhancement` | AI-powered features and smart automation | `analyze_schema_patterns, audit_database_security, build_query_from_intent, design_schema_from_requirements, discover_data_patterns, find_similar_columns, forecast_database_growth, generate_business_glossary, generate_data_dictionary, generate_documentation, generate_test_data, predict_query_performance, recommend_indexes, smart_search, suggest_query_improvements, visualize_query` |
 
 <details>
   <summary>Copy/paste list (comma-separated, no spaces)</summary>
