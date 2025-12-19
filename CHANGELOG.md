@@ -40,6 +40,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Last Updated timestamp in README.md
 - Version increment for new tool implementation
 
+## [1.25.0] - 2025-12-19
+
+### Fixed
+- Added `list_all_tools` tool to permission configuration with LIST category
+- Tool is now available for all permission sets that include "list" access
+- Updated both tool category mapping and documentation category mapping
+
+### Changed
+- Incremented version to 1.25.0 for permission configuration fix
+
 ## [Unreleased]
 
 ### Security
