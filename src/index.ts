@@ -156,7 +156,11 @@ export class MySQLMCP {
     return await this.dbTools.readTableSchema(params);
   }
 
-  async getDatabaseSummary(params: { database?: string }) {
+  async getDatabaseSummary(params: { 
+    database?: string;
+    max_tables?: number;
+    include_relationships?: boolean;
+  }) {
     const check = this.checkToolEnabled("getDatabaseSummary");
     if (!check.enabled) {
       return { status: "error", error: check.error };

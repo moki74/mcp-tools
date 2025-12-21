@@ -5,6 +5,21 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.29.0] - 2025-12-21
+
+### Enhanced
+- **`get_database_summary` tool** - Significantly improved output format and functionality:
+  - Added database **Overview section** displaying total tables, tables shown, and total estimated rows with thousands separators
+  - Enhanced **column display**: now one per line with data type, nullable status, and key indicators (PK, UNI, FK with target table)
+  - Added **Primary Key section** per table showing all PK columns
+  - Included **Foreign Key relationships** section showing all FK connections across tables (can be disabled with `include_relationships: false`)
+  - Added `max_tables` parameter (max 500) to limit output for large databases
+  - Added `include_relationships` parameter (default: true) to control FK relationships display
+  - Improved **markdown formatting** with clear hierarchy using H1, H2, H3 headings
+  - Enhanced **foreign key tracking**: shows FK targets inline per column and in dedicated relationships summary
+  - Added footer note when tables are truncated due to `max_tables` limit
+  - Better **readability** for AI context consumption and human review
+
 ## [1.28.0] - 2025-12-21
 
 ### Changed

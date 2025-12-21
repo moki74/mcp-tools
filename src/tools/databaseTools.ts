@@ -175,9 +175,13 @@ export class DatabaseTools {
 
   /**
    * Get a high-level summary of the database (tables, columns, row counts)
-   * Optimized for AI context window
+   * Optimized for AI context window with better formatting and optional limits
    */
-  async getDatabaseSummary(params: { database?: string }): Promise<{
+  async getDatabaseSummary(params: { 
+    database?: string;
+    max_tables?: number;
+    include_relationships?: boolean;
+  }): Promise<{
     status: string;
     data?: string;
     error?: string;
@@ -199,39 +203,129 @@ export class DatabaseTools {
         };
       }
 
-      // Get tables and row counts
+      const maxTables = params.max_tables ? Math.min(Math.max(params.max_tables, 1), 500) : undefined;
+      const includeRelationships = params.include_relationships ?? true;
+
+      // Get total table count first
+      const totalCountQuery = `
+        SELECT COUNT(*) as total
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE TABLE_SCHEMA = ?
+      `;
+      const totalCountResult = await this.db.query<any[]>(totalCountQuery, [database]);
+      const totalTables = totalCountResult[0]?.total || 0;
+
+      // Get tables and row counts with optional limit
       const tablesQuery = `
         SELECT TABLE_NAME, TABLE_ROWS
         FROM INFORMATION_SCHEMA.TABLES 
         WHERE TABLE_SCHEMA = ?
+        ORDER BY TABLE_NAME
+        ${maxTables ? `LIMIT ${maxTables}` : ''}
       `;
       const tables = await this.db.query<any[]>(tablesQuery, [database]);
 
-      // Get columns for all tables
+      if (tables.length === 0) {
+        return {
+          status: "success",
+          data: `# Database Summary: ${database}\n\nNo tables found in this database.`
+        };
+      }
+
+      // Get columns for displayed tables
+      const tableNames = tables.map(t => t.TABLE_NAME);
+      const placeholders = tableNames.map(() => '?').join(',');
+      
       const columnsQuery = `
-        SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_KEY
+        SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE
         FROM INFORMATION_SCHEMA.COLUMNS 
-        WHERE TABLE_SCHEMA = ?
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME IN (${placeholders})
         ORDER BY TABLE_NAME, ORDINAL_POSITION
       `;
-      const columns = await this.db.query<any[]>(columnsQuery, [database]);
+      const columns = await this.db.query<any[]>(columnsQuery, [database, ...tableNames]);
 
-      // Build text summary
+      // Get foreign key relationships if requested
+      let foreignKeys: any[] = [];
+      if (includeRelationships) {
+        const fkQuery = `
+          SELECT 
+            TABLE_NAME,
+            COLUMN_NAME,
+            REFERENCED_TABLE_NAME,
+            REFERENCED_COLUMN_NAME
+          FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+          WHERE TABLE_SCHEMA = ? 
+            AND TABLE_NAME IN (${placeholders})
+            AND REFERENCED_TABLE_NAME IS NOT NULL
+        `;
+        foreignKeys = await this.db.query<any[]>(fkQuery, [database, ...tableNames]);
+      }
+
+      // Build enhanced summary
       let summary = `# Database Summary: ${database}\n\n`;
       
+      // Overview section
+      summary += `## Overview\n`;
+      summary += `- **Total Tables**: ${totalTables}\n`;
+      summary += `- **Tables Shown**: ${tables.length}${maxTables && totalTables > maxTables ? ` (limited to ${maxTables})` : ''}\n`;
+      
+      const totalRows = tables.reduce((sum, t) => sum + (parseInt(t.TABLE_ROWS) || 0), 0);
+      summary += `- **Total Estimated Rows**: ~${totalRows.toLocaleString()}\n\n`;
+
+      // Tables section
+      summary += `## Tables\n\n`;
+      
       for (const table of tables) {
-        summary += `## Table: ${table.TABLE_NAME} (~${table.TABLE_ROWS || 0} rows)\n`;
+        const rowCount = parseInt(table.TABLE_ROWS) || 0;
+        summary += `### ${table.TABLE_NAME}\n`;
+        summary += `**Rows**: ~${rowCount.toLocaleString()}\n\n`;
         
         const tableColumns = columns.filter(c => c.TABLE_NAME === table.TABLE_NAME);
-        const columnDefs = tableColumns.map(c => {
-          let def = `${c.COLUMN_NAME} (${c.DATA_TYPE})`;
-          if (c.COLUMN_KEY === 'PRI') def += " [PK]";
-          if (c.COLUMN_KEY === 'MUL') def += " [FK/Index]";
-          if (c.COLUMN_KEY === 'UNI') def += " [Unique]";
-          return def;
-        });
+        const tableFKs = foreignKeys.filter(fk => fk.TABLE_NAME === table.TABLE_NAME);
         
-        summary += `Columns: ${columnDefs.join(", ")}\n\n`;
+        // Primary keys
+        const primaryKeys = tableColumns.filter(c => c.COLUMN_KEY === 'PRI');
+        if (primaryKeys.length > 0) {
+          summary += `**Primary Key(s)**: ${primaryKeys.map(c => c.COLUMN_NAME).join(', ')}\n\n`;
+        }
+        
+        // Columns
+        summary += `**Columns** (${tableColumns.length}):\n`;
+        for (const col of tableColumns) {
+          const nullable = col.IS_NULLABLE === 'YES' ? 'nullable' : 'not null';
+          let keys: string[] = [];
+          
+          if (col.COLUMN_KEY === 'PRI') keys.push('PK');
+          else if (col.COLUMN_KEY === 'UNI') keys.push('UNI');
+          
+          // Check if this column is a foreign key
+          const fk = tableFKs.find(f => f.COLUMN_NAME === col.COLUMN_NAME);
+          if (fk) {
+            keys.push(`FK → ${fk.REFERENCED_TABLE_NAME}.${fk.REFERENCED_COLUMN_NAME}`);
+          } else if (col.COLUMN_KEY === 'MUL') {
+            keys.push('Index');
+          }
+          
+          const keyInfo = keys.length > 0 ? ` [${keys.join(', ')}]` : '';
+          summary += `  - ${col.COLUMN_NAME}: ${col.DATA_TYPE} (${nullable})${keyInfo}\n`;
+        }
+        
+        summary += `\n`;
+      }
+
+      // Relationships summary if included and exists
+      if (includeRelationships && foreignKeys.length > 0) {
+        summary += `## Foreign Key Relationships (${foreignKeys.length})\n\n`;
+        for (const fk of foreignKeys) {
+          summary += `- ${fk.TABLE_NAME}.${fk.COLUMN_NAME} → ${fk.REFERENCED_TABLE_NAME}.${fk.REFERENCED_COLUMN_NAME}\n`;
+        }
+        summary += `\n`;
+      }
+
+      // Footer note if tables were limited
+      if (maxTables && totalTables > maxTables) {
+        summary += `\n---\n`;
+        summary += `*Note: ${totalTables - maxTables} table(s) not shown. Increase \`max_tables\` parameter to see more.*\n`;
       }
 
       return {

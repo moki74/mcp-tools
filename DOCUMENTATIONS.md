@@ -439,10 +439,18 @@ This section provides a comprehensive reference of all 145 available tools organ
 
 | Tool | Description | Requires |
 |------|-------------|----------|
-| `get_database_summary` | High-level overview (tables, columns, rows) for AI context | `list` |
+| `get_database_summary` | Enhanced database overview with overview section, per-table breakdown (PKs, columns with nullable info, FK references), optional relationships summary, and configurable table limits | `list` |
 | `get_schema_erd` | Generate Mermaid.js ER diagram for visualization | `list` |
 | `get_schema_rag_context` | Condensed schema snapshot (tables, PK/FK, row estimates) for RAG prompts | `list` |
 | `get_column_statistics` | Profile data (min, max, nulls, distinct) for analysis | `read` |
+
+#### Database Summary Enhancement
+- **Better readability**: Columns displayed one per line with type, nullable status, and key indicators (PK, UNI, FK with target)
+- **Overview section**: Shows total tables, tables displayed, and total estimated rows
+- **Configurable limits**: Use `max_tables` parameter (max 500) to limit output for large databases
+- **Relationship tracking**: Automatically includes foreign key relationships (set `include_relationships: false` to disable)
+- **Formatted output**: Uses markdown headings for clear hierarchy, number formatting with thousands separators
+- **Foreign key details**: Shows FK targets inline per column and in dedicated relationships section
 
 #### Schema-Aware RAG Context Pack
 - Purpose-built for embeddings: returns a `context_text` block plus structured `tables` and `relationships` so agents can self-orient without pulling a full ERD.

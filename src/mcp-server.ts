@@ -44,13 +44,21 @@ const TOOLS: Tool[] = [
   {
     name: "get_database_summary",
     description:
-      "📊 Returns a high-level overview of the database including all tables, their columns, data types, and row counts. RECOMMENDED: Use this first when exploring a new database to understand its structure quickly. Optimized for AI context with concise formatting.",
+      "📊 Returns a high-level overview of the database including all tables, their columns, data types, row counts, and relationships. RECOMMENDED: Use this first when exploring a new database to understand its structure quickly. Features: database overview, per-table breakdown with primary keys, columns with nullable info and foreign key references, optional relationship summary, and configurable table limits.",
     inputSchema: {
       type: "object",
       properties: {
         database: {
           type: "string",
           description: "Optional: specific database name",
+        },
+        max_tables: {
+          type: "number",
+          description: "Optional: maximum number of tables to include (default: all tables, max 500)",
+        },
+        include_relationships: {
+          type: "boolean",
+          description: "Optional: include foreign key relationships section (default: true)",
         },
       },
     },
@@ -3531,7 +3539,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
       case "get_database_summary":
         result = await mysqlMCP.getDatabaseSummary(
-          (args || {}) as { database?: string },
+          (args || {}) as { 
+            database?: string;
+            max_tables?: number;
+            include_relationships?: boolean;
+          },
         );
         break;
 
