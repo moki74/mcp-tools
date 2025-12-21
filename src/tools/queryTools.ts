@@ -1,6 +1,5 @@
 import DatabaseConnection from "../db/connection";
 import SecurityLayer from "../security/securityLayer";
-import { validateRunQuery } from "../validation/schemas";
 import {
   QueryOptimizer,
   QueryHints,
@@ -21,7 +20,7 @@ export class QueryTools {
   /**
    * Execute a safe read-only SELECT query with optional optimizer hints
    */
-  async runQuery(queryParams: {
+  async runSelectQuery(queryParams: {
     query: string;
     params?: any[];
     hints?: QueryHints;
@@ -37,14 +36,6 @@ export class QueryTools {
     estimated_cost?: string;
     message?: string;
   }> {
-    // Validate input schema
-    if (!validateRunQuery(queryParams)) {
-      return {
-        status: "error",
-        error: "Invalid parameters: " + JSON.stringify(validateRunQuery.errors),
-      };
-    }
-
     try {
       const { query, params = [], hints, useCache = true } = queryParams;
 
@@ -69,7 +60,7 @@ export class QueryTools {
         return {
           status: "error",
           error:
-            "Only SELECT queries are allowed with runQuery. Use executeSql for other operations.",
+            "Only SELECT queries are allowed with run_select_query. Use execute_write_query for other operations.",
         };
       }
 
@@ -165,24 +156,16 @@ export class QueryTools {
    * Execute write operations (INSERT, UPDATE, DELETE) with validation
    * Note: DDL operations are blocked by the security layer for safety
    */
-  async executeSql(queryParams: { query: string; params?: any[] }): Promise<{
+  async executeWriteQuery(queryParams: { query: string; params?: any[] }): Promise<{
     status: string;
     data?: any;
     error?: string;
   }> {
-    // Validate input schema
-    if (!validateRunQuery(queryParams)) {
-      return {
-        status: "error",
-        error: "Invalid parameters: " + JSON.stringify(validateRunQuery.errors),
-      };
-    }
-
     try {
       const { query, params = [] } = queryParams;
 
       // Validate query using security layer
-      // Pass true for bypassDangerousCheck since this is executeSql (requires 'execute' permission)
+      // Pass true for bypassDangerousCheck since this is executeWriteQuery (requires 'execute' permission)
       const queryValidation = this.security.validateQuery(query, true);
       if (!queryValidation.valid) {
         return {
@@ -191,12 +174,12 @@ export class QueryTools {
         };
       }
 
-      // Ensure it's not a SELECT query (use runQuery for that)
+      // Ensure it's not a SELECT query (use runSelectQuery for that)
       if (queryValidation.queryType === "SELECT") {
         return {
           status: "error",
           error:
-            "SELECT queries should use runQuery method instead of executeSql.",
+            "SELECT queries should use run_select_query method instead of execute_write_query.",
         };
       }
 

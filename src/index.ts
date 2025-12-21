@@ -218,14 +218,14 @@ export class MySQLMCP {
   }
 
   // Query Tools
-  async runQuery(params: {
+  async runSelectQuery(params: {
     query: string;
     params?: any[];
     hints?: any;
     useCache?: boolean;
     dry_run?: boolean;
   }) {
-    const check = this.checkToolEnabled("runQuery");
+    const check = this.checkToolEnabled("runSelectQuery");
     if (!check.enabled) {
       return { status: "error", error: check.error };
     }
@@ -235,14 +235,14 @@ export class MySQLMCP {
       return {
         status: "error",
         error:
-          "Only SELECT queries are allowed with runQuery. Use executeSql for other operations.",
+          "Only SELECT queries are allowed with run_select_query. Use execute_write_query for other operations.",
       };
     }
-    return await this.queryTools.runQuery(params);
+    return await this.queryTools.runSelectQuery(params);
   }
 
-  async executeSql(params: { query: string; params?: any[] }) {
-    const check = this.checkToolEnabled("executeSql");
+  async executeWriteQuery(params: { query: string; params?: any[] }) {
+    const check = this.checkToolEnabled("executeWriteQuery");
     if (!check.enabled) {
       return { status: "error", error: check.error };
     }
@@ -254,11 +254,11 @@ export class MySQLMCP {
         return {
           status: "error",
           error:
-            'DDL operations (DROP, TRUNCATE, ALTER, CREATE) require the "ddl" permission. Use executeDdl tool or add "ddl" to permissions.',
+            'DDL operations (DROP, TRUNCATE, ALTER, CREATE) require the "ddl" permission. Use execute_ddl tool or add "ddl" to permissions.',
         };
       }
     }
-    return await this.queryTools.executeSql(params);
+    return await this.queryTools.executeWriteQuery(params);
   }
 
   // Analysis Tools
@@ -407,7 +407,7 @@ export class MySQLMCP {
     query: string;
     params?: any[];
   }) {
-    const check = this.checkToolEnabled("executeSql"); // Use executeSql permission for transaction queries
+    const check = this.checkToolEnabled("executeWriteQuery"); // Use executeWriteQuery permission for transaction queries
     if (!check.enabled) {
       return { status: "error", error: check.error };
     }

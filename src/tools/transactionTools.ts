@@ -148,7 +148,7 @@ export class TransactionTools {
       }
 
       // SECURITY VALIDATION: Check if user has execute permission
-      const hasExecutePermission = this.security.isToolEnabled("executeSql");
+      const hasExecutePermission = this.security.isToolEnabled("executeWriteQuery");
 
       // SECURITY VALIDATION: Validate the query before execution
       const queryValidation = this.security.validateQuery(

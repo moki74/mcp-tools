@@ -1,6 +1,6 @@
 # MySQL MCP Server - Detailed Documentation
 
-**Last Updated:** 2025-12-19 18:45:00
+**Last Updated:** 2025-12-21 17:00:00
 
 This file contains detailed documentation for all features of the MySQL MCP Server. For quick start and basic information, see [README.md](README.md).
 
@@ -9,7 +9,7 @@ This file contains detailed documentation for all features of the MySQL MCP Serv
 ## Table of Contents
 
 1. [Setup & Configuration (Extended)](#setup--configuration-extended) - Permissions + Categories
-2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 145 tools organized by category
+2. [🔧 Complete Tools Reference](#🔧-complete-tools-reference) - All 103 tools organized by category
 3. [DDL Operations](#🏗️-ddl-operations)
 4. [Data Export Tools](#📤-data-export-tools)
 5. [Data Import Tools](#📥-data-import-tools)
@@ -131,7 +131,7 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 **Layer 1 (Permissions)**: Allows `list`, `read`, `utility` operations
 **Layer 2 (Categories)**: Further restricts to `database_discovery` and `performance_monitoring` tools
 
-**Enabled tools**: `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`, `get_performance_metrics`, `get_slow_queries`, etc.
+**Enabled tools**: `list_databases`, `list_tables`, `read_table_schema`, `get_all_tables_relationships`, `get_performance_metrics`, `get_slow_queries`, etc.
 
 **Disabled tools**:
 - `read_records` - Has `read` permission but category is `crud_operations` (not allowed)
@@ -144,11 +144,11 @@ Use both 2nd argument (permissions) and 3rd argument (categories):
 | Permission | Operations Allowed | Example Tools |
 |------------|-------------------|---------------|
 | `list` | List/discover database objects | `list_databases`, `list_tables`, `list_views` |
-| `read` | Read data from tables | `read_records`, `run_query` |
+| `read` | Read data from tables | `read_records`, `run_select_query` |
 | `create` | Insert new records | `create_record`, `bulk_insert` |
 | `update` | Update existing records | `update_record`, `bulk_update` |
 | `delete` | Delete records | `delete_record`, `bulk_delete` |
-| `execute` | Execute custom SQL | `execute_sql`, `run_query` |
+| `execute` | Execute custom SQL | `execute_write_query` |
 | `ddl` | Schema changes | `create_table`, `alter_table`, `drop_table` |
 | `utility` | Utility operations | `test_connection`, `analyze_table` |
 | `transaction` | Transaction management | `begin_transaction`, `commit_transaction` |
@@ -210,7 +210,7 @@ This section provides a comprehensive reference of all 145 available tools organ
 | `list_databases` | Lists all databases on the MySQL server |
 | `list_tables` | Lists all tables in the current/specified database |
 | `read_table_schema` | Gets detailed schema (columns, types, keys, indexes) |
-| `get_table_relationships` | Discovers foreign key relationships |
+| `get_all_tables_relationships` | Gets all table relationships efficiently in one query |
 | `get_all_tables_relationships` | Gets foreign key relationships for ALL tables in a single call with in-memory processing |
 
 ### Data Operations - CRUD
@@ -234,8 +234,8 @@ This section provides a comprehensive reference of all 145 available tools organ
 
 | Tool | Description |
 |------|-------------|
-| `run_query` | Execute read-only SELECT queries |
-| `execute_sql` | Execute write operations (INSERT, UPDATE, DELETE, or DDL) |
+| `run_select_query` | Execute read-only SELECT queries |
+| `execute_write_query` | Execute write operations (INSERT, UPDATE, DELETE, or DDL) |
 
 ### Schema Management - DDL
 
@@ -3604,7 +3604,7 @@ Create a business glossary from database column names with auto-generated descri
 
 **User:** *"Show me the total number of orders per user for the last 30 days"*
 
-**AI uses `run_query`:**
+**AI uses `run_select_query`:**
 - Constructs JOIN query
 - Applies date filter
 - Groups by user
@@ -3891,12 +3891,12 @@ Parameters:
 
 Query logs are now included in responses from **ALL 30 tools**:
 
-✅ **Database Discovery** - `list_databases`, `list_tables`, `read_table_schema`, `get_table_relationships`, `get_all_tables_relationships`
+✅ **Database Discovery** - `list_databases`, `list_tables`, `read_table_schema`, `get_all_tables_relationships`
 ✅ **Data Operations** - `create_record`, `read_records`, `update_record`, `delete_record`
 ✅ **Bulk Operations** - `bulk_insert`, `bulk_update`, `bulk_delete`
-✅ **Custom Queries** - `run_query`, `execute_sql`
+✅ **Custom Queries** - `run_select_query`, `execute_write_query`
 ✅ **Schema Management** - `create_table`, `alter_table`, `drop_table`, `execute_ddl`
-✅ **Utilities** - `get_table_relationships`
+✅ **Utilities** - `get_all_tables_relationships`
 ✅ **Transactions** - `execute_in_transaction`
 ✅ **Stored Procedures** - `list_stored_procedures`, `get_stored_procedure_info`, `execute_stored_procedure`, etc.
 ✅ **Data Export** - `export_table_to_csv`, `export_query_to_csv`
@@ -3920,8 +3920,8 @@ Query logs are valuable for:
 ### Tools with Query Logging
 
 All tools that execute queries include logs:
-- `run_query` - SELECT query execution
-- `executeSql` - Write operations (INSERT, UPDATE, DELETE)
+- `run_select_query` - SELECT query execution
+- `execute_write_query` - Write operations (INSERT, UPDATE, DELETE)
 - `create_record` - Single record insertion
 - `read_records` - Record querying with filters
 - `update_record` - Record updates
@@ -4025,7 +4025,7 @@ console.log(`Query log memory usage: ~${estimatedMemory} KB`);
 
 - ✅ **Parameterized Queries** - All queries use prepared statements (SQL injection protection)
 - ✅ **Permission-Based Access** - Fine-grained control over operations
-- ✅ **Read-Only Validation** - `run_query` enforces SELECT-only operations
+- ✅ **Read-Only Validation** - `run_select_query` enforces SELECT-only operations
 - ✅ **DDL Gating** - Schema changes require explicit `ddl` permission
 - ✅ **Condition Requirements** - DELETE operations must include WHERE conditions
 - ✅ **Input Validation** - All inputs validated with JSON schemas
@@ -4145,7 +4145,7 @@ Returns:
 
 - **SELECT queries only**: Only SELECT queries are cached
 - **Automatic invalidation**: INSERT, UPDATE, DELETE operations automatically invalidate related cache entries
-- **Per-query control**: Use `useCache: false` in `run_query` to bypass cache for specific queries
+- **Per-query control**: Use `useCache: false` in `run_select_query` to bypass cache for specific queries
 
 ---
 
@@ -4161,11 +4161,11 @@ The MySQL MCP server provides advanced query optimization tools that help you im
 
 ### Using Optimizer Hints
 
-When running queries with `run_query`, you can include optimizer hints:
+When running queries with `run_select_query`, you can include optimizer hints:
 
 ```json
 {
-  "tool": "run_query",
+  "tool": "run_select_query",
   "arguments": {
     "query": "SELECT * FROM orders WHERE customer_id = ?",
     "params": [123],

@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # AGENTS Development Guidelines
 
 - This project uses **MySQL MCP** with the latest stable version of **Node.js**.

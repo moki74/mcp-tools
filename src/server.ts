@@ -83,7 +83,7 @@ const sanitizeParams = (req: Request, res: Response, next: NextFunction) => {
   if (req.params.id) {
     req.params.id = sanitizeFieldName(req.params.id);
   }
-  
+
   // Sanitize query parameters
   if (req.query.id_field) {
     req.query.id_field = sanitizeFieldName(req.query.id_field as string);
@@ -91,12 +91,12 @@ const sanitizeParams = (req: Request, res: Response, next: NextFunction) => {
   if (req.query.sort_by) {
     req.query.sort_by = sanitizeFieldName(req.query.sort_by as string);
   }
-  
+
   // Sanitize request body
   if (req.body.query) {
     req.body.query = sanitizeQuery(req.body.query);
   }
-  
+
   next();
 };
 
@@ -118,7 +118,7 @@ const requestSizeLimit = (maxSize: number) => {
 
 // Error handling middleware
 const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  logger.error(`${err.name}: ${err.message}`, { 
+  logger.error(`${err.name}: ${err.message}`, {
     path: req.path,
     method: req.method,
     body: req.body,
@@ -146,9 +146,9 @@ app.get('/features', (req: Request, res: Response) => {
     res.status(200).json(featureStatus);
   } catch (error) {
     logger.error('Error getting feature status', { error });
-    res.status(500).json({ 
-      status: 'error', 
-      error: 'Failed to retrieve feature configuration status' 
+    res.status(500).json({
+      status: 'error',
+      error: 'Failed to retrieve feature configuration status'
     });
   }
 });
@@ -195,12 +195,12 @@ apiRouter.post(
     try {
       const { tableName } = req.params;
       const { data } = req.body;
-      
+
       const result = await mcp.createRecord({
         table_name: tableName,
         data
       });
-      
+
       res.status(201).json(result);
     } catch (error) {
       next(error);
@@ -212,7 +212,7 @@ apiRouter.get('/tables/:tableName/records', async (req: Request, res: Response, 
   try {
     const { tableName } = req.params;
     const { filters, limit, offset, sort_by, sort_direction } = req.query;
-    
+
     // Validate and parse filters
     let parsedFilters;
     if (filters) {
@@ -227,7 +227,7 @@ apiRouter.get('/tables/:tableName/records', async (req: Request, res: Response, 
         });
       }
     }
-    
+
     // Validate the complete request
     const validation = validateReadRecords({
       table_name: tableName,
@@ -241,7 +241,7 @@ apiRouter.get('/tables/:tableName/records', async (req: Request, res: Response, 
         direction: (sort_direction as string)?.toLowerCase() === 'desc' ? 'desc' : 'asc'
       } : undefined
     });
-    
+
     if (!validation.valid) {
       return res.status(400).json({
         error: {
@@ -251,7 +251,7 @@ apiRouter.get('/tables/:tableName/records', async (req: Request, res: Response, 
         }
       });
     }
-    
+
     const result = await mcp.readRecords({
       table_name: tableName,
       filters: parsedFilters,
@@ -264,7 +264,7 @@ apiRouter.get('/tables/:tableName/records', async (req: Request, res: Response, 
         direction: (sort_direction as string)?.toLowerCase() === 'desc' ? 'desc' : 'asc'
       } : undefined
     });
-    
+
     res.json(result);
   } catch (error) {
     next(error);
@@ -283,13 +283,13 @@ apiRouter.put(
     try {
       const { tableName, id } = req.params;
       const { data, id_field } = req.body;
-      
+
       const result = await mcp.updateRecord({
         table_name: tableName,
         data,
         conditions: [{ field: id_field || 'id', operator: '=', value: id }]
       });
-      
+
       res.json(result);
     } catch (error) {
       next(error);
@@ -307,12 +307,12 @@ apiRouter.delete(
     try {
       const { tableName, id } = req.params;
       const { id_field } = req.query;
-      
+
       const result = await mcp.deleteRecord({
         table_name: tableName,
         conditions: [{ field: id_field as string || 'id', operator: '=', value: id }]
       });
-      
+
       res.json(result);
     } catch (error) {
       next(error);
@@ -328,12 +328,12 @@ apiRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { query, params } = req.body;
-      
-      const result = await mcp.runQuery({
+
+      const result = await mcp.runSelectQuery({
         query,
         params: params || []
       });
-      
+
       res.json(result);
     } catch (error) {
       next(error);
@@ -348,12 +348,12 @@ apiRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { query, params } = req.body;
-      
-      const result = await mcp.executeSql({
+
+      const result = await mcp.executeWriteQuery({
         query,
         params: params || []
       });
-      
+
       res.json(result);
     } catch (error) {
       next(error);

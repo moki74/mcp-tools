@@ -5,6 +5,45 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.28.0] - 2025-12-21
+
+### Changed
+- **[BREAKING]** Removed `get_table_relationships` tool - use `get_all_tables_relationships` instead for better performance
+  - `get_all_tables_relationships` retrieves ALL table relationships in a single efficient query with in-memory processing
+  - Much faster than calling `get_table_relationships` repeatedly for each table
+- **Enhanced tool descriptions** for improved LLM understanding across 40+ critical tools:
+  - Added visual indicators (emojis) for tool categories: 🤖 AI-powered, ⚡ Performance, 🔒 Security, 📊 Analytics, etc.
+  - Clarified when to use each tool vs similar alternatives
+  - Added use-case context and examples in descriptions
+  - Highlighted AI-first tools for natural language operations
+  - Improved consistency in description length and detail level
+- Updated total tool count from 104 to 103 across all documentation
+
+### Fixed
+- Removed duplicate `get_all_tables_relationships` entry in DOCUMENTATIONS.md
+- Corrected references to deprecated `get_table_relationships` in documentation examples
+
+## [1.27.1] - 2025-12-21
+
+### Removed
+- **Deprecated Tools**: Removed legacy `runQuery` and `executeSql` tools completely
+  - These tools were replaced by `run_select_query` and `execute_write_query` in v1.27.0
+  - Removed from feature configuration mappings
+  - Removed validation schemas
+  - Updated all internal references to use new tool names
+
+### Changed
+- Updated transaction tools to use `executeWriteQuery` permission check instead of deprecated `executeSql`
+
+## [1.27.0] - 2025-12-21
+
+### Changed
+- **Renamed Tools for Clarity**:
+  - `run_query` -> `run_select_query`
+  - `execute_sql` -> `execute_write_query`
+- **Updated Error Messages**: Error messages now explicitly reference the new tool names to guide users/LLMs to the correct tool for the job.
+- **Updated Documentation**: Updated README.md and DOCUMENTATIONS.md to reflect the new tool names and configuration examples.
+
 ## [1.26.2] - 2025-12-19
 
 ### Fixed

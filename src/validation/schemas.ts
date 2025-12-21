@@ -173,34 +173,8 @@ const filterConditionSchema = {
   additionalProperties: false
 };
 
-export const runQuerySchema = {
-  type: 'object',
-  required: ['query'],
-  properties: {
-    query: { type: 'string' },
-    params: { 
-      type: 'array',
-      items: {},
-      nullable: true
-    }
-  },
-  additionalProperties: false
-};
-
-// SQL execution schema
-export const executeSqlSchema = {
-  type: 'object',
-  required: ['query'],
-  properties: {
-    query: { type: 'string' },
-    params: { 
-      type: 'array',
-      items: {},
-      nullable: true
-    }
-  },
-  additionalProperties: false
-};
+// Note: runQuerySchema and executeSqlSchema have been removed
+// Use runSelectQuerySchema and executeWriteQuerySchema instead
 
 // DDL schemas
 export const createTableSchema = {
@@ -574,8 +548,6 @@ export const validateDeleteRecord = ajv.compile(deleteRecordSchema);
 export const validateBulkInsert = ajv.compile(bulkInsertSchema);
 export const validateBulkUpdate = ajv.compile(bulkUpdateSchema);
 export const validateBulkDelete = ajv.compile(bulkDeleteSchema);
-export const validateRunQuery = ajv.compile(runQuerySchema);
-export const validateExecuteSql = ajv.compile(executeSqlSchema);
 export const validateCreateTable = ajv.compile(createTableSchema);
 export const validateAlterTable = ajv.compile(alterTableSchema);
 export const validateDropTable = ajv.compile(dropTableSchema);

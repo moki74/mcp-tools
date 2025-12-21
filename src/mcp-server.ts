@@ -22,7 +22,7 @@ let mysqlMCP: MySQLMCP;
 const TOOLS: Tool[] = [
   {
     name: "list_databases",
-    description: "Lists all databases available on the MySQL server.",
+    description: "Lists all databases available on the MySQL server. Use this to discover what databases exist before querying them.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -30,7 +30,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "list_tables",
-    description: "Lists all tables in the connected MySQL database.",
+    description: "Lists all tables in the connected database. Use this as the first step when exploring an unfamiliar database to see available tables.",
     inputSchema: {
       type: "object",
       properties: {
@@ -44,7 +44,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_database_summary",
     description:
-      "Get a high-level summary of the database (tables, columns, row counts) optimized for AI context.",
+      "📊 Returns a high-level overview of the database including all tables, their columns, data types, and row counts. RECOMMENDED: Use this first when exploring a new database to understand its structure quickly. Optimized for AI context with concise formatting.",
     inputSchema: {
       type: "object",
       properties: {
@@ -58,7 +58,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_schema_erd",
     description:
-      "Get a Mermaid.js ER diagram string representing the database schema and relationships.",
+      "📈 Generates a visual Mermaid.js ER diagram showing tables and their relationships. Perfect for visualizing database structure and foreign key connections. Use when users ask to 'visualize' or 'diagram' the database.",
     inputSchema: {
       type: "object",
       properties: {
@@ -72,7 +72,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_schema_rag_context",
     description:
-      "Return a compact schema-aware context pack (tables, PK/FK, columns, row estimates) optimized for RAG prompts.",
+      "🎯 AI-OPTIMIZED: Returns ultra-compact schema information (tables, columns, keys, relationships, row estimates) designed specifically for LLM context windows. Use this when you need schema awareness but want to minimize token usage. Configurable limits for tables/columns.",
     inputSchema: {
       type: "object",
       properties: {
@@ -98,7 +98,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_column_statistics",
     description:
-      "Get detailed statistics for a specific column (min, max, avg, distinct counts, nulls).",
+      "Returns detailed statistics for a specific column: min/max values, average, distinct count, null percentage, and value distribution. Use to understand data quality and ranges in a column before writing queries.",
     inputSchema: {
       type: "object",
       properties: {
@@ -121,7 +121,7 @@ const TOOLS: Tool[] = [
   {
     name: "read_table_schema",
     description:
-      "Reads the schema of a specified table, including columns, types, keys, and indexes.",
+      "Returns complete schema definition for a table: columns, data types, constraints, keys, indexes, and defaults. Use when you need detailed structural information about a specific table.",
     inputSchema: {
       type: "object",
       properties: {
@@ -135,7 +135,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "create_record",
-    description: "Creates a new record in the specified table.",
+    description: "Inserts a single new record into a table. For inserting multiple records at once, use bulk_insert for better performance.",
     inputSchema: {
       type: "object",
       properties: {
@@ -154,7 +154,7 @@ const TOOLS: Tool[] = [
   {
     name: "read_records",
     description:
-      "Reads records from the specified table with optional filtering, pagination, and sorting.",
+      "Reads records from a table with built-in filtering, pagination, and sorting. Use this for simple data retrieval. For complex queries with JOINs or aggregations, use run_select_query instead.",
     inputSchema: {
       type: "object",
       properties: {
@@ -208,7 +208,7 @@ const TOOLS: Tool[] = [
   {
     name: "update_record",
     description:
-      "Updates existing records in the specified table based on conditions.",
+      "Updates records in a table based on specified conditions. For updating many records with different values, use bulk_update for better performance.",
     inputSchema: {
       type: "object",
       properties: {
@@ -244,7 +244,7 @@ const TOOLS: Tool[] = [
   {
     name: "delete_record",
     description:
-      "Deletes records from the specified table based on conditions.",
+      "Deletes records from a table based on specified conditions. Always requires conditions for safety (no WHERE-less deletes). For deleting multiple record sets, use bulk_delete.",
     inputSchema: {
       type: "object",
       properties: {
@@ -276,7 +276,7 @@ const TOOLS: Tool[] = [
   {
     name: "bulk_insert",
     description:
-      "Bulk insert multiple records into the specified table with batch processing for optimal performance.",
+      "⚡ PERFORMANCE: Inserts multiple records efficiently using batch processing. Handles 1000s of rows with automatic batching. Use this instead of create_record when inserting many records at once (10+ rows).",
     inputSchema: {
       type: "object",
       properties: {
@@ -308,7 +308,7 @@ const TOOLS: Tool[] = [
   {
     name: "bulk_update",
     description:
-      "Bulk update multiple records with different conditions and data using batch processing.",
+      "⚡ PERFORMANCE: Updates multiple records with different values in batches. Each update can have unique conditions and data. Much faster than calling update_record repeatedly for multiple rows.",
     inputSchema: {
       type: "object",
       properties: {
@@ -373,7 +373,7 @@ const TOOLS: Tool[] = [
   {
     name: "bulk_delete",
     description:
-      "Bulk delete records based on multiple condition sets using batch processing.",
+      "⚡ PERFORMANCE: Deletes multiple sets of records efficiently in batches. Each condition set defines a separate delete operation. More efficient than calling delete_record multiple times.",
     inputSchema: {
       type: "object",
       properties: {
@@ -416,9 +416,9 @@ const TOOLS: Tool[] = [
     },
   },
   {
-    name: "run_query",
+    name: "run_select_query",
     description:
-      "⚡ USE THIS FOR SELECT QUERIES. Runs a read-only SQL SELECT query with optional parameters, optimizer hints, and caching support. ONLY SELECT statements are allowed - use execute_sql for INSERT/UPDATE/DELETE, use execute_ddl for CREATE/ALTER/DROP.",
+      "⚡ PRIMARY TOOL FOR SELECT QUERIES. Executes read-only SELECT statements with parameterization, optimizer hints, query caching, and dry-run mode. Supports complex queries with JOINs, subqueries, and aggregations. ⚠️ ONLY for SELECT - use execute_write_query for INSERT/UPDATE/DELETE, use execute_ddl for CREATE/ALTER/DROP.",
     inputSchema: {
       type: "object",
       properties: {
@@ -485,9 +485,9 @@ const TOOLS: Tool[] = [
     },
   },
   {
-    name: "execute_sql",
+    name: "execute_write_query",
     description:
-      '⚡ USE THIS FOR INSERT/UPDATE/DELETE. Executes a write SQL operation (INSERT, UPDATE, DELETE) with optional parameters. NOT for SELECT (use run_query), NOT for DDL (use execute_ddl for CREATE/ALTER/DROP/TRUNCATE/RENAME).',
+      '⚡ PRIMARY TOOL FOR INSERT/UPDATE/DELETE QUERIES. Executes data modification statements with parameterization support. Returns affected row count and execution details. ⚠️ NOT for SELECT (use run_select_query), NOT for DDL (use execute_ddl for CREATE/ALTER/DROP/TRUNCATE/RENAME).',
     inputSchema: {
       type: "object",
       properties: {
@@ -508,7 +508,7 @@ const TOOLS: Tool[] = [
   {
     name: "safe_export_table",
     description:
-      "Exports table data to CSV with enforced data masking rules to protect sensitive information.",
+      "🔒 SECURITY: Exports table data to CSV with automatic PII/sensitive data masking. Redacts emails, credit cards, passwords, etc. Use this instead of export_table_to_csv when handling sensitive data or sharing exports externally.",
     inputSchema: {
       type: "object",
       properties: {
@@ -536,7 +536,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "repair_query",
-    description: "Analyzes a SQL query (and optional error) to suggest repairs or optimizations using EXPLAIN and heuristics.",
+    description: "🔧 Diagnoses SQL query errors and suggests fixes. Analyzes syntax errors, missing columns/tables, and logic issues. Provide the query and optional error message to get repair recommendations. Use when a query fails or needs debugging.",
     inputSchema: {
       type: "object",
       properties: {
@@ -555,7 +555,7 @@ const TOOLS: Tool[] = [
   {
     name: "create_table",
     description:
-      'Creates a new table with the specified columns and indexes. Requires "ddl" permission.',
+      '🏗️ Creates a new table with columns, data types, constraints, and indexes. Simplified interface compared to raw DDL. Requires "ddl" permission.',
     inputSchema: {
       type: "object",
       properties: {
@@ -610,7 +610,7 @@ const TOOLS: Tool[] = [
   {
     name: "alter_table",
     description:
-      'Alters an existing table structure (add/drop/modify columns, add/drop indexes). Requires "ddl" permission.',
+      '🔧 Modifies existing table structure: add/drop/modify/rename columns, add/drop indexes. Supports multiple operations in one call. Requires "ddl" permission.',
     inputSchema: {
       type: "object",
       properties: {
@@ -655,7 +655,7 @@ const TOOLS: Tool[] = [
   {
     name: "drop_table",
     description:
-      'Drops (deletes) a table and all its data. Requires "ddl" permission. WARNING: This is irreversible!',
+      '🗑️ DESTRUCTIVE: Permanently deletes a table and ALL its data. Cannot be undone! Consider backup_table first. Requires "ddl" permission. ⚠️ WARNING: IRREVERSIBLE!',
     inputSchema: {
       type: "object",
       properties: {
@@ -674,7 +674,7 @@ const TOOLS: Tool[] = [
   {
     name: "execute_ddl",
     description:
-      '⚡ USE THIS FOR DDL ONLY (CREATE, ALTER, DROP, TRUNCATE, RENAME). NOT for SELECT (use run_query), NOT for INSERT/UPDATE/DELETE (use execute_sql). Requires "ddl" permission.',
+      '⚡ PRIMARY TOOL FOR DDL STATEMENTS. Executes schema modification queries: CREATE, ALTER, DROP, TRUNCATE, RENAME. Use for complex DDL that structured tools don\'t cover. ⚠️ NOT for SELECT (use run_select_query), NOT for INSERT/UPDATE/DELETE (use execute_write_query). Requires "ddl" permission.',
     inputSchema: {
       type: "object",
       properties: {
@@ -688,7 +688,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "describe_connection",
-    description: "Returns information about the current database connection.",
+    description: "Returns current database connection details: host, database name, user, port, and connection status. Use to verify which database you're connected to.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -697,7 +697,7 @@ const TOOLS: Tool[] = [
   {
     name: "read_changelog",
     description:
-      "Reads the changelog to see what features are new or changed.",
+      "Reads the MySQL MCP Server changelog to see version history, new features, bug fixes, and breaking changes. Useful for understanding tool capabilities and recent updates.",
     inputSchema: {
       type: "object",
       properties: {
@@ -715,7 +715,7 @@ const TOOLS: Tool[] = [
   {
     name: "test_connection",
     description:
-      "Tests the database connection and returns latency information.",
+      "Tests database connectivity and measures latency. Returns connection status and response time. Use to troubleshoot connection issues or check database availability.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -724,29 +724,15 @@ const TOOLS: Tool[] = [
   {
     name: "list_all_tools",
     description:
-      "Lists all available MCP tools with their definitions and server metadata.",
+      "📋 Returns complete catalog of all available tools with names, descriptions, parameters, and current permissions. Use to discover tool capabilities or when users ask 'what can you do?'.",
     inputSchema: {
       type: "object",
       properties: {},
     },
   },
   {
-    name: "get_table_relationships",
-    description: "Returns foreign key relationships for a specified table.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        table_name: {
-          type: "string",
-          description: "Name of the table to get relationships for",
-        },
-      },
-      required: ["table_name"],
-    },
-  },
-  {
     name: "get_all_tables_relationships",
-    description: "Gets all table foreign key relationships in one call with memory-efficient relationship mapping.",
+    description: "Gets ALL table foreign key relationships in the entire database in a single efficient query. Returns a comprehensive relationship map showing parent-child connections between all tables. Much faster than querying table-by-table.",
     inputSchema: {
       type: "object",
       properties: {
@@ -761,7 +747,7 @@ const TOOLS: Tool[] = [
   {
     name: "begin_transaction",
     description:
-      "Begins a new database transaction. Returns a transaction ID for subsequent operations.",
+      "🔄 Starts a new database transaction and returns a transaction ID. Use with commit_transaction or rollback_transaction to group multiple operations atomically. Essential for data consistency when multiple changes must succeed or fail together.",
     inputSchema: {
       type: "object",
       properties: {
@@ -775,7 +761,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "commit_transaction",
-    description: "Commits a transaction and makes all changes permanent.",
+    description: "✅ Commits an active transaction, making all changes permanent. Use after successful completion of all operations within a transaction started by begin_transaction.",
     inputSchema: {
       type: "object",
       properties: {
@@ -790,7 +776,7 @@ const TOOLS: Tool[] = [
   {
     name: "rollback_transaction",
     description:
-      "Rolls back a transaction and undoes all changes made within it.",
+      "↩️ Rolls back an active transaction, undoing ALL changes made within it. Use when an error occurs during transaction or when changes need to be cancelled.",
     inputSchema: {
       type: "object",
       properties: {
@@ -804,7 +790,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_transaction_status",
-    description: "Returns the status of all active transactions.",
+    description: "Shows all active transactions with their IDs, start times, and operation counts. Use to monitor transaction state or debug transaction issues.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -812,7 +798,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "execute_in_transaction",
-    description: "Executes a SQL query within an active transaction.",
+    description: "Executes a SQL query within an existing transaction context. The query becomes part of the transaction and will be committed or rolled back with it. Use after begin_transaction.",
     inputSchema: {
       type: "object",
       properties: {
@@ -984,7 +970,7 @@ const TOOLS: Tool[] = [
   {
     name: "export_table_to_csv",
     description:
-      "Export table data to CSV format with optional filtering, pagination, and sorting.",
+      "📄 Exports table data to CSV format with filtering, pagination, and sorting. For sensitive data, use safe_export_table instead which includes automatic data masking.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1041,7 +1027,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "export_query_to_csv",
-    description: "Export the results of a SELECT query to CSV format.",
+    description: "📄 Executes a SELECT query and exports results to CSV format. Supports complex queries with JOINs and aggregations. For sensitive data, consider using safe_export_table or adding manual data masking.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1066,7 +1052,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_cache_stats",
     description:
-      "Get query cache statistics including hit rate, size, and configuration.",
+      "📊 Returns query cache performance metrics: hit rate, miss rate, size, memory usage, and entry count. Use to monitor cache effectiveness and tune cache settings.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -1132,7 +1118,7 @@ const TOOLS: Tool[] = [
   {
     name: "analyze_query",
     description:
-      "Analyze a SQL query and get optimization suggestions including recommended indexes and hints.",
+      "🔍 Analyzes a SQL query using EXPLAIN and provides optimization suggestions: missing indexes, inefficient operations, cost estimates. Returns actionable recommendations. Use before running expensive queries.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1906,7 +1892,7 @@ const TOOLS: Tool[] = [
   {
     name: "truncate_table",
     description:
-      "Truncates a table (removes all rows quickly). Requires 'ddl' permission. WARNING: This is irreversible!",
+      "🗑️ DESTRUCTIVE: Removes ALL rows from a table instantly (faster than DELETE). Resets auto-increment counters. Cannot be undone! Consider backup_table first. Requires 'ddl' permission. ⚠️ WARNING: IRREVERSIBLE!",
     inputSchema: {
       type: "object",
       properties: {
@@ -2134,7 +2120,7 @@ const TOOLS: Tool[] = [
   {
     name: "backup_database",
     description:
-      "Backup entire database or selected tables to SQL dump format.",
+      "💾 Creates SQL dump backup of entire database or specific tables. Includes structure and optionally data. Returns backup as SQL text. Use before major schema changes or migrations.",
     inputSchema: {
       type: "object",
       properties: {
@@ -2838,7 +2824,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_performance_metrics",
     description:
-      "Get comprehensive MySQL performance metrics including query performance, connection stats, buffer pool metrics, and InnoDB statistics.",
+      "📊 COMPREHENSIVE MONITORING: Returns complete MySQL performance dashboard including query stats, connection pool, buffer pool efficiency, InnoDB metrics, and disk I/O. Use for performance troubleshooting or health checks.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -2979,7 +2965,7 @@ const TOOLS: Tool[] = [
   {
     name: "build_query_from_intent",
     description:
-      "Converts natural language to optimized SQL with context-aware query generation. Analyzes your intent and generates safe, optimized SQL queries with explanations.",
+      "🤖 AI-POWERED: Converts natural language descriptions into optimized SQL queries. Example: 'show me all users who registered last month' → SELECT query. Includes query explanation and safety checks. RECOMMENDED for when users describe what they want instead of writing SQL.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3013,7 +2999,7 @@ const TOOLS: Tool[] = [
   {
     name: "suggest_query_improvements",
     description:
-      "Analyzes a SQL query and suggests improvements for speed, memory, or readability. Identifies inefficient patterns and provides optimized alternatives.",
+      "🎯 AI-POWERED: Analyzes a SQL query and suggests optimizations for speed, memory usage, or readability. Identifies missing indexes, inefficient JOINs, subquery opportunities, and anti-patterns. Use when a query is slow or complex.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3040,7 +3026,7 @@ const TOOLS: Tool[] = [
   {
     name: "design_schema_from_requirements",
     description:
-      "Designs a database schema from natural language requirements. Returns a proposed schema spec and CREATE TABLE / CREATE INDEX statements (does not execute DDL).",
+      "🤖 AI-POWERED SCHEMA DESIGN: Converts business requirements into complete database schema. Input: 'I need a blog with users, posts, and comments' → Output: normalized table structures with relationships, indexes, and CREATE statements. Does NOT execute DDL automatically.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3096,7 +3082,7 @@ const TOOLS: Tool[] = [
   {
     name: "audit_database_security",
     description:
-      "Audits MySQL security configuration and (optionally) accounts/privileges using read-only inspection queries. Returns prioritized findings and recommendations.",
+      "🔒 AI-POWERED SECURITY AUDIT: Analyzes database security configuration, user privileges, password policies, and access patterns. Returns prioritized security risks with remediation steps. Read-only, safe to run anytime.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3120,7 +3106,7 @@ const TOOLS: Tool[] = [
   {
     name: "recommend_indexes",
     description:
-      "Analyzes real query patterns from performance_schema digests and suggests concrete CREATE INDEX statements. Uses heuristics to avoid duplicate/redundant indexes.",
+      "🎯 AI-POWERED INDEX RECOMMENDATIONS: Analyzes actual query patterns from performance_schema and suggests specific indexes to create. Identifies slow queries and missing indexes. Returns ready-to-execute CREATE INDEX statements. Avoids redundant indexes.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3158,7 +3144,7 @@ const TOOLS: Tool[] = [
   {
     name: "generate_test_data",
     description:
-      "Generates synthetic test data as SQL INSERT statements for a given table (does not execute). Attempts FK-aware value selection for referential integrity.",
+      "🤖 AI-POWERED DATA GENERATION: Creates realistic synthetic test data based on column names and types. Respects foreign key relationships. Returns INSERT statements (does not execute). Perfect for testing, demos, or development environments.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3212,7 +3198,7 @@ const TOOLS: Tool[] = [
   {
     name: "visualize_query",
     description:
-      "Creates a visual representation of a read-only SQL query as a Mermaid flowchart, based on EXPLAIN FORMAT=JSON and lightweight SQL parsing.",
+      "📊 AI-POWERED VISUALIZATION: Converts a SQL query into a visual Mermaid flowchart showing execution flow, table scans, joins, and filters. Based on EXPLAIN analysis. Helps understand complex query execution. Use when users ask to 'visualize' or 'explain' a query.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3296,7 +3282,7 @@ const TOOLS: Tool[] = [
   {
     name: "smart_search",
     description:
-      "Finds relevant tables, columns, data patterns, and relationships using semantic search. Essential for exploring large databases with hundreds of tables.",
+      "🔍 AI-POWERED SEARCH: Finds tables, columns, and data using semantic search. Example: search 'customer email' finds email columns, user tables, contact info, etc. Essential for exploring unfamiliar or large databases (100+ tables). Much smarter than simple name matching.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3394,7 +3380,7 @@ const TOOLS: Tool[] = [
   {
     name: "generate_documentation",
     description:
-      "Generates comprehensive database documentation with business glossary in Markdown, HTML, or JSON format. Includes schema, relationships, and example queries.",
+      "📝 AI-POWERED DOCUMENTATION: Generates comprehensive database documentation in Markdown, HTML, or JSON. Includes schema diagrams, table descriptions, relationships, and example queries. Perfect for onboarding or creating data catalogs.",
     inputSchema: {
       type: "object",
       properties: {
@@ -3487,7 +3473,7 @@ const TOOLS: Tool[] = [
 const server = new Server(
   {
     name: "mysql-mcp-server",
-    version: "1.17.0",
+    version: "1.28.0",
   },
   {
     capabilities: {
@@ -3651,8 +3637,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         break;
 
       // Query Tools
-      case "run_query":
-        result = await mysqlMCP.runQuery(
+      case "run_select_query":
+        result = await mysqlMCP.runSelectQuery(
           (args || {}) as {
             query: string;
             params?: any[];
@@ -3663,8 +3649,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         );
         break;
 
-      case "execute_sql":
-        result = await mysqlMCP.executeSql(
+      case "execute_write_query":
+        result = await mysqlMCP.executeWriteQuery(
           (args || {}) as { query: string; params?: any[] },
         );
         break;
@@ -3701,12 +3687,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       case "read_changelog":
         result = await mysqlMCP.readChangelog(
           (args || {}) as { version?: string; limit?: number },
-        );
-        break;
-
-      case "get_table_relationships":
-        result = await mysqlMCP.getTableRelationships(
-          (args || {}) as { table_name: string },
         );
         break;
 

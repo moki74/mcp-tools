@@ -65,7 +65,7 @@ export class AiTools {
         // 3. Run EXPLAIN
         try {
             const explainQuery = `EXPLAIN FORMAT=JSON ${query}`;
-            // Note: We use the raw connection or executeSql equivalent.
+            // Note: We use the raw connection or executeWriteQuery equivalent.
             // But EXPLAIN is safe-ish if the inner query is safe.
             // validation passed, so we try EXPLAIN.
             const explainResult = await this.db.query<any[]>(explainQuery);

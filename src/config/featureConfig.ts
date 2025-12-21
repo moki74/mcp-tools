@@ -78,8 +78,8 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   bulkDelete: ToolCategory.DELETE,
 
   // Query tools
-  runQuery: ToolCategory.READ,
-  executeSql: ToolCategory.EXECUTE,
+  runSelectQuery: ToolCategory.READ,
+  executeWriteQuery: ToolCategory.EXECUTE,
 
   // DDL tools
   createTable: ToolCategory.DDL,
@@ -261,8 +261,8 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   bulkDelete: DocCategory.BULK_OPERATIONS,
 
   // Custom Queries
-  runQuery: DocCategory.CUSTOM_QUERIES,
-  executeSql: DocCategory.CUSTOM_QUERIES,
+  runSelectQuery: DocCategory.CUSTOM_QUERIES,
+  executeWriteQuery: DocCategory.CUSTOM_QUERIES,
 
   // Schema Management (DDL)
   createTable: DocCategory.SCHEMA_MANAGEMENT,

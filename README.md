@@ -4,7 +4,7 @@
 
 **A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
-**Last Updated:** 2025-12-19 19:09:00
+**Last Updated:** 2025-12-21 17:00:00
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mysql-mcp)](https://www.npmjs.com/package/@berthojoris/mysql-mcp)
@@ -173,7 +173,7 @@ Alternative approach using environment variables instead of connection string:
         "DB_USER": "root",
         "DB_PASSWORD": "your_password",
         "DB_NAME": "your_database",
-        "MCP_PERMISSIONS": "list,read,utility"
+        "MCP_PERMISSIONS": "list,read,utility,create,update,delete"
       }
     }
   }
@@ -194,8 +194,8 @@ Alternative approach using environment variables instead of connection string:
         "DB_USER": "root",
         "DB_PASSWORD": "your_password",
         "DB_NAME": "your_database",
-        "MCP_PERMISSIONS": "list,read,utility",
-        "MCP_CATEGORIES": "database_discovery,performance_monitoring"
+        "MCP_PERMISSIONS": "list,read,utility,create,update,delete",
+        "MCP_CATEGORIES": "database_discovery,performance_monitoring,custom_queries"
       }
     }
   }
@@ -243,7 +243,7 @@ Use documentation categories to fine-tune which tools are exposed (Layer 2):
 | `database_discovery` | Explore databases, tables, and schema structure | `get_all_tables_relationships, get_table_relationships, list_databases, list_tables, read_table_schema` |
 | `crud_operations` | Create, read, update, delete operations on data | `create_record, delete_record, read_records, update_record` |
 | `bulk_operations` | High-performance batch processing operations | `bulk_delete, bulk_insert, bulk_update` |
-| `custom_queries` | Execute custom SQL queries and advanced operations | `execute_sql, run_query` |
+| `custom_queries` | Execute custom SQL queries and advanced operations | `execute_write_query, run_select_query` |
 | `schema_management` | Manage database schema, tables, and structure | `alter_table, create_table, drop_table, execute_ddl` |
 | `utilities` | Database utilities, diagnostics, and helper functions | `describe_connection, export_query_to_csv, export_table_to_csv, list_all_tools, read_changelog, test_connection` |
 | `transaction_management` | Handle ACID transactions and rollback operations | `begin_transaction, commit_transaction, execute_in_transaction, get_transaction_status, rollback_transaction` |
