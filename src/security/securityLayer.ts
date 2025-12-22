@@ -240,10 +240,10 @@ export class SecurityLayer {
 
     // Check for comment-like sequences that could be used for injection
     const suspiciousPatterns = [
-      /\/*/,   // Potential comment start
-      /\*\//,  // Potential comment end
-      /--/,    // Potential comment
-      /#/,     // Potential comment
+      /\/\*/,   // Potential comment start (literal /*)
+      /\*\//,   // Potential comment end (literal */)
+      /--\s/,   // Potential comment (-- followed by space, not -- in dates)
+      /#/,      // Potential comment
     ];
 
     for (const pattern of suspiciousPatterns) {
