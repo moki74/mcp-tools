@@ -1,8 +1,8 @@
 # MySQL MCP Server - Documentation
 
-**Last Updated:** 2025-12-22 15:45:00  
-**Version:** 1.30.0  
-**Total Tools:** 144
+**Last Updated:** 2025-12-23 12:00:00  
+**Version:** 1.31.0  
+**Total Tools:** 150
 
 Comprehensive documentation for the MySQL MCP Server. For quick start, see [README.md](README.md).
 
@@ -124,11 +124,17 @@ Tool enabled = (Has Permission) AND (Has Category OR No categories specified)
 - `drop_table` - Delete tables
 - `execute_ddl` - Execute raw DDL
 
-### 6. Index Management (4 tools)
+### 6. Index Management (10 tools)
 - `list_indexes` - List table indexes
 - `get_index_info` - Get index details
 - `create_index` - Create indexes
 - `drop_index` - Drop indexes
+- `create_fulltext_index` - Create FULLTEXT indexes for text search
+- `fulltext_search` - Perform full-text search with MATCH AGAINST
+- `get_fulltext_info` - Get FULLTEXT index information
+- `drop_fulltext_index` - Drop FULLTEXT indexes
+- `get_fulltext_stats` - Get FULLTEXT index statistics
+- `optimize_fulltext` - Optimize FULLTEXT indexes
 
 ### 7. Constraint Management (7 tools)
 - `list_foreign_keys` - List foreign keys

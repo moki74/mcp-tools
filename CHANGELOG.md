@@ -5,6 +5,21 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] - 2025-12-23
+
+### Added
+- **Full-Text Search Management** - New category with 6 powerful tools for text search:
+  - `create_fulltext_index` - Create FULLTEXT indexes on text columns with support for ngram and mecab parsers (CJK languages)
+  - `fulltext_search` - Perform full-text search using MATCH AGAINST with multiple search modes (natural language, boolean, query expansion)
+  - `get_fulltext_info` - Retrieve FULLTEXT index information including index names, columns, and parser details
+  - `drop_fulltext_index` - Remove FULLTEXT indexes from tables
+  - `get_fulltext_stats` - Get statistics for FULLTEXT indexes (document count, size, key length)
+  - `optimize_fulltext` - Optimize tables to update FULLTEXT index statistics and reclaim space
+
+### Changed
+- Updated Index Management category from 4 to 10 tools (added 6 full-text search tools)
+- Updated total tool count from 144 to 150
+
 ## [1.30.0] - 2025-12-22
 
 ### Fixed

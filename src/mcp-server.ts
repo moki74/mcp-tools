@@ -3475,6 +3475,182 @@ const TOOLS: Tool[] = [
       },
     },
   },
+  {
+    name: "create_fulltext_index",
+    description:
+      "Creates a FULLTEXT index on one or more text columns in a table. Supports ngram and mecab parsers for advanced text search capabilities (useful for languages like Chinese, Japanese, Korean). Use this to enable full-text search on text columns.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to create the fulltext index on",
+        },
+        columns: {
+          type: "array",
+          items: { type: "string" },
+          description: "Array of column names to include in the fulltext index",
+        },
+        index_name: {
+          type: "string",
+          description: "Optional: custom name for the index (default: auto-generated)",
+        },
+        parser: {
+          type: "string",
+          enum: ["ngram", "mecab"],
+          description: "Optional: parser for CJK languages (ngram or mecab)",
+        },
+        ngram_token_size: {
+          type: "number",
+          description: "Optional: token size for ngram parser (default: 2)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name", "columns"],
+    },
+  },
+  {
+    name: "fulltext_search",
+    description:
+      "Performs full-text search on a table using MATCH AGAINST clause. Supports natural language, boolean mode, and query expansion. Returns results ordered by relevance score. Use this for efficient text search on indexed columns.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to search",
+        },
+        search_term: {
+          type: "string",
+          description: "Search term or query",
+        },
+        columns: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional: array of column names to search (default: all fulltext indexed columns)",
+        },
+        mode: {
+          type: "string",
+          enum: [
+            "natural_language",
+            "natural_language_with_query_expansion",
+            "boolean",
+            "query_expansion",
+          ],
+          description: "Search mode (default: natural_language)",
+        },
+        limit: {
+          type: "number",
+          description: "Optional: maximum number of results (default: 100)",
+        },
+        offset: {
+          type: "number",
+          description: "Optional: offset for pagination (default: 0)",
+        },
+        order_by: {
+          type: "string",
+          description: "Optional: column to order by (default: relevance_score)",
+        },
+        order_direction: {
+          type: "string",
+          enum: ["ASC", "DESC"],
+          description: "Optional: order direction (default: DESC)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name", "search_term"],
+    },
+  },
+  {
+    name: "get_fulltext_info",
+    description:
+      "Retrieves information about FULLTEXT indexes on a table including index names, columns, and parser details. Use this to discover what fulltext indexes exist on a table.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table",
+        },
+        index_name: {
+          type: "string",
+          description: "Optional: specific index name to query (default: all indexes)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  {
+    name: "drop_fulltext_index",
+    description:
+      "Drops a FULLTEXT index from a table. Use this to remove a fulltext index that is no longer needed.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table",
+        },
+        index_name: {
+          type: "string",
+          description: "Optional: name of the index to drop (default: first fulltext index found)",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  {
+    name: "get_fulltext_stats",
+    description:
+      "Retrieves statistics for FULLTEXT indexes on a table including document count, size, and key length. Use this to analyze index performance and size.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
+  {
+    name: "optimize_fulltext",
+    description:
+      "Optimizes a table to update FULLTEXT index statistics and reclaim space. Use this after bulk inserts or updates to improve search performance.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        table_name: {
+          type: "string",
+          description: "Name of the table to optimize",
+        },
+        database: {
+          type: "string",
+          description: "Optional: specific database name",
+        },
+      },
+      required: ["table_name"],
+    },
+  },
 ];
 
 // Create the MCP server
@@ -4213,6 +4389,77 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
           (args || {}) as {
             include_descriptions?: boolean;
             group_by?: "table" | "category" | "alphabetical";
+            database?: string;
+          },
+        );
+        break;
+
+      case "create_fulltext_index":
+        result = await mysqlMCP.createFulltextIndex(
+          (args || {}) as {
+            table_name: string;
+            columns: string[];
+            index_name?: string;
+            parser?: "ngram" | "mecab";
+            ngram_token_size?: number;
+            database?: string;
+          },
+        );
+        break;
+
+      case "fulltext_search":
+        result = await mysqlMCP.fulltextSearch(
+          (args || {}) as {
+            table_name: string;
+            search_term: string;
+            columns?: string[];
+            mode?:
+              | "natural_language"
+              | "natural_language_with_query_expansion"
+              | "boolean"
+              | "query_expansion";
+            limit?: number;
+            offset?: number;
+            order_by?: string;
+            order_direction?: "ASC" | "DESC";
+            database?: string;
+          },
+        );
+        break;
+
+      case "get_fulltext_info":
+        result = await mysqlMCP.getFulltextInfo(
+          (args || {}) as {
+            table_name: string;
+            index_name?: string;
+            database?: string;
+          },
+        );
+        break;
+
+      case "drop_fulltext_index":
+        result = await mysqlMCP.dropFulltextIndex(
+          (args || {}) as {
+            table_name: string;
+            index_name?: string;
+            database?: string;
+          },
+        );
+        break;
+
+      case "get_fulltext_stats":
+        result = await mysqlMCP.getFulltextStats(
+          (args || {}) as {
+            table_name: string;
+            database?: string;
+          },
+        );
+        break;
+
+      case "optimize_fulltext":
+        result = await mysqlMCP.optimizeFulltext(
+          (args || {}) as {
+            table_name: string;
             database?: string;
           },
         );

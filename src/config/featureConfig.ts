@@ -236,6 +236,14 @@ export const toolCategoryMap: Record<string, ToolCategory> = {
   visualizeQuery: ToolCategory.UTILITY,
   predictQueryPerformance: ToolCategory.UTILITY,
   forecastDatabaseGrowth: ToolCategory.UTILITY,
+
+  // Full-Text Search Tools
+  createFulltextIndex: ToolCategory.DDL,
+  fulltextSearch: ToolCategory.READ,
+  getFulltextInfo: ToolCategory.LIST,
+  dropFulltextIndex: ToolCategory.DDL,
+  getFulltextStats: ToolCategory.LIST,
+  optimizeFulltext: ToolCategory.UTILITY,
 };
 
 /**
@@ -436,6 +444,14 @@ export const toolDocCategoryMap: Record<string, DocCategory> = {
   visualizeQuery: DocCategory.AI_ENHANCEMENT,
   predictQueryPerformance: DocCategory.AI_ENHANCEMENT,
   forecastDatabaseGrowth: DocCategory.AI_ENHANCEMENT,
+
+  // Full-Text Search
+  createFulltextIndex: DocCategory.INDEX_MANAGEMENT,
+  fulltextSearch: DocCategory.INDEX_MANAGEMENT,
+  getFulltextInfo: DocCategory.INDEX_MANAGEMENT,
+  dropFulltextIndex: DocCategory.INDEX_MANAGEMENT,
+  getFulltextStats: DocCategory.INDEX_MANAGEMENT,
+  optimizeFulltext: DocCategory.INDEX_MANAGEMENT,
 };
 
 /**

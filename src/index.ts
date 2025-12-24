@@ -31,6 +31,7 @@ import { SchemaPatternTools } from "./tools/schemaPatternTools";
 import { QueryVisualizationTools } from "./tools/queryVisualizationTools";
 import { ForecastingTools } from "./tools/forecastingTools";
 import { SmartQueryBuilderTools } from "./tools/smartQueryBuilderTools";
+import { FulltextSearchTools } from "./tools/fulltextSearchTools";
 import SecurityLayer from "./security/securityLayer";
 import DatabaseConnection from "./db/connection";
 import { FeatureConfig } from "./config/featureConfig";
@@ -73,6 +74,7 @@ export class MySQLMCP {
   private queryVisualizationTools: QueryVisualizationTools;
   private forecastingTools: ForecastingTools;
   private smartQueryBuilderTools: SmartQueryBuilderTools;
+  private fulltextSearchTools: FulltextSearchTools;
   private security: SecurityLayer;
   private featureConfig: FeatureConfig;
 
@@ -115,6 +117,7 @@ export class MySQLMCP {
     this.queryVisualizationTools = new QueryVisualizationTools(this.security);
     this.forecastingTools = new ForecastingTools(this.security);
     this.smartQueryBuilderTools = new SmartQueryBuilderTools(this.security);
+    this.fulltextSearchTools = new FulltextSearchTools(this.security);
   }
 
   // Helper method to check if tool is enabled
@@ -1872,6 +1875,78 @@ export class MySQLMCP {
     const check = this.checkToolEnabled("endSession");
     if (!check.enabled) return { status: "error", error: check.error };
     return await this.smartQueryBuilderTools.endSession(params);
+  }
+
+  // Full-Text Search Tools
+  async createFulltextIndex(params: {
+    table_name: string;
+    columns: string[];
+    index_name?: string;
+    parser?: "ngram" | "mecab";
+    ngram_token_size?: number;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("createFulltextIndex");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.fulltextSearchTools.createFulltextIndex(params);
+  }
+
+  async fulltextSearch(params: {
+    table_name: string;
+    search_term: string;
+    columns?: string[];
+    mode?:
+      | "natural_language"
+      | "natural_language_with_query_expansion"
+      | "boolean"
+      | "query_expansion";
+    limit?: number;
+    offset?: number;
+    order_by?: string;
+    order_direction?: "ASC" | "DESC";
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("fulltextSearch");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.fulltextSearchTools.fulltextSearch(params);
+  }
+
+  async getFulltextInfo(params: {
+    table_name: string;
+    index_name?: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("getFulltextInfo");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.fulltextSearchTools.getFulltextInfo(params);
+  }
+
+  async dropFulltextIndex(params: {
+    table_name: string;
+    index_name?: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("dropFulltextIndex");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.fulltextSearchTools.dropFulltextIndex(params);
+  }
+
+  async getFulltextStats(params: {
+    table_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("getFulltextStats");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.fulltextSearchTools.getFulltextStats(params);
+  }
+
+  async optimizeFulltext(params: {
+    table_name: string;
+    database?: string;
+  }) {
+    const check = this.checkToolEnabled("optimizeFulltext");
+    if (!check.enabled) return { status: "error", error: check.error };
+    return await this.fulltextSearchTools.optimizeFulltext(params);
   }
 }
 
