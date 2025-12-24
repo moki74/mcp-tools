@@ -1,7 +1,7 @@
 # MySQL MCP Server - Documentation
 
-**Last Updated:** 2025-12-23 12:00:00  
-**Version:** 1.31.0  
+**Last Updated:** 2025-12-25 00:00:00  
+**Version:** 1.32.0  
 **Total Tools:** 150
 
 Comprehensive documentation for the MySQL MCP Server. For quick start, see [README.md](README.md).
@@ -193,9 +193,24 @@ Tool enabled = (Has Permission) AND (Has Category OR No categories specified)
 - `get_transaction_status` - Check transaction state
 - `execute_in_transaction` - Execute within transaction
 
-### 14. Performance Monitoring (9 tools)
+### 14. Performance Monitoring (10 tools)
+- `get_performance_metrics` - Get overall performance metrics
+- `get_top_queries_by_time` - Get queries by execution time
+- `get_top_queries_by_count` - Get queries by execution count
+- `get_slow_queries` - Get slow query log
+- `get_table_io_stats` - Get table I/O statistics
+- `get_index_usage_stats` - Get index usage statistics
+- `get_unused_indexes` - Find unused indexes
+- `get_connection_pool_stats` - Get connection pool statistics
+- `get_database_health_check` - Get database health status
+- `reset_performance_stats` - Reset performance statistics
+
+### 15. Query Optimization (3 tools)
 - `analyze_query` - Analyze query performance
 - `get_optimization_hints` - Get optimizer hints
+- `repair_query` - Repair broken SQL queries
+
+### 16. Server Management (9 tools)
 - `show_process_list` - Show running processes
 - `kill_process` - Terminate processes
 - `show_status` - Server status variables
@@ -203,32 +218,75 @@ Tool enabled = (Has Permission) AND (Has Category OR No categories specified)
 - `explain_query` - Query execution plan
 - `show_engine_status` - Storage engine status
 - `get_server_info` - Comprehensive server info
+- `show_binary_logs` - Show binary log files
+- `show_replication_status` - Show replication status
 
-### 15. Cache Management (4 tools)
+### 17. Cache Management (4 tools)
 - `get_cache_stats` - Query cache statistics
 - `get_cache_config` - Cache configuration
 - `configure_cache` - Configure cache settings
 - `clear_cache` - Clear cached results
 
-### 16. Data Export (4 tools)
+### 18. Data Export (6 tools)
 - `export_table_to_csv` - Export table to CSV
 - `export_query_to_csv` - Export query to CSV
 - `export_table_to_json` - Export table to JSON
 - `export_query_to_json` - Export query to JSON
 - `safe_export_table` - Export with PII masking
+- `export_table_to_sql` - Export table to SQL dump
 
-### 17. Backup & Restore (5 tools)
+### 19. Backup & Restore (5 tools)
 - `backup_table` - Backup single table
 - `backup_database` - Backup entire database
 - `restore_from_sql` - Restore from SQL dump
 - `get_create_table_statement` - Get CREATE TABLE
 - `get_database_schema` - Get complete schema
 
-### 18. Utilities (4 tools)
+### 20. Utilities (4 tools)
 - `test_connection` - Test connectivity
 - `describe_connection` - Connection info
 - `read_changelog` - Read changelog
 - `invalidate_table_cache` - Clear table cache
+
+### 21. Data Import (2 tools)
+- `import_from_csv` - Import data from CSV file
+- `import_from_json` - Import data from JSON file
+
+### 22. Data Migration (5 tools)
+- `copy_table_data` - Copy data from one table to another
+- `move_table_data` - Move data between tables
+- `clone_table` - Clone a table with its structure and data
+- `compare_table_structure` - Compare structure between two tables
+- `sync_table_data` - Synchronize data between tables
+
+### 23. Schema Migrations (9 tools)
+- `init_migrations_table` - Initialize migrations tracking table
+- `create_migration` - Create a new migration
+- `apply_migrations` - Apply pending migrations
+- `rollback_migration` - Rollback a specific migration
+- `get_migration_status` - Get migration status
+- `get_schema_version` - Get current schema version
+- `validate_migrations` - Validate migration files
+- `reset_failed_migration` - Reset a failed migration
+- `generate_migration_from_diff` - Generate migration from schema diff
+
+### 24. AI Enhancement (16 tools)
+- `build_query_from_intent` - Convert natural language to SQL
+- `suggest_query_improvements` - Suggest query optimizations
+- `smart_search` - Semantic search for tables, columns, data
+- `find_similar_columns` - Find columns similar to a given column
+- `discover_data_patterns` - Discover data patterns in tables
+- `generate_documentation` - Generate database documentation
+- `generate_data_dictionary` - Generate data dictionary for tables
+- `generate_business_glossary` - Generate business glossary
+- `design_schema_from_requirements` - Design schema from requirements
+- `audit_database_security` - Audit database security
+- `recommend_indexes` - Recommend indexes for optimization
+- `generate_test_data` - Generate test data for tables
+- `analyze_schema_patterns` - Analyze schema design patterns
+- `visualize_query` - Visualize query execution plan
+- `predict_query_performance` - Predict query performance
+- `forecast_database_growth` - Forecast database growth
 
 ---
 

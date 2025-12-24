@@ -5,6 +5,14 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] - 2025-12-25
+
+### Fixed
+- **Documentation Tool Count Mismatch** - Fixed discrepancy between actual tool count (150) and documented tool count (149)
+- Added missing `repair_query` tool to Query Optimization category documentation
+- Updated total tool count in DOCUMENTATIONS.md and README.md to 150
+- Updated last updated timestamp in DOCUMENTATIONS.md to 2025-12-25
+
 ## [1.31.0] - 2025-12-23
 
 ### Added
