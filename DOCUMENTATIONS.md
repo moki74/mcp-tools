@@ -1,7 +1,7 @@
 # MySQL MCP Server - Documentation
 
-**Last Updated:** 2025-12-25 00:00:00  
-**Version:** 1.32.0  
+**Last Updated:** 2025-01-06 00:00:00  
+**Version:** 1.33.0
 **Total Tools:** 150
 
 Comprehensive documentation for the MySQL MCP Server. For quick start, see [README.md](README.md).

@@ -259,6 +259,41 @@ export function validateCreateRecord(data: any): { valid: boolean; errors?: stri
       errors: formatErrors(createRecordValidator.errors || [])
     };
   }
+  
+  // Additional validation for table name
+  if (data && data.table_name && typeof data.table_name === 'string') {
+    const tableNameValidation = validateTableName(data.table_name);
+    if (!tableNameValidation.valid) {
+      return {
+        valid: false,
+        errors: [tableNameValidation.error || 'Invalid table name']
+      };
+    }
+  }
+  
+  // Additional validation for data values
+  if (data && data.data && typeof data.data === 'object' && data.data !== null) {
+    for (const [key, value] of Object.entries(data.data)) {
+      if (typeof key === 'string') {
+        const fieldValidation = validateFieldName(key);
+        if (!fieldValidation.valid) {
+          return {
+            valid: false,
+            errors: [fieldValidation.error || 'Invalid field name']
+          };
+        }
+      }
+      
+      const valueValidation = validateValue(value);
+      if (!valueValidation.valid) {
+        return {
+          valid: false,
+          errors: [valueValidation.error || 'Invalid value']
+        };
+      }
+    }
+  }
+  
   return { valid: true };
 }
 
@@ -270,6 +305,43 @@ export function validateReadRecords(data: any): { valid: boolean; errors?: strin
       errors: formatErrors(readRecordsValidator.errors || [])
     };
   }
+  
+  // Additional validation for table name
+  if (data && data.table_name && typeof data.table_name === 'string') {
+    const tableNameValidation = validateTableName(data.table_name);
+    if (!tableNameValidation.valid) {
+      return {
+        valid: false,
+        errors: [tableNameValidation.error || 'Invalid table name']
+      };
+    }
+  }
+  
+  // Additional validation for filters
+  if (data && data.filters && Array.isArray(data.filters)) {
+    for (const filter of data.filters) {
+      if (filter && filter.field && typeof filter.field === 'string') {
+        const fieldValidation = validateFieldName(filter.field);
+        if (!fieldValidation.valid) {
+          return {
+            valid: false,
+            errors: [fieldValidation.error || 'Invalid field name']
+          };
+        }
+      }
+      
+      if (filter && filter.value !== undefined) {
+        const valueValidation = validateValue(filter.value);
+        if (!valueValidation.valid) {
+          return {
+            valid: false,
+            errors: [valueValidation.error || 'Invalid value']
+          };
+        }
+      }
+    }
+  }
+  
   return { valid: true };
 }
 
@@ -281,6 +353,66 @@ export function validateUpdateRecord(data: any): { valid: boolean; errors?: stri
       errors: formatErrors(updateRecordValidator.errors || [])
     };
   }
+  
+  // Additional validation for table name
+  if (data && data.table_name && typeof data.table_name === 'string') {
+    const tableNameValidation = validateTableName(data.table_name);
+    if (!tableNameValidation.valid) {
+      return {
+        valid: false,
+        errors: [tableNameValidation.error || 'Invalid table name']
+      };
+    }
+  }
+  
+  // Additional validation for data values
+  if (data && data.data && typeof data.data === 'object' && data.data !== null) {
+    for (const [key, value] of Object.entries(data.data)) {
+      if (typeof key === 'string') {
+        const fieldValidation = validateFieldName(key);
+        if (!fieldValidation.valid) {
+          return {
+            valid: false,
+            errors: [fieldValidation.error || 'Invalid field name']
+          };
+        }
+      }
+      
+      const valueValidation = validateValue(value);
+      if (!valueValidation.valid) {
+        return {
+          valid: false,
+          errors: [valueValidation.error || 'Invalid value']
+        };
+      }
+    }
+  }
+  
+  // Additional validation for conditions
+  if (data && data.conditions && Array.isArray(data.conditions)) {
+    for (const condition of data.conditions) {
+      if (condition && condition.field && typeof condition.field === 'string') {
+        const fieldValidation = validateFieldName(condition.field);
+        if (!fieldValidation.valid) {
+          return {
+            valid: false,
+            errors: [fieldValidation.error || 'Invalid field name']
+          };
+        }
+      }
+      
+      if (condition && condition.value !== undefined) {
+        const valueValidation = validateValue(condition.value);
+        if (!valueValidation.valid) {
+          return {
+            valid: false,
+            errors: [valueValidation.error || 'Invalid value']
+          };
+        }
+      }
+    }
+  }
+  
   return { valid: true };
 }
 
@@ -292,6 +424,43 @@ export function validateDeleteRecord(data: any): { valid: boolean; errors?: stri
       errors: formatErrors(deleteRecordValidator.errors || [])
     };
   }
+  
+  // Additional validation for table name
+  if (data && data.table_name && typeof data.table_name === 'string') {
+    const tableNameValidation = validateTableName(data.table_name);
+    if (!tableNameValidation.valid) {
+      return {
+        valid: false,
+        errors: [tableNameValidation.error || 'Invalid table name']
+      };
+    }
+  }
+  
+  // Additional validation for conditions
+  if (data && data.conditions && Array.isArray(data.conditions)) {
+    for (const condition of data.conditions) {
+      if (condition && condition.field && typeof condition.field === 'string') {
+        const fieldValidation = validateFieldName(condition.field);
+        if (!fieldValidation.valid) {
+          return {
+            valid: false,
+            errors: [fieldValidation.error || 'Invalid field name']
+          };
+        }
+      }
+      
+      if (condition && condition.value !== undefined) {
+        const valueValidation = validateValue(condition.value);
+        if (!valueValidation.valid) {
+          return {
+            valid: false,
+            errors: [valueValidation.error || 'Invalid value']
+          };
+        }
+      }
+    }
+  }
+  
   return { valid: true };
 }
 
@@ -303,6 +472,38 @@ export function validateQuery(data: any): { valid: boolean; errors?: string[] } 
       errors: formatErrors(queryValidator.errors || [])
     };
   }
+  
+  // Additional validation for query string
+  if (data && data.query && typeof data.query === 'string') {
+    const valueValidation = validateValue(data.query);
+    if (!valueValidation.valid) {
+      return {
+        valid: false,
+        errors: [valueValidation.error || 'Invalid query']
+      };
+    }
+  }
+  
+  // Additional validation for parameters
+  if (data && data.params && Array.isArray(data.params)) {
+    if (data.params.length > INPUT_LIMITS.MAX_PARAMETERS) {
+      return {
+        valid: false,
+        errors: [`Parameters array exceeds maximum length of ${INPUT_LIMITS.MAX_PARAMETERS} items`]
+      };
+    }
+    
+    for (const param of data.params) {
+      const valueValidation = validateValue(param);
+      if (!valueValidation.valid) {
+        return {
+          valid: false,
+          errors: [valueValidation.error || 'Invalid parameter']
+        };
+      }
+    }
+  }
+  
   return { valid: true };
 }
 
@@ -314,6 +515,45 @@ export function validateBulkInsert(data: any): { valid: boolean; errors?: string
       errors: formatErrors(bulkInsertValidator.errors || [])
     };
   }
+  
+  // Additional validation for table name
+  if (data && data.table_name && typeof data.table_name === 'string') {
+    const tableNameValidation = validateTableName(data.table_name);
+    if (!tableNameValidation.valid) {
+      return {
+        valid: false,
+        errors: [tableNameValidation.error || 'Invalid table name']
+      };
+    }
+  }
+  
+  // Additional validation for data values
+  if (data && data.data && Array.isArray(data.data)) {
+    for (const record of data.data) {
+      if (record && typeof record === 'object' && record !== null) {
+        for (const [key, value] of Object.entries(record)) {
+          if (typeof key === 'string') {
+            const fieldValidation = validateFieldName(key);
+            if (!fieldValidation.valid) {
+              return {
+                valid: false,
+                errors: [fieldValidation.error || 'Invalid field name']
+              };
+            }
+          }
+          
+          const valueValidation = validateValue(value);
+          if (!valueValidation.valid) {
+            return {
+              valid: false,
+              errors: [valueValidation.error || 'Invalid value']
+            };
+          }
+        }
+      }
+    }
+  }
+  
   return { valid: true };
 }
 
@@ -330,17 +570,184 @@ function formatErrors(errors: ErrorObject[]): string[] {
 // Sanitization functions
 export function sanitizeTableName(tableName: string): string {
   // Remove any characters that aren't valid MySQL identifiers
-  return tableName.replace(/[^a-zA-Z0-9_]/g, '').replace(/^[^a-zA-Z_]/, '');
+  // MySQL identifiers can contain letters, digits, underscore, and must start with letter, underscore, or $
+  const sanitized = tableName.replace(/[^a-zA-Z0-9_$]/g, '').replace(/^[^a-zA-Z_$]/, '');
+  
+  // Ensure the table name is not empty after sanitization
+  if (!sanitized) {
+    throw new Error('Invalid table name after sanitization');
+  }
+  
+  // Ensure the table name is not too long (MySQL limit is 64 characters)
+  if (sanitized.length > 64) {
+    return sanitized.substring(0, 64);
+  }
+  
+  return sanitized;
 }
 
 export function sanitizeFieldName(fieldName: string): string {
   // Remove any characters that aren't valid MySQL identifiers
-  return fieldName.replace(/[^a-zA-Z0-9_]/g, '').replace(/^[^a-zA-Z_]/, '');
+  const sanitized = fieldName.replace(/[^a-zA-Z0-9_$]/g, '').replace(/^[^a-zA-Z_$]/, '');
+  
+  // Ensure the field name is not empty after sanitization
+  if (!sanitized) {
+    throw new Error('Invalid field name after sanitization');
+  }
+  
+  // Ensure the field name is not too long (MySQL limit is 64 characters)
+  if (sanitized.length > 64) {
+    return sanitized.substring(0, 64);
+  }
+  
+  return sanitized;
 }
 
 export function sanitizeQuery(query: string): string {
   // Basic query sanitization - remove potential control characters
   return query.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+}
+
+// Enhanced validation functions
+export function validateTableName(tableName: string): { valid: boolean; error?: string } {
+  if (!tableName || typeof tableName !== 'string') {
+    return { valid: false, error: 'Table name must be a non-empty string' };
+  }
+  
+  if (tableName.length > 64) {
+    return { valid: false, error: 'Table name exceeds maximum length of 64 characters' };
+  }
+  
+  // Check for valid MySQL identifier format
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
+    return { valid: false, error: 'Table name contains invalid characters' };
+  }
+  
+  // Check for reserved words
+  const reservedWords = [
+    'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER', 'TABLE', 'INDEX',
+    'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'CONSTRAINT', 'UNIQUE', 'CHECK',
+    'DEFAULT', 'NOT', 'NULL', 'IS', 'AS', 'FROM', 'WHERE', 'GROUP', 'BY', 'ORDER',
+    'HAVING', 'LIMIT', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'OUTER', 'ON', 'AND', 'OR',
+    'IN', 'EXISTS', 'BETWEEN', 'LIKE', 'UNION', 'ALL', 'DISTINCT', 'COUNT', 'SUM',
+    'AVG', 'MIN', 'MAX', 'DATE', 'TIME', 'TIMESTAMP', 'DATETIME', 'YEAR', 'INT',
+    'INTEGER', 'SMALLINT', 'TINYINT', 'MEDIUMINT', 'BIGINT', 'DECIMAL', 'NUMERIC',
+    'FLOAT', 'DOUBLE', 'REAL', 'BIT', 'BOOLEAN', 'BOOL', 'CHAR', 'VARCHAR', 'TINYTEXT',
+    'TEXT', 'MEDIUMTEXT', 'LONGTEXT', 'TINYBLOB', 'BLOB', 'MEDIUMBLOB', 'LONGBLOB',
+    'BINARY', 'VARBINARY', 'ENUM', 'SET', 'GEOMETRY', 'POINT', 'LINESTRING', 'POLYGON',
+    'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON', 'GEOMETRYCOLLECTION', 'IF', 'ELSE',
+    'ELSEIF', 'END', 'WHILE', 'LOOP', 'REPEAT', 'FOR', 'CASE', 'WHEN', 'THEN', 'BEGIN',
+    'COMMIT', 'ROLLBACK', 'START', 'TRANSACTION', 'SAVEPOINT', 'LOCK', 'UNLOCK', 'USE',
+    'DATABASE', 'SCHEMA', 'SHOW', 'DESCRIBE', 'DESC', 'EXPLAIN', 'HELP', 'DO', 'HANDLER',
+    'LOAD', 'REPLACE', 'IGNORE', 'LOW_PRIORITY', 'DELAYED', 'HIGH_PRIORITY', 'SQL_SMALL_RESULT',
+    'SQL_BIG_RESULT', 'SQL_BUFFER_RESULT', 'SQL_CACHE', 'SQL_NO_CACHE', 'SQL_CALC_FOUND_ROWS',
+    'DUAL', 'FALSE', 'TRUE', 'NULL', 'UNKNOWN', 'ADD', 'ALL', 'ALTER', 'ANALYZE', 'AND',
+    'AS', 'ASC', 'ASENSITIVE', 'BEFORE', 'BETWEEN', 'BIGINT', 'BINARY', 'BLOB', 'BOTH',
+    'BY', 'CALL', 'CASCADE', 'CASE', 'CHANGE', 'CHAR', 'CHARACTER', 'CHECK', 'COLLATE',
+    'COLUMN', 'CONDITION', 'CONNECTION', 'CONSTRAINT', 'CONTINUE', 'CONVERT', 'CREATE',
+    'CROSS', 'CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP', 'CURRENT_USER', 'CURSOR',
+    'DATABASE', 'DATABASES', 'DAY_HOUR', 'DAY_MICROSECOND', 'DAY_MINUTE', 'DAY_SECOND',
+    'DEC', 'DECIMAL', 'DECLARE', 'DEFAULT', 'DELAYED', 'DELETE', 'DESC', 'DESCRIBE',
+    'DETERMINISTIC', 'DISTINCT', 'DISTINCTROW', 'DIV', 'DOUBLE', 'DROP', 'DUAL', 'EACH',
+    'ELSE', 'ELSEIF', 'ENCLOSED', 'ESCAPED', 'EXISTS', 'EXIT', 'EXPLAIN', 'FALSE', 'FETCH',
+    'FLOAT', 'FLOAT4', 'FLOAT8', 'FOR', 'FORCE', 'FOREIGN', 'FROM', 'FULLTEXT', 'GRANT',
+    'GROUP', 'HAVING', 'HIGH_PRIORITY', 'HOUR_MICROSECOND', 'HOUR_MINUTE', 'HOUR_SECOND',
+    'IF', 'IGNORE', 'IN', 'INDEX', 'INFILE', 'INNER', 'INOUT', 'INSENSITIVE', 'INSERT',
+    'INT', 'INT1', 'INT2', 'INT3', 'INT4', 'INT8', 'INTEGER', 'INTERVAL', 'INTO', 'IS',
+    'ITERATE', 'JOIN', 'KEY', 'KEYS', 'KILL', 'LEADING', 'LEAVE', 'LEFT', 'LIKE', 'LIMIT',
+    'LINES', 'LOAD', 'LOCALTIME', 'LOCALTIMESTAMP', 'LOCK', 'LONG', 'LONGBLOB', 'LONGTEXT',
+    'LOOP', 'LOW_PRIORITY', 'MATCH', 'MEDIUMBLOB', 'MEDIUMINT', 'MEDIUMTEXT', 'MIDDLEINT',
+    'MINUTE_MICROSECOND', 'MINUTE_SECOND', 'MOD', 'MODIFIES', 'NATURAL', 'NOT', 'NO_WRITE_TO_BINLOG',
+    'NULL', 'NUMERIC', 'ON', 'OPTIMIZE', 'OPTION', 'OPTIONALLY', 'OR', 'ORDER', 'OUT', 'OUTER',
+    'OUTFILE', 'PRECISION', 'PRIMARY', 'PROCEDURE', 'PURGE', 'RAID0', 'READ', 'READS',
+    'REAL', 'REFERENCES', 'REGEXP', 'RELEASE', 'RENAME', 'REPEAT', 'REPLACE', 'REQUIRE',
+    'RESTRICT', 'RETURN', 'REVOKE', 'RIGHT', 'RLIKE', 'SCHEMA', 'SCHEMAS', 'SECOND_MICROSECOND',
+    'SELECT', 'SENSITIVE', 'SEPARATOR', 'SET', 'SHOW', 'SMALLINT', 'SPATIAL', 'SPECIFIC',
+    'SQL', 'SQLEXCEPTION', 'SQLSTATE', 'SQLWARNING', 'SQL_BIG_RESULT', 'SQL_CALC_FOUND_ROWS',
+    'SQL_SMALL_RESULT', 'SSL', 'STARTING', 'STRAIGHT_JOIN', 'TABLE', 'TERMINATED', 'THEN',
+    'TINYBLOB', 'TINYINT', 'TINYTEXT', 'TO', 'TRAILING', 'TRIGGER', 'TRUE', 'UNDO', 'UNION',
+    'UNIQUE', 'UNLOCK', 'UNSIGNED', 'UPDATE', 'USAGE', 'USE', 'USING', 'UTC_DATE', 'UTC_TIME',
+    'UTC_TIMESTAMP', 'VALUES', 'VARBINARY', 'VARCHAR', 'VARCHARACTER', 'VARYING', 'WHEN',
+    'WHERE', 'WHILE', 'WITH', 'WRITE', 'XOR', 'YEAR_MONTH', 'ZEROFILL'
+  ];
+  
+  if (reservedWords.includes(tableName.toUpperCase())) {
+    return { valid: false, error: 'Table name cannot be a reserved word' };
+  }
+  
+  return { valid: true };
+}
+
+export function validateFieldName(fieldName: string): { valid: boolean; error?: string } {
+  if (!fieldName || typeof fieldName !== 'string') {
+    return { valid: false, error: 'Field name must be a non-empty string' };
+  }
+  
+  if (fieldName.length > 64) {
+    return { valid: false, error: 'Field name exceeds maximum length of 64 characters' };
+  }
+  
+  // Check for valid MySQL identifier format
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(fieldName)) {
+    return { valid: false, error: 'Field name contains invalid characters' };
+  }
+  
+  return { valid: true };
+}
+
+export function validateValue(value: any): { valid: boolean; error?: string } {
+  // Validate string values
+  if (typeof value === 'string') {
+    if (value.length > INPUT_LIMITS.MAX_STRING_LENGTH) {
+      return { valid: false, error: `String value exceeds maximum length of ${INPUT_LIMITS.MAX_STRING_LENGTH} characters` };
+    }
+    
+    // Check for potential injection patterns
+    const injectionPatterns = [
+      /(?:;|\s)UNION\s+(?:ALL\s+|DISTINCT\s+)?SELECT/i,
+      /(?:;|\s)SELECT\s+.*\s+FROM\s+(?:information_schema|mysql|performance_schema)/i,
+      /(?:;|\s)DROP\s+(?:TABLE|DATABASE)/i,
+      /(?:;|\s)CREATE\s+(?:TABLE|DATABASE)/i,
+      /(?:;|\s)DELETE\s+FROM/i,
+      /(?:;|\s)UPDATE\s+.*\s+SET/i,
+      /(?:;|\s)INSERT\s+INTO/i,
+      /(?:;|\s)EXEC\s+/i,
+      /(?:;|\s)EXECUTE\s+/i,
+      /(?:;|\s)CALL\s+/i,
+      /(?:;|\s)LOAD_FILE/i,
+      /(?:;|\s)INTO\s+OUTFILE/i,
+      /(?:;|\s)INTO\s+DUMPFILE/i,
+    ];
+    
+    for (const pattern of injectionPatterns) {
+      if (pattern.test(value)) {
+        return { valid: false, error: 'Value contains potential SQL injection patterns' };
+      }
+    }
+  }
+  
+  // Validate array values
+  if (Array.isArray(value)) {
+    if (value.length > 1000) { // Reasonable limit for array values
+      return { valid: false, error: 'Array value exceeds maximum length of 1000 items' };
+    }
+    
+    for (const item of value) {
+      const validation = validateValue(item);
+      if (!validation.valid) {
+        return validation;
+      }
+    }
+  }
+  
+  // Validate number values
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) {
+      return { valid: false, error: 'Number value must be finite' };
+    }
+  }
+  
+  return { valid: true };
 }
 
 // Input size limits

@@ -12,6 +12,13 @@ import {
   Pagination,
   Sorting,
 } from "../validation/schemas";
+import {
+  validateTableName,
+  validateFieldName,
+  validateValue,
+  sanitizeTableName,
+  sanitizeFieldName
+} from "../validation/inputValidation";
 
 export class CrudTools {
   private db: DatabaseConnection;
@@ -45,23 +52,39 @@ export class CrudTools {
     try {
       const { table_name, data } = params;
 
-      // Validate table name
-      const tableValidation = this.security.validateIdentifier(table_name);
-      if (!tableValidation.valid) {
+      // Enhanced validation using new validation functions
+      const tableNameValidation = validateTableName(table_name);
+      if (!tableNameValidation.valid) {
         return {
           status: "error",
-          error: `Invalid table name: ${tableValidation.error}`,
+          error: `Invalid table name: ${tableNameValidation.error}`,
         };
       }
 
-      // Validate column names
-      const columns = Object.keys(data);
-      for (const column of columns) {
-        const columnValidation = this.security.validateIdentifier(column);
-        if (!columnValidation.valid) {
+      // Sanitize table name
+      const sanitizedTableName = sanitizeTableName(table_name);
+      if (!sanitizedTableName) {
+        return {
+          status: "error",
+          error: "Failed to sanitize table name",
+        };
+      }
+
+      // Validate column names and values
+      for (const [key, value] of Object.entries(data)) {
+        const fieldValidation = validateFieldName(key);
+        if (!fieldValidation.valid) {
           return {
             status: "error",
-            error: `Invalid column name '${column}': ${columnValidation.error}`,
+            error: `Invalid column name '${key}': ${fieldValidation.error}`,
+          };
+        }
+
+        const valueValidation = validateValue(value);
+        if (!valueValidation.valid) {
+          return {
+            status: "error",
+            error: `Invalid value for column '${key}': ${valueValidation.error}`,
           };
         }
       }
@@ -77,9 +100,10 @@ export class CrudTools {
       }
 
       // Build the query with escaped identifiers
-      const escapedTableName = this.security.escapeIdentifier(table_name);
+      const escapedTableName = this.security.escapeIdentifier(sanitizedTableName);
+      const columns = Object.keys(data);
       const escapedColumns = columns.map((col) =>
-        this.security.escapeIdentifier(col),
+        this.security.escapeIdentifier(sanitizeFieldName(col)),
       );
       const placeholders = columns.map(() => "?").join(", ");
 
@@ -132,20 +156,27 @@ export class CrudTools {
     try {
       const { table_name, filters, pagination, sorting } = params;
 
-      // Validate table name
-      const tableValidation = this.security.validateIdentifier(table_name);
-      if (!tableValidation.valid) {
+      // Enhanced validation using new validation functions
+      const tableNameValidation = validateTableName(table_name);
+      if (!tableNameValidation.valid) {
         return {
           status: "error",
-          error: `Invalid table name: ${tableValidation.error}`,
+          error: `Invalid table name: ${tableNameValidation.error}`,
+        };
+      }
+
+      // Sanitize table name
+      const sanitizedTableName = sanitizeTableName(table_name);
+      if (!sanitizedTableName) {
+        return {
+          status: "error",
+          error: "Failed to sanitize table name",
         };
       }
 
       // Validate sorting field if provided
       if (sorting) {
-        const sortFieldValidation = this.security.validateIdentifier(
-          sorting.field,
-        );
+        const sortFieldValidation = validateFieldName(sorting.field);
         if (!sortFieldValidation.valid) {
           return {
             status: "error",
@@ -154,16 +185,22 @@ export class CrudTools {
         }
       }
 
-      // Validate filter fields if provided
+      // Validate filter fields and values if provided
       if (filters && filters.length > 0) {
         for (const filter of filters) {
-          const fieldValidation = this.security.validateIdentifier(
-            filter.field,
-          );
+          const fieldValidation = validateFieldName(filter.field);
           if (!fieldValidation.valid) {
             return {
               status: "error",
               error: `Invalid filter field '${filter.field}': ${fieldValidation.error}`,
+            };
+          }
+
+          const valueValidation = validateValue(filter.value);
+          if (!valueValidation.valid) {
+            return {
+              status: "error",
+              error: `Invalid filter value for field '${filter.field}': ${valueValidation.error}`,
             };
           }
         }
@@ -225,13 +262,13 @@ export class CrudTools {
       // Build the ORDER BY clause if sorting is provided
       let orderByClause = "";
       if (sorting) {
-        const escapedSortField = this.security.escapeIdentifier(sorting.field);
+        const escapedSortField = this.security.escapeIdentifier(sanitizeFieldName(sorting.field));
         orderByClause = `ORDER BY ${escapedSortField} ${sorting.direction.toUpperCase()}`;
       }
 
       // Build the LIMIT clause if pagination is provided
       let limitClause = "";
-      const escapedTableName = this.security.escapeIdentifier(table_name);
+      const escapedTableName = this.security.escapeIdentifier(sanitizedTableName);
 
       if (pagination) {
         const offset = (pagination.page - 1) * pagination.limit;
@@ -303,36 +340,58 @@ export class CrudTools {
     try {
       const { table_name, data, conditions } = params;
 
-      // Validate table name
-      const tableValidation = this.security.validateIdentifier(table_name);
-      if (!tableValidation.valid) {
+      // Enhanced validation using new validation functions
+      const tableNameValidation = validateTableName(table_name);
+      if (!tableNameValidation.valid) {
         return {
           status: "error",
-          error: `Invalid table name: ${tableValidation.error}`,
+          error: `Invalid table name: ${tableNameValidation.error}`,
         };
       }
 
-      // Validate column names in data
-      const columns = Object.keys(data);
-      for (const column of columns) {
-        const columnValidation = this.security.validateIdentifier(column);
-        if (!columnValidation.valid) {
+      // Sanitize table name
+      const sanitizedTableName = sanitizeTableName(table_name);
+      if (!sanitizedTableName) {
+        return {
+          status: "error",
+          error: "Failed to sanitize table name",
+        };
+      }
+
+      // Validate column names and values in data
+      for (const [key, value] of Object.entries(data)) {
+        const fieldValidation = validateFieldName(key);
+        if (!fieldValidation.valid) {
           return {
             status: "error",
-            error: `Invalid column name '${column}': ${columnValidation.error}`,
+            error: `Invalid column name '${key}': ${fieldValidation.error}`,
+          };
+        }
+
+        const valueValidation = validateValue(value);
+        if (!valueValidation.valid) {
+          return {
+            status: "error",
+            error: `Invalid value for column '${key}': ${valueValidation.error}`,
           };
         }
       }
 
-      // Validate condition fields
+      // Validate condition fields and values
       for (const condition of conditions) {
-        const fieldValidation = this.security.validateIdentifier(
-          condition.field,
-        );
+        const fieldValidation = validateFieldName(condition.field);
         if (!fieldValidation.valid) {
           return {
             status: "error",
             error: `Invalid condition field '${condition.field}': ${fieldValidation.error}`,
+          };
+        }
+
+        const valueValidation = validateValue(condition.value);
+        if (!valueValidation.valid) {
+          return {
+            status: "error",
+            error: `Invalid condition value for field '${condition.field}': ${valueValidation.error}`,
           };
         }
       }
@@ -405,7 +464,7 @@ export class CrudTools {
       }
 
       // Build the query with escaped table name
-      const escapedTableName = this.security.escapeIdentifier(table_name);
+      const escapedTableName = this.security.escapeIdentifier(sanitizedTableName);
       const query = `UPDATE ${escapedTableName} SET ${setClause} ${whereClause}`;
 
       // Execute the query with sanitized parameters
@@ -451,12 +510,21 @@ export class CrudTools {
     try {
       const { table_name, conditions } = params;
 
-      // Validate table name
-      const tableValidation = this.security.validateIdentifier(table_name);
-      if (!tableValidation.valid) {
+      // Enhanced validation using new validation functions
+      const tableNameValidation = validateTableName(table_name);
+      if (!tableNameValidation.valid) {
         return {
           status: "error",
-          error: `Invalid table name: ${tableValidation.error}`,
+          error: `Invalid table name: ${tableNameValidation.error}`,
+        };
+      }
+
+      // Sanitize table name
+      const sanitizedTableName = sanitizeTableName(table_name);
+      if (!sanitizedTableName) {
+        return {
+          status: "error",
+          error: "Failed to sanitize table name",
         };
       }
 
@@ -468,15 +536,21 @@ export class CrudTools {
         };
       }
 
-      // Validate condition fields
+      // Validate condition fields and values
       for (const condition of conditions) {
-        const fieldValidation = this.security.validateIdentifier(
-          condition.field,
-        );
+        const fieldValidation = validateFieldName(condition.field);
         if (!fieldValidation.valid) {
           return {
             status: "error",
             error: `Invalid condition field '${condition.field}': ${fieldValidation.error}`,
+          };
+        }
+
+        const valueValidation = validateValue(condition.value);
+        if (!valueValidation.valid) {
+          return {
+            status: "error",
+            error: `Invalid condition value for field '${condition.field}': ${valueValidation.error}`,
           };
         }
       }
@@ -538,7 +612,7 @@ export class CrudTools {
       }
 
       // Build the query with escaped table name
-      const escapedTableName = this.security.escapeIdentifier(table_name);
+      const escapedTableName = this.security.escapeIdentifier(sanitizedTableName);
       const query = `DELETE FROM ${escapedTableName} ${whereClause}`;
 
       // Execute the query with sanitized parameters
@@ -581,12 +655,21 @@ export class CrudTools {
     try {
       const { table_name, data, batch_size = 1000 } = params;
 
-      // Validate table name
-      const tableValidation = this.security.validateIdentifier(table_name);
-      if (!tableValidation.valid) {
+      // Enhanced validation using new validation functions
+      const tableNameValidation = validateTableName(table_name);
+      if (!tableNameValidation.valid) {
         return {
           status: "error",
-          error: `Invalid table name: ${tableValidation.error}`,
+          error: `Invalid table name: ${tableNameValidation.error}`,
+        };
+      }
+
+      // Sanitize table name
+      const sanitizedTableName = sanitizeTableName(table_name);
+      if (!sanitizedTableName) {
+        return {
+          status: "error",
+          error: "Failed to sanitize table name",
         };
       }
 
@@ -615,14 +698,28 @@ export class CrudTools {
         }
       }
 
-      // Validate column names
+      // Validate column names and values
       for (const column of columns) {
-        const columnValidation = this.security.validateIdentifier(column);
+        const columnValidation = validateFieldName(column);
         if (!columnValidation.valid) {
           return {
             status: "error",
             error: `Invalid column name '${column}': ${columnValidation.error}`,
           };
+        }
+      }
+
+      // Validate all values in the data
+      for (let i = 0; i < data.length; i++) {
+        const record = data[i];
+        for (const [key, value] of Object.entries(record)) {
+          const valueValidation = validateValue(value);
+          if (!valueValidation.valid) {
+            return {
+              status: "error",
+              error: `Invalid value for column '${key}' in record ${i + 1}: ${valueValidation.error}`,
+            };
+          }
         }
       }
 
@@ -651,9 +748,9 @@ export class CrudTools {
         }
 
         // Build the query with escaped identifiers
-        const escapedTableName = this.security.escapeIdentifier(table_name);
+        const escapedTableName = this.security.escapeIdentifier(sanitizedTableName);
         const escapedColumns = columns.map((col) =>
-          this.security.escapeIdentifier(col),
+          this.security.escapeIdentifier(sanitizeFieldName(col)),
         );
         const valueGroups = batch
           .map(() => `(${columns.map(() => "?").join(", ")})`)
@@ -714,12 +811,21 @@ export class CrudTools {
     try {
       const { table_name, updates, batch_size = 100 } = params;
 
-      // Validate table name
-      const tableValidation = this.security.validateIdentifier(table_name);
-      if (!tableValidation.valid) {
+      // Enhanced validation using new validation functions
+      const tableNameValidation = validateTableName(table_name);
+      if (!tableNameValidation.valid) {
         return {
           status: "error",
-          error: `Invalid table name: ${tableValidation.error}`,
+          error: `Invalid table name: ${tableNameValidation.error}`,
+        };
+      }
+
+      // Sanitize table name
+      const sanitizedTableName = sanitizeTableName(table_name);
+      if (!sanitizedTableName) {
+        return {
+          status: "error",
+          error: "Failed to sanitize table name",
         };
       }
 
@@ -735,27 +841,40 @@ export class CrudTools {
       for (let i = 0; i < updates.length; i++) {
         const update = updates[i];
 
-        // Validate column names in data
-        const columns = Object.keys(update.data);
-        for (const column of columns) {
-          const columnValidation = this.security.validateIdentifier(column);
-          if (!columnValidation.valid) {
+        // Validate column names and values in data
+        for (const [key, value] of Object.entries(update.data)) {
+          const fieldValidation = validateFieldName(key);
+          if (!fieldValidation.valid) {
             return {
               status: "error",
-              error: `Invalid column name '${column}' in update ${i + 1}: ${columnValidation.error}`,
+              error: `Invalid column name '${key}' in update ${i + 1}: ${fieldValidation.error}`,
+            };
+          }
+
+          const valueValidation = validateValue(value);
+          if (!valueValidation.valid) {
+            return {
+              status: "error",
+              error: `Invalid value for column '${key}' in update ${i + 1}: ${valueValidation.error}`,
             };
           }
         }
 
-        // Validate condition fields
+        // Validate condition fields and values
         for (const condition of update.conditions) {
-          const fieldValidation = this.security.validateIdentifier(
-            condition.field,
-          );
+          const fieldValidation = validateFieldName(condition.field);
           if (!fieldValidation.valid) {
             return {
               status: "error",
               error: `Invalid condition field '${condition.field}' in update ${i + 1}: ${fieldValidation.error}`,
+            };
+          }
+
+          const valueValidation = validateValue(condition.value);
+          if (!valueValidation.valid) {
+            return {
+              status: "error",
+              error: `Invalid condition value for field '${condition.field}' in update ${i + 1}: ${valueValidation.error}`,
             };
           }
         }
@@ -849,7 +968,7 @@ export class CrudTools {
             }
 
             // Build and execute the query
-            const escapedTableName = this.security.escapeIdentifier(table_name);
+            const escapedTableName = this.security.escapeIdentifier(sanitizedTableName);
             const query = `UPDATE ${escapedTableName} SET ${setClause} ${whereClause}`;
 
             const result = await this.db.query<any>(
@@ -915,12 +1034,21 @@ export class CrudTools {
     try {
       const { table_name, condition_sets, batch_size = 100 } = params;
 
-      // Validate table name
-      const tableValidation = this.security.validateIdentifier(table_name);
-      if (!tableValidation.valid) {
+      // Enhanced validation using new validation functions
+      const tableNameValidation = validateTableName(table_name);
+      if (!tableNameValidation.valid) {
         return {
           status: "error",
-          error: `Invalid table name: ${tableValidation.error}`,
+          error: `Invalid table name: ${tableNameValidation.error}`,
+        };
+      }
+
+      // Sanitize table name
+      const sanitizedTableName = sanitizeTableName(table_name);
+      if (!sanitizedTableName) {
+        return {
+          status: "error",
+          error: "Failed to sanitize table name",
         };
       }
 
@@ -944,15 +1072,21 @@ export class CrudTools {
           };
         }
 
-        // Validate condition fields
+        // Validate condition fields and values
         for (const condition of conditions) {
-          const fieldValidation = this.security.validateIdentifier(
-            condition.field,
-          );
+          const fieldValidation = validateFieldName(condition.field);
           if (!fieldValidation.valid) {
             return {
               status: "error",
               error: `Invalid condition field '${condition.field}' in condition set ${i + 1}: ${fieldValidation.error}`,
+            };
+          }
+
+          const valueValidation = validateValue(condition.value);
+          if (!valueValidation.valid) {
+            return {
+              status: "error",
+              error: `Invalid condition value for field '${condition.field}' in condition set ${i + 1}: ${valueValidation.error}`,
             };
           }
         }
@@ -1033,7 +1167,7 @@ export class CrudTools {
             }
 
             // Build and execute the query
-            const escapedTableName = this.security.escapeIdentifier(table_name);
+            const escapedTableName = this.security.escapeIdentifier(sanitizedTableName);
             const query = `DELETE FROM ${escapedTableName} ${whereClause}`;
 
             const result = await this.db.query<any>(

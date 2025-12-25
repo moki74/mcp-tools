@@ -230,6 +230,13 @@ export class SecurityLayer {
       /\*\//,                // End comment without start
       /\/\*\*.*?\*\//g,     // Nested comment attempts
       /\/\*!\s*\d+\s+.*?\*\//g, // MySQL version-specific comments
+      /\/\*!.*?\*\//g,       // MySQL conditional comments
+      /--\s+/,               // Comments with space after --
+      /--\t/,                // Comments with tab after --
+      /--\r/,                // Comments with carriage return after --
+      /--\n/,                // Comments with newline after --
+      /\/\*--.*?\*\//g,      // Comments inside multi-line comments
+      /\/\*.*?--.*?\*\//g,   // Comments with -- inside multi-line comments
     ];
 
     for (const pattern of commentPatterns) {
@@ -244,6 +251,8 @@ export class SecurityLayer {
       /\*\//,   // Potential comment end (literal */)
       /--\s/,   // Potential comment (-- followed by space, not -- in dates)
       /#/,      // Potential comment
+      /\/\*.*?/, // Partial comment start
+      /.*?\*\//, // Partial comment end
     ];
 
     for (const pattern of suspiciousPatterns) {
@@ -260,7 +269,7 @@ export class SecurityLayer {
    */
   private detectMultipleStatements(query: string): { valid: boolean; error?: string } {
     // Remove string literals to avoid false positives
-    const queryWithoutStrings = query.replace(/'[^']*'|"[^"]*"/g, '');
+    const queryWithoutStrings = query.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, '');
     
     // Check for multiple semicolons not at the end
     const semicolonMatches = queryWithoutStrings.match(/;/g);
@@ -271,6 +280,13 @@ export class SecurityLayer {
     // Check for semicolon not at the very end (after trimming)
     const trimmedQuery = query.trim();
     if (trimmedQuery.includes(';') && !trimmedQuery.endsWith(';')) {
+      return { valid: false, error: "Multiple statements not allowed" };
+    }
+
+    // Additional check for multiple statements using different delimiters
+    // Check for multiple statements separated by whitespace + semicolon + whitespace
+    const statementPattern = /\s*;\s*(?=\s*(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE|RENAME|SHOW|DESC|EXPLAIN|HELP)\b)/gi;
+    if (statementPattern.test(queryWithoutStrings)) {
       return { valid: false, error: "Multiple statements not allowed" };
     }
 
@@ -317,7 +333,7 @@ export class SecurityLayer {
    */
   private detectDangerousKeywords(cleanQuery: string): { valid: boolean; error?: string } {
     // Remove string literals to avoid false positives
-    const queryWithoutStrings = cleanQuery.replace(/'[^']*'|"[^"]*"/g, '');
+    const queryWithoutStrings = cleanQuery.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, '');
 
     for (const keyword of this.dangerousKeywords) {
       // Enhanced regex with word boundaries and case insensitivity
@@ -333,8 +349,15 @@ export class SecurityLayer {
     // Additional dangerous patterns
     const dangerousPatterns = [
       /\b(LOAD_FILE|INTO\s+OUTFILE|INTO\s+DUMPFILE)\b/i,
-      /\b(GRANT|REVOKE|CREATE\s+USER|DROP\s+USER|ALTER\s+USER|SET\s+PASSWORD)\b/i,
-      /\b(INFORMATION_SCHEMA\.|MYSQL\.|PERFORMANCE_SCHEMA\.)\b/i,
+      /\b(GRANT|REVOKE|CREATE\s+USER|DROP\s+USER|ALTER\s+USER|SET\s+PASSWORD|RENAME\s+USER)\b/i,
+      /\b(INFORMATION_SCHEMA\.|MYSQL\.|PERFORMANCE_SCHEMA\.|SYS\.)\b/i,
+      /\b(SLEEP|BENCHMARK|GET_LOCK|RELEASE_LOCK)\b/i,
+      /\b(PREPARE|EXECUTE|DEALLOCATE\s+PREPARE)\b/i,
+      /\b(LOAD\s+DATA|SELECT\s+.*\s+INTO\s+OUTFILE|SELECT\s+.*\s+INTO\s+DUMPFILE)\b/i,
+      /\b(SHOW\s+GRANTS|SHOW\s+CREATE\s+USER|SET\s+GLOBAL|SET\s+PERSIST|FLUSH|SHUTDOWN)\b/i,
+      /\b(INSTALL\s+COMPONENT|UNINSTALL\s+COMPONENT|INSTALL\s+PLUGIN|UNINSTALL\s+PLUGIN)\b/i,
+      /\b(START\s+SLAVE|STOP\s+SLAVE|CHANGE\s+MASTER|PURGE\s+BINARY\s+LOGS|RESET\s+MASTER|RESET\s+SLAVE)\b/i,
+      /\b(XA\s+|KILL\s+\d+)\b/i,
     ];
 
     for (const pattern of dangerousPatterns) {

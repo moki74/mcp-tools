@@ -5,6 +5,21 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.0] - 2025-01-06
+
+### Added
+- Enhanced security validation with improved input sanitization
+- Added type checking for all validation parameters to prevent undefined errors
+- Improved SQL injection prevention with additional security checks
+- Enhanced validation for table names, field names, and query parameters
+- Added comprehensive type safety for all database operations
+
+### Fixed
+- Fixed undefined error handling in validation functions
+- Fixed security layer variable reference issues
+- Improved validation for bulk operations and query parameters
+- Enhanced type safety in query tools
+
 ## [1.32.0] - 2025-12-25
 
 ### Fixed

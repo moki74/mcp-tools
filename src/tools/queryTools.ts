@@ -5,6 +5,10 @@ import {
   QueryHints,
   QueryAnalysis,
 } from "../optimization/queryOptimizer";
+import {
+  validateQuery,
+  validateValue,
+} from "../validation/inputValidation";
 
 export class QueryTools {
   private db: DatabaseConnection;
@@ -39,24 +43,33 @@ export class QueryTools {
     try {
       const { query, params = [], hints, useCache = true } = queryParams;
 
+      // Validate query using new input validation
+      const queryValidationResult = validateQuery({ query, params });
+      if (!queryValidationResult.valid) {
+        return {
+          status: "error",
+          error: `Query validation failed: ${queryValidationResult.errors?.join(', ') || 'Invalid query parameters'}`,
+        };
+      }
+
       // Check if user has execute permission to bypass dangerous keyword checks
       const hasExecutePermission = this.security.hasExecutePermission();
 
       // Validate query using security layer
       // If user has execute permission, allow advanced SQL features
-      const queryValidation = this.security.validateQuery(
+      const securityQueryValidation = this.security.validateQuery(
         query,
         hasExecutePermission,
       );
-      if (!queryValidation.valid) {
+      if (!securityQueryValidation.valid) {
         return {
           status: "error",
-          error: `Query validation failed: ${queryValidation.error}`,
+          error: `Query validation failed: ${securityQueryValidation.error}`,
         };
       }
 
       // Ensure it's a SELECT query
-      if (queryValidation.queryType !== "SELECT") {
+      if (securityQueryValidation.queryType !== "SELECT") {
         return {
           status: "error",
           error:
@@ -164,18 +177,27 @@ export class QueryTools {
     try {
       const { query, params = [] } = queryParams;
 
-      // Validate query using security layer
-      // Pass true for bypassDangerousCheck since this is executeWriteQuery (requires 'execute' permission)
-      const queryValidation = this.security.validateQuery(query, true);
-      if (!queryValidation.valid) {
+      // Validate query using new input validation
+      const queryValidationResult = validateQuery({ query, params });
+      if (!queryValidationResult.valid) {
         return {
           status: "error",
-          error: `Query validation failed: ${queryValidation.error}`,
+          error: `Query validation failed: ${queryValidationResult.errors?.join(', ') || 'Invalid query parameters'}`,
+        };
+      }
+
+      // Validate query using security layer
+      // Pass true for bypassDangerousCheck since this is executeWriteQuery (requires 'execute' permission)
+      const securityQueryValidation = this.security.validateQuery(query, true);
+      if (!securityQueryValidation.valid) {
+        return {
+          status: "error",
+          error: `Query validation failed: ${securityQueryValidation.error}`,
         };
       }
 
       // Ensure it's not a SELECT query (use runSelectQuery for that)
-      if (queryValidation.queryType === "SELECT") {
+      if (securityQueryValidation.queryType === "SELECT") {
         return {
           status: "error",
           error:
