@@ -1,9 +1,9 @@
 import DatabaseConnection from "../db/connection";
-import { validateReadRecords } from "../validation/schemas";
-import { FilterCondition, Pagination, Sorting } from "../validation/schemas";
+import { validateReadRecords, FilterCondition, Pagination, Sorting } from "../validation/schemas";
 import SecurityLayer from "../security/securityLayer";
 import { FeatureConfig } from "../config/featureConfig";
 import { dbConfig } from "../config/config";
+import { validateImportFromJSON } from "../validation/inputValidation";
 
 export class DataExportTools {
   private db: DatabaseConnection;
@@ -965,6 +965,15 @@ export class DataExportTools {
     data?: any;
     error?: string;
   }> {
+    // Validate input parameters using the new validation function
+    const validation = validateImportFromJSON(params);
+    if (!validation.valid) {
+      return { 
+        status: "error", 
+        error: `Validation failed: ${validation.errors?.join(', ') || 'Invalid parameters'}` 
+      };
+    }
+
     try {
       const {
         table_name,
@@ -981,13 +990,13 @@ export class DataExportTools {
         return { status: "error", error: dbValidation.error };
       }
 
-      // Validate table name
+      // Validate table name using security layer
       const tableValidation = this.security.validateIdentifier(table_name);
       if (!tableValidation.valid) {
         return { status: "error", error: tableValidation.error };
       }
 
-      // Parse JSON
+      // Parse JSON - this should already be validated by validateImportFromJSON
       let data: any[];
       try {
         data = JSON.parse(json_data);

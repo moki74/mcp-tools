@@ -8,6 +8,18 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { MySQLMCP } from "./index.js";
+import { 
+  validateCreateRecord, 
+  validateReadRecords, 
+  validateUpdateRecord, 
+  validateDeleteRecord, 
+  validateQuery, 
+  validateBulkInsert,
+  validateTableName,
+  validateFieldName,
+  validateValue,
+  validateImportFromJSON
+} from "./validation/inputValidation.js";
 
 // Get permissions and categories from environment variables (set by bin/mcp-mysql.js)
 // Layer 1 (Permissions): MCP_PERMISSIONS or MCP_CONFIG (backward compatible)
@@ -3699,6 +3711,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
   const { name, arguments: args } = request.params;
 
+  // Validate tool arguments before execution
+  const validation = validateToolArguments(name, args);
+  if (!validation.valid) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Validation Error: ${validation.errors?.join(', ') || 'Invalid arguments'}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
   try {
     let result;
 
@@ -4192,9 +4218,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       case "export_query_to_json":
         result = await mysqlMCP.exportQueryToJSON((args || {}) as any);
         break;
-      case "export_query_to_csv":
-        result = await mysqlMCP.exportQueryToCSV((args || {}) as any);
-        break;
+
       case "safe_export_table":
         result = await mysqlMCP.safeExportTable((args || {}) as any);
         break;
@@ -4646,6 +4670,52 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
     };
   }
 });
+
+// Validation function to validate tool arguments before execution
+function validateToolArguments(name: string, args: any): { valid: boolean; errors?: string[] } {
+  if (!args) return { valid: true }; // Some tools don't require arguments
+
+  try {
+    switch (name) {
+      case "create_record":
+        return validateCreateRecord(args);
+      case "read_records":
+        return validateReadRecords(args);
+      case "update_record":
+        return validateUpdateRecord(args);
+      case "delete_record":
+        return validateDeleteRecord(args);
+      case "run_select_query":
+      case "execute_write_query":
+      case "execute_ddl":
+        return validateQuery({ query: args?.query || "" });
+      case "bulk_insert":
+        return validateBulkInsert(args);
+      case "list_tables":
+      case "get_schema_erd":
+      case "get_schema_rag_context":
+      case "get_database_summary":
+        if (args.database !== undefined) {
+          const validation = validateValue(args.database);
+          if (!validation.valid) return { valid: false, errors: [validation.error || 'Invalid database name'] };
+        }
+        return { valid: true };
+      case "get_column_statistics":
+      case "read_table_schema":
+        if (args.table_name) {
+          const validation = validateTableName(args.table_name);
+          if (!validation.valid) return { valid: false, errors: [validation.error || 'Invalid table name'] };
+        }
+        return { valid: true };
+      case "import_from_json":
+        return validateImportFromJSON(args);
+      default:
+        return { valid: true }; // For tools without specific validation
+    }
+  } catch (error) {
+    return { valid: false, errors: [`Validation error: ${error instanceof Error ? error.message : 'Unknown validation error'}`] };
+  }
+}
 
 // Start the server
 async function main() {

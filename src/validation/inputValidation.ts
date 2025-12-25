@@ -750,6 +750,8 @@ export function validateValue(value: any): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
+
+
 // Input size limits
 export const INPUT_LIMITS = {
   MAX_QUERY_LENGTH: 100000,
@@ -760,3 +762,108 @@ export const INPUT_LIMITS = {
   MAX_TABLE_NAME_LENGTH: 64,
   MAX_FIELD_NAME_LENGTH: 64
 };
+
+// Schema for importFromJSON
+const importFromJsonSchema = {
+  type: 'object',
+  required: ['table_name', 'json_data'],
+  properties: {
+    table_name: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 64,
+      pattern: '^[a-zA-Z_][a-zA-Z0-9_]*$'
+    },
+    json_data: {
+      type: 'string',
+      minLength: 1
+    },
+    column_mapping: {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+      nullable: true
+    },
+    skip_errors: {
+      type: 'boolean',
+      nullable: true
+    },
+    batch_size: {
+      type: 'number',
+      minimum: 1,
+      maximum: 10000,
+      nullable: true
+    },
+    database: {
+      type: 'string',
+      nullable: true
+    }
+  },
+  additionalProperties: false
+};
+
+export function validateImportFromJSON(data: any): { valid: boolean; errors?: string[] } {
+  try {
+    const valid = ajv.validate(importFromJsonSchema, data);
+    
+    if (!valid) {
+      const errors = ajv.errors?.map((error: ErrorObject) => 
+        error.message || 'Validation error'
+      ) || ['Unknown validation error'];
+      return { valid: false, errors };
+    }
+
+    // Additional custom validation
+    if (data.table_name) {
+      const tableValidation = validateTableName(data.table_name);
+      if (!tableValidation.valid) {
+        return { valid: false, errors: [tableValidation.error!] };
+      }
+    }
+
+    if (data.json_data) {
+      // Check if JSON data is valid JSON
+      try {
+        const parsed = JSON.parse(data.json_data);
+        if (!Array.isArray(parsed)) {
+          return { valid: false, errors: ['JSON data must be an array of objects'] };
+        }
+        if (parsed.length === 0) {
+          return { valid: false, errors: ['JSON data cannot be empty'] };
+        }
+        // Limit the size of the JSON data
+        if (data.json_data.length > INPUT_LIMITS.MAX_STRING_LENGTH) {
+          return { valid: false, errors: [`JSON data exceeds maximum length of ${INPUT_LIMITS.MAX_STRING_LENGTH} characters`] };
+        }
+      } catch (e) {
+        return { valid: false, errors: ['Invalid JSON data'] };
+      }
+    }
+
+    if (data.column_mapping) {
+      for (const [key, value] of Object.entries(data.column_mapping)) {
+        if (typeof key !== 'string' || typeof value !== 'string') {
+          return { valid: false, errors: ['Column mapping keys and values must be strings'] };
+        }
+        const keyValidation = validateFieldName(key);
+        if (!keyValidation.valid) {
+          return { valid: false, errors: [`Invalid column mapping key: ${keyValidation.error}`] };
+        }
+        const valueValidation = validateFieldName(value);
+        if (!valueValidation.valid) {
+          return { valid: false, errors: [`Invalid column mapping value: ${valueValidation.error}`] };
+        }
+      }
+    }
+
+    if (data.database) {
+      const dbValidation = validateValue(data.database);
+      if (!dbValidation.valid) {
+        return { valid: false, errors: [dbValidation.error!] };
+      }
+    }
+
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, errors: [`Validation error: ${error instanceof Error ? error.message : 'Unknown validation error'}`] };
+  }
+}

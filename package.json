@@ -4,6 +4,7 @@
   "description": "Model Context Protocol server for MySQL database integration with dynamic per-project permissions, backup/restore, data import/export, and data migration capabilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "bin": {
     "mcp-mysql": "bin/mcp-mysql.js"
   },
@@ -16,6 +17,7 @@
     "dev:mcp": "ts-node src/mcp-server.ts",
     "dev:api": "ts-node src/server.ts",
     "test": "jest --passWithNoTests",
+    "lint": "eslint src/**/*.ts --quiet",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
@@ -82,6 +84,9 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.6.0",
     "@types/winston": "^2.4.4",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "eslint": "^9.39.2",
     "jest": "^29.6.4",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
