@@ -5,6 +5,14 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.2] - 2025-12-27
+
+### Fixed
+- Fixed local MCP server startup crash (`ReferenceError: exports is not defined in ES module scope`) which could surface to clients as `MCP error -32000: Connection closed`
+
+### Documentation
+- Updated DOCUMENTATIONS.md and README timestamps/version references
+
 ## [1.33.0] - 2025-01-06
 
 ### Added

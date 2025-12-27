@@ -1,7 +1,7 @@
 # MySQL MCP Server - Documentation
 
-**Last Updated:** 2025-01-06 00:00:00  
-**Version:** 1.33.0
+**Last Updated:** 2025-12-27 03:00:42  
+**Version:** 1.33.2
 **Total Tools:** 150
 
 Comprehensive documentation for the MySQL MCP Server. For quick start, see [README.md](README.md).
@@ -456,6 +456,12 @@ await mcp.call("compare_table_structure", {
 2. **Connection Failed**: Verify database credentials and network
 3. **Query Errors**: Use `repair_query` for diagnosis
 4. **Performance Issues**: Use `analyze_query` and optimization hints
+
+### MCP error `-32000: Connection closed` (local server)
+
+If your client reports `MCP error -32000: Connection closed`, the server process is usually crashing on startup.
+
+If you see `ReferenceError: exports is not defined in ES module scope` in the server stderr logs, update to **v1.33.2+** (fixes an ESM/CJS mismatch that caused the MCP process to exit immediately).
 
 ### Error Messages
 

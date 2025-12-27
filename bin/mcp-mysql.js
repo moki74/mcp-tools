@@ -8,7 +8,9 @@
 
 const path = require("path");
 const { spawn } = require("child_process");
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 // Get MySQL connection string, permissions, and optional categories
 const args = process.argv.slice(2);
