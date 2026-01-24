@@ -5,6 +5,13 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.3] - 2026-01-24
+
+### Fixed
+- Fixed `undefined` error in `read_records` and other CRUD tools when validation fails or unexpected errors occur.
+- Improved error handling in `CrudTools` to safely handle non-Error exceptions.
+- Consolidated validation logic to use enhanced `inputValidation` functions for better error reporting.
+
 ## [1.33.2] - 2025-12-27
 
 ### Fixed

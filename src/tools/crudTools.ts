@@ -1,11 +1,6 @@
 import DatabaseConnection from "../db/connection";
 import SecurityLayer from "../security/securityLayer";
 import {
-  validateCreateRecord,
-  validateReadRecords,
-  validateUpdateRecord,
-  validateDeleteRecord,
-  validateBulkInsert,
   validateBulkUpdate,
   validateBulkDelete,
   FilterCondition,
@@ -13,11 +8,16 @@ import {
   Sorting,
 } from "../validation/schemas";
 import {
+  validateCreateRecord,
+  validateReadRecords,
+  validateUpdateRecord,
+  validateDeleteRecord,
+  validateBulkInsert,
   validateTableName,
   validateFieldName,
   validateValue,
   sanitizeTableName,
-  sanitizeFieldName
+  sanitizeFieldName,
 } from "../validation/inputValidation";
 
 export class CrudTools {
@@ -41,11 +41,12 @@ export class CrudTools {
     error?: string;
   }> {
     // Validate input schema
-    if (!validateCreateRecord(params)) {
+    const validation = validateCreateRecord(params);
+    if (!validation.valid) {
       return {
         status: "error",
         error:
-          "Invalid parameters: " + JSON.stringify(validateCreateRecord.errors),
+          "Invalid parameters: " + (validation.errors?.join(", ") || "Unknown validation error"),
       };
     }
 
@@ -125,7 +126,7 @@ export class CrudTools {
     } catch (error: any) {
       return {
         status: "error",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -145,11 +146,12 @@ export class CrudTools {
     error?: string;
   }> {
     // Validate input schema
-    if (!validateReadRecords(params)) {
+    const validation = validateReadRecords(params);
+    if (!validation.valid) {
       return {
         status: "error",
         error:
-          "Invalid parameters: " + JSON.stringify(validateReadRecords.errors),
+          "Invalid parameters: " + (validation.errors?.join(", ") || "Unknown validation error"),
       };
     }
 
@@ -311,7 +313,7 @@ export class CrudTools {
     } catch (error: any) {
       return {
         status: "error",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -329,11 +331,12 @@ export class CrudTools {
     error?: string;
   }> {
     // Validate input schema
-    if (!validateUpdateRecord(params)) {
+    const validation = validateUpdateRecord(params);
+    if (!validation.valid) {
       return {
         status: "error",
         error:
-          "Invalid parameters: " + JSON.stringify(validateUpdateRecord.errors),
+          "Invalid parameters: " + (validation.errors?.join(", ") || "Unknown validation error"),
       };
     }
 
@@ -482,7 +485,7 @@ export class CrudTools {
     } catch (error: any) {
       return {
         status: "error",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -499,11 +502,12 @@ export class CrudTools {
     error?: string;
   }> {
     // Validate input schema
-    if (!validateDeleteRecord(params)) {
+    const validation = validateDeleteRecord(params);
+    if (!validation.valid) {
       return {
         status: "error",
         error:
-          "Invalid parameters: " + JSON.stringify(validateDeleteRecord.errors),
+          "Invalid parameters: " + (validation.errors?.join(", ") || "Unknown validation error"),
       };
     }
 
@@ -630,7 +634,7 @@ export class CrudTools {
     } catch (error: any) {
       return {
         status: "error",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -644,11 +648,12 @@ export class CrudTools {
     batch_size?: number;
   }): Promise<{ status: string; data?: any; error?: string }> {
     // Validate input schema
-    if (!validateBulkInsert(params)) {
+    const validation = validateBulkInsert(params);
+    if (!validation.valid) {
       return {
         status: "error",
         error:
-          "Invalid parameters: " + JSON.stringify(validateBulkInsert.errors),
+          "Invalid parameters: " + (validation.errors?.join(", ") || "Unknown validation error"),
       };
     }
 
@@ -783,7 +788,7 @@ export class CrudTools {
     } catch (error: any) {
       return {
         status: "error",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
