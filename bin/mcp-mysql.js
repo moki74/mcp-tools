@@ -6,8 +6,6 @@
  * It implements the Model Context Protocol using stdio transport
  */
 
-const path = require("path");
-const { spawn } = require("child_process");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -157,42 +155,12 @@ if (!permissions && !categories) {
 // Log to stderr (not stdout, which is used for MCP protocol)
 console.error(`Starting MySQL MCP server with connection to ${dbMessage}`);
 
-// Run the MCP server
+// Run the MCP server directly (no child process spawn)
+// This ensures proper stdio communication for MCP protocol
 try {
-  // Determine the path to the compiled MCP server file
-  const serverPath = path.resolve(__dirname, "../dist/mcp-server.js");
-
-  // Spawn the MCP server process with stdio transport
-  // stdin/stdout are used for MCP protocol communication
-  // stderr is used for logging
-  const server = spawn("node", [serverPath], {
-    stdio: ["inherit", "inherit", "inherit"],
-    env: process.env,
-  });
-
-  // Handle server process events
-  server.on("error", (err) => {
-    console.error("Failed to start MCP server:", err);
-    process.exit(1);
-  });
-
-  server.on("exit", (code) => {
-    if (code !== 0 && code !== null) {
-      console.error(`MCP server exited with code ${code}`);
-      process.exit(code);
-    }
-  });
-
-  // Handle termination signals
-  process.on("SIGINT", () => {
-    console.error("Shutting down MySQL MCP server...");
-    server.kill("SIGINT");
-  });
-
-  process.on("SIGTERM", () => {
-    console.error("Shutting down MySQL MCP server...");
-    server.kill("SIGTERM");
-  });
+  // Directly require and execute the MCP server module
+  // This avoids stdio forwarding issues with child processes
+  require("../dist/mcp-server.js");
 } catch (error) {
   console.error("Error starting MCP server:", error.message);
   process.exit(1);

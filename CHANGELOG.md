@@ -5,6 +5,13 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.5] - 2026-01-25
+
+### Fixed
+- **MCP Connection Issue**: Fixed stdio communication problem that prevented MCP clients (Droid CLI, Claude, etc.) from connecting when using `npx`
+- Changed from spawning a child process to directly requiring the MCP server module, ensuring proper stdin/stdout communication for the MCP protocol
+- Removed unused `path` and `child_process` imports from bin/mcp-mysql.js
+
 ## [1.33.4] - 2026-01-25
 
 ### Documentation
