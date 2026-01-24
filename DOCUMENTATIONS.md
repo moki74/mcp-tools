@@ -1,7 +1,7 @@
 # MySQL MCP Server - Documentation
 
-**Last Updated:** 2026-01-25 11:30:00  
-**Version:** 1.33.5
+**Last Updated:** 2026-01-25 14:00:00  
+**Version:** 1.33.6
 **Total Tools:** 150
 
 Comprehensive documentation for the MySQL MCP Server. For quick start, see [README.md](README.md).
@@ -31,6 +31,7 @@ Configure MySQL MCP with two access-control layers:
   "mcpServers": {
     "mysql": {
       "command": "npx",
+      "type": "stdio",
       "args": [
         "-y",
         "@berthojoris/mcp-mysql-server",

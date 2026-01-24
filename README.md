@@ -4,7 +4,7 @@
 
 **A production-ready Model Context Protocol (MCP) server for MySQL database integration with AI agents**
 
-**Last Updated:** 2026-01-25 11:30:00
+**Last Updated:** 2026-01-25 14:00:00
 
 [![npm version](https://img.shields.io/npm/v/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
 [![npm downloads](https://img.shields.io/npm/dm/@berthojoris/mcp-mysql-server)](https://www.npmjs.com/package/@berthojoris/mcp-mysql-server)
@@ -33,6 +33,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
   "mcpServers": {
     "mysql": {
       "command": "npx",
+      "type": "stdio",
       "args": [
         "-y",
         "@berthojoris/mcp-mysql-server",
@@ -124,6 +125,7 @@ If you want ready-to-copy snippets per client (Claude Code/Cursor/Windsurf/Cline
   "mcpServers": {
     "mysql": {
       "command": "npx",
+      "type": "stdio",
       "args": [
         "-y",
         "@berthojoris/mcp-mysql-server",
@@ -141,6 +143,7 @@ If you want ready-to-copy snippets per client (Claude Code/Cursor/Windsurf/Cline
   "mcpServers": {
     "mysql": {
       "command": "npx",
+      "type": "stdio",
       "args": [
         "-y",
         "@berthojoris/mcp-mysql-server",
@@ -166,6 +169,7 @@ Alternative approach using environment variables instead of connection string:
   "mcpServers": {
     "mysql": {
       "command": "npx",
+      "type": "stdio",
       "args": ["-y", "@berthojoris/mcp-mysql-server"],
       "env": {
         "DB_HOST": "localhost",
@@ -187,6 +191,7 @@ Alternative approach using environment variables instead of connection string:
   "mcpServers": {
     "mysql": {
       "command": "npx",
+      "type": "stdio",
       "args": ["-y", "@berthojoris/mcp-mysql-server"],
       "env": {
         "DB_HOST": "localhost",

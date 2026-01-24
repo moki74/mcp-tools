@@ -5,6 +5,13 @@ All notable changes to the MySQL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.6] - 2026-01-25
+
+### Documentation
+- **Added `"type": "stdio"` to all configuration examples**: Some MCP clients (like Droid CLI, Factory) require explicit `"type": "stdio"` in the configuration to establish proper connection
+- Updated README.md and DOCUMENTATIONS.md with the required `type` field in all JSON config examples
+- This fixes "disconnected" status issues when using the MCP server with certain AI agent clients
+
 ## [1.33.5] - 2026-01-25
 
 ### Fixed
