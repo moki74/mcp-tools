@@ -33,7 +33,7 @@ Configure MySQL MCP with two access-control layers:
       "command": "npx",
       "args": [
         "-y",
-        "@berthojoris/mysql-mcp",
+        "@berthojoris/mcp-mysql-server",
         "mysql://user:password@localhost:3306/database",
         "list,read,utility",
         "database_discovery,performance_monitoring"

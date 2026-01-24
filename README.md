@@ -23,7 +23,7 @@
 Run directly with `npx`:
 
 ```bash
-npx @berthojoris/mysql-mcp mysql://user:pass@localhost:3306/mydb "list,read,utility"
+npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/mydb "list,read,utility"
 ```
 
 Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
@@ -35,7 +35,7 @@ Add to your AI agent config (`.mcp.json`, `.cursor/mcp.json`, etc.):
       "command": "npx",
       "args": [
         "-y",
-        "@berthojoris/mysql-mcp",
+        "@berthojoris/mcp-mysql-server",
         "mysql://user:pass@localhost:3306/mydb",
         "list,read,utility"
       ]
@@ -55,13 +55,13 @@ For agent-specific examples (Codex TOML, Zed, local path, multi-DB), see **[DOCU
 No installation required - run directly:
 
 ```bash
-npx @berthojoris/mysql-mcp mysql://user:pass@localhost:3306/db "list,read,utility"
+npx @berthojoris/mcp-mysql-server mysql://user:pass@localhost:3306/db "list,read,utility"
 ```
 
 ### Option 2: Global Installation
 
 ```bash
-npm install -g @berthojoris/mysql-mcp
+npm install -g @berthojoris/mcp-mysql-server
 mcp-mysql mysql://user:pass@localhost:3306/db "list,read,utility"
 ```
 
@@ -126,7 +126,7 @@ If you want ready-to-copy snippets per client (Claude Code/Cursor/Windsurf/Cline
       "command": "npx",
       "args": [
         "-y",
-        "@berthojoris/mysql-mcp",
+        "@berthojoris/mcp-mysql-server",
         "mysql://user:password@localhost:3306/database",
         "list,read,utility,create,update,ddl"
       ]
@@ -143,7 +143,7 @@ If you want ready-to-copy snippets per client (Claude Code/Cursor/Windsurf/Cline
       "command": "npx",
       "args": [
         "-y",
-        "@berthojoris/mysql-mcp",
+        "@berthojoris/mcp-mysql-server",
         "mysql://user:password@localhost:3306/database_name_here",
         "list,read,utility,create,update,ddl",
         "database_discovery,crud_operations,custom_queries,schema_management,index_management,constraint_management,table_maintenance,query_optimization,analysis"
@@ -166,7 +166,7 @@ Alternative approach using environment variables instead of connection string:
   "mcpServers": {
     "mysql": {
       "command": "npx",
-      "args": ["-y", "@berthojoris/mysql-mcp"],
+      "args": ["-y", "@berthojoris/mcp-mysql-server"],
       "env": {
         "DB_HOST": "localhost",
         "DB_PORT": "3306",
@@ -187,7 +187,7 @@ Alternative approach using environment variables instead of connection string:
   "mcpServers": {
     "mysql": {
       "command": "npx",
-      "args": ["-y", "@berthojoris/mysql-mcp"],
+      "args": ["-y", "@berthojoris/mcp-mysql-server"],
       "env": {
         "DB_HOST": "localhost",
         "DB_PORT": "3306",
