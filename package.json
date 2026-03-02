@@ -7,8 +7,7 @@
     "packages/*"
   ],
   "bin": {
-    "mcp-mysql": "packages/mysql/bin/mcp-mysql.js",
-    "mcp-jira": "packages/jira/bin/mcp-jira.js"
+    "mcp-mysql": "packages/mysql/bin/mcp-mysql.js"
   },
   "scripts": {
     "build": "npm run build --workspaces",
