@@ -4,7 +4,6 @@ packages/*/node_modules/
 package-lock.json
 
 # Build output
-packages/*/dist/
 packages/*/build/
 *.tsbuildinfo
 

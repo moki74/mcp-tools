@@ -10,7 +10,6 @@
     "mcp-mysql": "packages/mysql/bin/mcp-mysql.js"
   },
   "scripts": {
-    "prepare": "npm run build --workspaces --if-present",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present"
