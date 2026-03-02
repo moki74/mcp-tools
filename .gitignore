@@ -3,8 +3,7 @@ node_modules/
 packages/*/node_modules/
 package-lock.json
 
-# Build output (monorepo: per-package dist/)
-packages/*/dist/
+# Build output (local only, dist/ is committed for npx distribution)
 packages/*/build/
 *.tsbuildinfo
 
