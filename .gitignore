@@ -3,7 +3,8 @@ node_modules/
 packages/*/node_modules/
 package-lock.json
 
-# Build output (local only, dist/ is committed for npx distribution)
+# Build output
+packages/*/dist/
 packages/*/build/
 *.tsbuildinfo
 
